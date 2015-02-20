@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if [ ! -d externals/depot_tools ]; then
+	git submodule init
+	git submodule update
+fi
+
+if [ ! -d externals/v8 ]; then
+	pushd externals
+	export PATH=`pwd`/depot_tools:$PATH
+	fetch v8
+	cd v8
+	git checkout branch-heads/3.31
+	make native -j 4
+	popd
+fi
