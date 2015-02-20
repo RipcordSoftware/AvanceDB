@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ ! -d externals/depot_tools ]; then
+if [ ! -d externals/depot_tools ] || [ ! -d externals/couchdb ]; then
 	git submodule init
 	git submodule update
 fi
