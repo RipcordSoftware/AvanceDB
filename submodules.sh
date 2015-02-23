@@ -21,6 +21,7 @@ fi
 if [ ! -d externals/libmicrohttpdi-${LIBMICROHTTPD_VER} ]; then
 	pushd externals
 	curl ftp://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-${LIBMICROHTTPD_VER}.tar.gz -O
+	tar xvfz libmicrohttpd-${LIBMICROHTTPD_VER}.tar.gz
 	cd libmicrohttpd-${LIBMICROHTTPD_VER}
 	./configure
 	make -j 4	
