@@ -44,7 +44,6 @@
           <incDir>
             <pElem>../../externals/libhttpserver/src</pElem>
           </incDir>
-          <commandLine>-fprofile-arcs -ftest-coverage</commandLine>
         </ccTool>
         <linkerTool>
           <linkerLibItems>
