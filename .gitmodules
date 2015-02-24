@@ -6,4 +6,4 @@
 	url = git://git.apache.org/couchdb.git
 [submodule "externals/libhttpserver"]
 	path = externals/libhttpserver
-	url = https://github.com/etr/libhttpserver.git
+	url = https://github.com/RipcordSoftware/libhttpserver.git
