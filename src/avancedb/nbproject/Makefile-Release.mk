@@ -35,6 +35,8 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/futon_web_site_resource.o \
+	${OBJECTDIR}/http_extn_mime_map.o \
 	${OBJECTDIR}/main.o
 
 
@@ -65,6 +67,16 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb: ../../externals/libmicrohtt
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb ${OBJECTFILES} ${LDLIBSOPTIONS}
+
+${OBJECTDIR}/futon_web_site_resource.o: futon_web_site_resource.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I../../externals/libhttpserver/src `pkg-config --cflags gnutls` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/futon_web_site_resource.o futon_web_site_resource.cpp
+
+${OBJECTDIR}/http_extn_mime_map.o: http_extn_mime_map.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I../../externals/libhttpserver/src `pkg-config --cflags gnutls` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/http_extn_mime_map.o http_extn_mime_map.cpp
 
 ${OBJECTDIR}/main.o: main.cpp 
 	${MKDIR} -p ${OBJECTDIR}

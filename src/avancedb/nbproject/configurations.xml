@@ -4,6 +4,8 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>futon_web_site_resource.h</itemPath>
+      <itemPath>http_extn_mime_map.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
@@ -12,6 +14,8 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <itemPath>futon_web_site_resource.cpp</itemPath>
+      <itemPath>http_extn_mime_map.cpp</itemPath>
       <itemPath>main.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
@@ -54,6 +58,14 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <item path="futon_web_site_resource.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="futon_web_site_resource.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="http_extn_mime_map.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="http_extn_mime_map.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>
     </conf>
@@ -92,6 +104,14 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <item path="futon_web_site_resource.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="futon_web_site_resource.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="http_extn_mime_map.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="http_extn_mime_map.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>
     </conf>
