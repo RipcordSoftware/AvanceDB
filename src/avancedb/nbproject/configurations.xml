@@ -8,6 +8,7 @@
       <itemPath>couchdb_session_resource.h</itemPath>
       <itemPath>futon_web_site_resource.h</itemPath>
       <itemPath>http_extn_mime_map.h</itemPath>
+      <itemPath>http_server_custom_resource.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
@@ -71,6 +72,8 @@
       </item>
       <item path="http_extn_mime_map.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="http_server_custom_resource.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>
     </conf>
@@ -120,6 +123,8 @@
       <item path="http_extn_mime_map.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="http_extn_mime_map.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="http_server_custom_resource.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>

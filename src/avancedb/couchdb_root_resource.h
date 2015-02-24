@@ -15,7 +15,7 @@ public:
     }
     
 private:
-    std::string body_;
+    const std::string body_;
     httpserver::http_response_builder response_builder_;
 
 };
