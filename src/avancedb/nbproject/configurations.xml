@@ -35,6 +35,24 @@
         <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
       <compileType>
+        <ccTool>
+          <standard>8</standard>
+          <incDir>
+            <pElem>../../externals/libhttpserver/src</pElem>
+          </incDir>
+          <commandLine>-fprofile-arcs -ftest-coverage</commandLine>
+        </ccTool>
+        <linkerTool>
+          <linkerLibItems>
+            <linkerLibFileItem>../../externals/libhttpserver/build/src/.libs/libhttpserver.a</linkerLibFileItem>
+            <linkerLibFileItem>../../externals/libmicrohttpd-0.9.39/src/microhttpd/.libs/libmicrohttpd.a</linkerLibFileItem>
+            <linkerOptionItem>`pkg-config --libs gnutls`</linkerOptionItem>
+            <linkerLibLibItem>gcrypt</linkerLibLibItem>
+            <linkerLibLibItem>boost_filesystem-mt</linkerLibLibItem>
+            <linkerLibLibItem>boost_system-mt</linkerLibLibItem>
+            <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
+          </linkerLibItems>
+        </linkerTool>
       </compileType>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -51,6 +69,10 @@
         </cTool>
         <ccTool>
           <developmentMode>5</developmentMode>
+          <standard>8</standard>
+          <incDir>
+            <pElem>../../externals/libhttpserver/src</pElem>
+          </incDir>
         </ccTool>
         <fortranCompilerTool>
           <developmentMode>5</developmentMode>
@@ -58,6 +80,17 @@
         <asmTool>
           <developmentMode>5</developmentMode>
         </asmTool>
+        <linkerTool>
+          <linkerLibItems>
+            <linkerLibFileItem>../../externals/libhttpserver/build/src/.libs/libhttpserver.a</linkerLibFileItem>
+            <linkerLibFileItem>../../externals/libmicrohttpd-0.9.39/src/microhttpd/.libs/libmicrohttpd.a</linkerLibFileItem>
+            <linkerOptionItem>`pkg-config --libs gnutls`</linkerOptionItem>
+            <linkerLibLibItem>gcrypt</linkerLibLibItem>
+            <linkerLibLibItem>boost_filesystem-mt</linkerLibLibItem>
+            <linkerLibLibItem>boost_system-mt</linkerLibLibItem>
+            <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
+          </linkerLibItems>
+        </linkerTool>
       </compileType>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>

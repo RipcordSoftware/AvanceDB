@@ -57,8 +57,8 @@ build: .build-post
 # Add your pre 'build' code here...
 
 .build-post: .build-impl
-# Add your post 'build' code here...
-	mkdir -p ${CND_DISTDIR}/${CONF}/${CND_PLATFORM_${CONF}}/www && rsync -ruv ../../externals/couchdb/share/www/* ${CND_DISTDIR}/${CONF}/${CND_PLATFORM_${CONF}}/www
+# Copy Futon/Fauxton files into the build directory
+	mkdir -p ${CND_DISTDIR}/${CONF}/${CND_PLATFORM_${CONF}}/www/_utils && rsync -ruv ../../externals/couchdb/share/www/* ${CND_DISTDIR}/${CONF}/${CND_PLATFORM_${CONF}}/www/_utils
 
 
 # clean
