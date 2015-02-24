@@ -27,4 +27,12 @@
 *.out
 *.app
 
-src/avancedb/dist
+# ignore project specific directories
+src/avancedb/dist/
+src/avancedb/build/
+
+# ignore netbeans project private dirs
+**/nbproject/private/
+
+# ignore the externals dir, these aren't our files
+externals/
