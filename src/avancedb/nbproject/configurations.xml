@@ -4,6 +4,8 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>couchdb_root_resource.h</itemPath>
+      <itemPath>couchdb_session_resource.h</itemPath>
       <itemPath>futon_web_site_resource.h</itemPath>
       <itemPath>http_extn_mime_map.h</itemPath>
     </logicalFolder>
@@ -57,6 +59,10 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <item path="couchdb_root_resource.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="couchdb_session_resource.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="futon_web_site_resource.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="futon_web_site_resource.h" ex="false" tool="3" flavor2="0">
@@ -103,6 +109,10 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <item path="couchdb_root_resource.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="couchdb_session_resource.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="futon_web_site_resource.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="futon_web_site_resource.h" ex="false" tool="3" flavor2="0">
