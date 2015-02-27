@@ -28,8 +28,11 @@
 *.app
 
 # ignore project specific directories
-src/avancedb/dist/
-src/avancedb/build/
+src/*/dist/
+src/*/build/
+
+# ignore netbeans generated files
+.dep.inc
 
 # ignore netbeans project private dirs
 **/nbproject/private/
