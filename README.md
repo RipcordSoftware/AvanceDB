@@ -3,7 +3,7 @@ An in-memory database based on the CouchDB REST API and containing the CouchDB F
 
 Written in C++ 11 with Boost and the following technologies:
 * Google V8
-* libmicrohttpd/libhttpserver
+* RipcordSoftware/libhttpserver
 
 ## Building
 To build you'll need:
