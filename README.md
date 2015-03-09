@@ -10,8 +10,6 @@ To build you'll need:
 * GCC 4.8.x
 * GNU Make
 * Boost 1.53
-* gnutls
-* gcrypt
 * pthreads
 * zlib
 
