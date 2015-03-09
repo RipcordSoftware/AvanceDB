@@ -39,3 +39,6 @@ src/*/build/
 
 # ignore the externals dir, these aren't our files
 externals/
+
+# ignore the root copy of Futon/Fauxton
+src/avancedb/www/**
