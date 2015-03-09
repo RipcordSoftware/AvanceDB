@@ -4,11 +4,6 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
-      <itemPath>couchdb_root_resource.h</itemPath>
-      <itemPath>couchdb_session_resource.h</itemPath>
-      <itemPath>futon_web_site_resource.h</itemPath>
-      <itemPath>http_extn_mime_map.h</itemPath>
-      <itemPath>http_server_custom_resource.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
@@ -17,8 +12,6 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <itemPath>futon_web_site_resource.cpp</itemPath>
-      <itemPath>http_extn_mime_map.cpp</itemPath>
       <itemPath>main.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
@@ -44,36 +37,8 @@
       <compileType>
         <ccTool>
           <standard>8</standard>
-          <incDir>
-            <pElem>../../externals/libhttpserver/src</pElem>
-          </incDir>
         </ccTool>
-        <linkerTool>
-          <linkerLibItems>
-            <linkerLibFileItem>../../externals/libhttpserver/build/src/.libs/libhttpserver.a</linkerLibFileItem>
-            <linkerLibFileItem>../../externals/libmicrohttpd-0.9.39/src/microhttpd/.libs/libmicrohttpd.a</linkerLibFileItem>
-            <linkerOptionItem>`pkg-config --libs gnutls`</linkerOptionItem>
-            <linkerLibLibItem>gcrypt</linkerLibLibItem>
-            <linkerLibLibItem>boost_filesystem-mt</linkerLibLibItem>
-            <linkerLibLibItem>boost_system-mt</linkerLibLibItem>
-            <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
-          </linkerLibItems>
-        </linkerTool>
       </compileType>
-      <item path="couchdb_root_resource.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="couchdb_session_resource.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="futon_web_site_resource.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="futon_web_site_resource.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="http_extn_mime_map.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="http_extn_mime_map.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="http_server_custom_resource.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>
     </conf>
@@ -90,9 +55,6 @@
         <ccTool>
           <developmentMode>5</developmentMode>
           <standard>8</standard>
-          <incDir>
-            <pElem>../../externals/libhttpserver/src</pElem>
-          </incDir>
         </ccTool>
         <fortranCompilerTool>
           <developmentMode>5</developmentMode>
@@ -100,32 +62,7 @@
         <asmTool>
           <developmentMode>5</developmentMode>
         </asmTool>
-        <linkerTool>
-          <linkerLibItems>
-            <linkerLibFileItem>../../externals/libhttpserver/build/src/.libs/libhttpserver.a</linkerLibFileItem>
-            <linkerLibFileItem>../../externals/libmicrohttpd-0.9.39/src/microhttpd/.libs/libmicrohttpd.a</linkerLibFileItem>
-            <linkerOptionItem>`pkg-config --libs gnutls`</linkerOptionItem>
-            <linkerLibLibItem>gcrypt</linkerLibLibItem>
-            <linkerLibLibItem>boost_filesystem-mt</linkerLibLibItem>
-            <linkerLibLibItem>boost_system-mt</linkerLibLibItem>
-            <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
-          </linkerLibItems>
-        </linkerTool>
       </compileType>
-      <item path="couchdb_root_resource.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="couchdb_session_resource.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="futon_web_site_resource.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="futon_web_site_resource.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="http_extn_mime_map.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="http_extn_mime_map.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="http_server_custom_resource.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>
     </conf>

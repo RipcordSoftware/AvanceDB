@@ -35,8 +35,6 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
-	${OBJECTDIR}/futon_web_site_resource.o \
-	${OBJECTDIR}/http_extn_mime_map.o \
 	${OBJECTDIR}/main.o
 
 
@@ -54,34 +52,20 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=../../externals/libhttpserver/build/src/.libs/libhttpserver.a ../../externals/libmicrohttpd-0.9.39/src/microhttpd/.libs/libmicrohttpd.a `pkg-config --libs gnutls` -lgcrypt -lboost_filesystem-mt -lboost_system-mt -lpthread   
+LDLIBSOPTIONS=
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
 	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb: ../../externals/libhttpserver/build/src/.libs/libhttpserver.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb: ../../externals/libmicrohttpd-0.9.39/src/microhttpd/.libs/libmicrohttpd.a
-
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb ${OBJECTFILES} ${LDLIBSOPTIONS}
 
-${OBJECTDIR}/futon_web_site_resource.o: futon_web_site_resource.cpp 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../../externals/libhttpserver/src `pkg-config --cflags gnutls` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/futon_web_site_resource.o futon_web_site_resource.cpp
-
-${OBJECTDIR}/http_extn_mime_map.o: http_extn_mime_map.cpp 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../../externals/libhttpserver/src `pkg-config --cflags gnutls` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/http_extn_mime_map.o http_extn_mime_map.cpp
-
 ${OBJECTDIR}/main.o: main.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../../externals/libhttpserver/src `pkg-config --cflags gnutls` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
+	$(COMPILE.cc) -O2 -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
 
 # Subprojects
 .build-subprojects:
