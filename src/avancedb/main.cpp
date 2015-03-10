@@ -18,7 +18,20 @@ int main() {
 
                     rs::httpserver::FileStream stream(uri);
                     if (stream) {
-                        response->setContentType(contentType.get()).Send(stream);
+                        auto lastModifiedTime = stream.getLastModifiedTime();
+                        if (lastModifiedTime) {
+                            auto etag = boost::lexical_cast<std::string>(lastModifiedTime.get());
+                            
+                            if (etag == request->getIfNoneMatch()) {
+                              response->setStatusCode(304).setStatusDescription("Not Modified").Send();
+                            } else {
+                                response->setETag(etag);
+                            }
+
+                        }
+                        if (!response->HasResponded()) {
+                            response->setContentType(contentType.get()).Send(stream);
+                        }
                     }
                 }
             }
