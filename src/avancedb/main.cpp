@@ -11,7 +11,7 @@ int main() {
         if (uri.find("/_utils") == 0) {
             if (uri == "/_utils") {
                 response->setHeader(rs::httpserver::Headers::Location, "/_utils/index.html").setStatusCode(302).Send();
-            } else {
+            } else if (rs::httpserver::FileStream::ValidatePath(uri)) {
                 auto contentType = rs::httpserver::MimeTypes::GetType(uri);
                 if (contentType) {                            
                     uri = "www" + uri;
