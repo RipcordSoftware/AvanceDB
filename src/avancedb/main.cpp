@@ -9,11 +9,11 @@ int main() {
         auto uri = request->getUri();
         
         if (uri.find("/_utils") == 0) {
-            if (uri == "/_utils") {
+            if (uri == "/_utils" || uri == "/_utils/") {
                 response->setHeader(rs::httpserver::Headers::Location, "/_utils/index.html").setStatusCode(302).Send();
-            } else if (rs::httpserver::FileStream::ValidatePath(uri)) {
+            } else {
                 auto contentType = rs::httpserver::MimeTypes::GetType(uri);
-                if (contentType) {                            
+                if (contentType) {
                     uri = "www" + uri;
 
                     rs::httpserver::FileStream stream(uri);
