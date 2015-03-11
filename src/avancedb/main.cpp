@@ -10,7 +10,7 @@ int main() {
         
         if (uri.find("/_utils") == 0) {
             if (uri == "/_utils" || uri == "/_utils/") {
-                response->setHeader(rs::httpserver::Headers::Location, "/_utils/index.html").setStatusCode(302).Send();
+                response->setLocation("/_utils/index.html").setStatusCode(302).Send();
             } else {
                 auto contentType = rs::httpserver::MimeTypes::GetType(uri);
                 if (contentType) {
