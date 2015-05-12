@@ -4,3 +4,6 @@
 [submodule "externals/libhttpserver"]
 	path = externals/libhttpserver
 	url = https://github.com/RipcordSoftware/libhttpserver.git
+[submodule "externals/couchdb"]
+	path = externals/couchdb
+	url = https://github.com/apache/couchdb.git
