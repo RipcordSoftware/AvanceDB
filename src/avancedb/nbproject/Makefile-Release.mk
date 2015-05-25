@@ -52,13 +52,19 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=../../externals/libhttpserver/src/libhttpserver/dist/Release/GNU-Linux-x86/libhttpserver.a -lboost_filesystem -lboost_thread -lboost_date_time -lboost_system `pkg-config --libs zlib` -lpthread   
+LDLIBSOPTIONS=../../externals/libhttpserver/src/libhttpserver/dist/Release/GNU-Linux-x86/libhttpserver.a ../../externals/libjsapi/src/libjsapi/dist/Release/GNU-Linux-x86/libjsapi.a ../../externals/libscriptobject/src/libscriptobject/dist/Release/GNU-Linux-x86/libscriptobject.a ../../externals/libscriptobject/src/libscriptobject_gason/dist/Release/GNU-Linux-x86/liblibscriptobject_gason.a -lboost_filesystem -lboost_thread -lboost_date_time -lboost_system `pkg-config --libs zlib` -lpthread   
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
 	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb: ../../externals/libhttpserver/src/libhttpserver/dist/Release/GNU-Linux-x86/libhttpserver.a
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb: ../../externals/libjsapi/src/libjsapi/dist/Release/GNU-Linux-x86/libjsapi.a
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb: ../../externals/libscriptobject/src/libscriptobject/dist/Release/GNU-Linux-x86/libscriptobject.a
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb: ../../externals/libscriptobject/src/libscriptobject_gason/dist/Release/GNU-Linux-x86/liblibscriptobject_gason.a
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
@@ -67,11 +73,14 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb: ${OBJECTFILES}
 ${OBJECTDIR}/main.o: main.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../../externals/libhttpserver/src/libhttpserver `pkg-config --cflags zlib` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
+	$(COMPILE.cc) -O2 -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi `pkg-config --cflags zlib` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
 
 # Subprojects
 .build-subprojects:
 	cd ../../externals/libhttpserver/src/libhttpserver && ${MAKE}  -f Makefile CONF=Release
+	cd ../../externals/libjsapi/src/libjsapi && ${MAKE}  -f Makefile CONF=Release
+	cd ../../externals/libscriptobject/src/libscriptobject && ${MAKE}  -f Makefile CONF=Release
+	cd ../../externals/libscriptobject/src/libscriptobject_gason && ${MAKE}  -f Makefile CONF=Release
 
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
@@ -81,6 +90,9 @@ ${OBJECTDIR}/main.o: main.cpp
 # Subprojects
 .clean-subprojects:
 	cd ../../externals/libhttpserver/src/libhttpserver && ${MAKE}  -f Makefile CONF=Release clean
+	cd ../../externals/libjsapi/src/libjsapi && ${MAKE}  -f Makefile CONF=Release clean
+	cd ../../externals/libscriptobject/src/libscriptobject && ${MAKE}  -f Makefile CONF=Release clean
+	cd ../../externals/libscriptobject/src/libscriptobject_gason && ${MAKE}  -f Makefile CONF=Release clean
 
 # Enable dependency checking
 .dep.inc: .depcheck-impl
