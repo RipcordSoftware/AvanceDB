@@ -7,3 +7,9 @@
 [submodule "externals/couchdb"]
 	path = externals/couchdb
 	url = https://github.com/apache/couchdb.git
+[submodule "externals/libscriptobject"]
+	path = externals/libscriptobject
+	url = https://github.com/RipcordSoftware/libscriptobject.git
+[submodule "externals/libjsapi"]
+	path = externals/libjsapi
+	url = https://github.com/RipcordSoftware/libjsapi.git
