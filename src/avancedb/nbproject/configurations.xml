@@ -4,6 +4,8 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>http_server.h</itemPath>
+      <itemPath>rest_server.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
@@ -12,7 +14,9 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <itemPath>http_server.cpp</itemPath>
       <itemPath>main.cpp</itemPath>
+      <itemPath>rest_server.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -92,6 +96,7 @@
                             OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liblibscriptobject_gason.a">
               </makeArtifact>
             </linkerLibProjectItem>
+            <linkerLibLibItem>boost_regex</linkerLibLibItem>
             <linkerLibLibItem>boost_filesystem</linkerLibLibItem>
             <linkerLibLibItem>boost_thread</linkerLibLibItem>
             <linkerLibLibItem>boost_date_time</linkerLibLibItem>
@@ -102,7 +107,15 @@
           <commandLine>--coverage</commandLine>
         </linkerTool>
       </compileType>
+      <item path="http_server.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="http_server.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="rest_server.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="rest_server.h" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
     <conf name="Release" type="1">
@@ -179,6 +192,7 @@
                             OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liblibscriptobject_gason.a">
               </makeArtifact>
             </linkerLibProjectItem>
+            <linkerLibLibItem>boost_regex</linkerLibLibItem>
             <linkerLibLibItem>boost_filesystem</linkerLibLibItem>
             <linkerLibLibItem>boost_thread</linkerLibLibItem>
             <linkerLibLibItem>boost_date_time</linkerLibLibItem>
@@ -188,7 +202,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <item path="http_server.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="http_server.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="rest_server.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="rest_server.h" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
   </confs>
