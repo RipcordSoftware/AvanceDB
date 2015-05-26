@@ -1,7 +1,9 @@
 #include "http_server.h"
 
 int main() {
-    HttpServer::Start();
+    HttpServer server;
+    
+    server.Start();
     
     return 0;
 }
