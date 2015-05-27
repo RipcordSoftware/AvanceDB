@@ -3,6 +3,8 @@
 
 #include "libhttpserver.h"
 
+#include "databases.h"
+
 class RestServer {
 public:
     
@@ -18,6 +20,7 @@ private:
     bool GetSignature(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response);
     
     rs::httpserver::RequestRouter router_;        
+    Databases databases_;
 
 };
 

@@ -4,6 +4,7 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>databases.h</itemPath>
       <itemPath>http_server.h</itemPath>
       <itemPath>rest_server.h</itemPath>
     </logicalFolder>
@@ -14,6 +15,7 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <itemPath>databases.cpp</itemPath>
       <itemPath>http_server.cpp</itemPath>
       <itemPath>main.cpp</itemPath>
       <itemPath>rest_server.cpp</itemPath>
@@ -107,6 +109,10 @@
           <commandLine>--coverage</commandLine>
         </linkerTool>
       </compileType>
+      <item path="databases.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="databases.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="http_server.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="http_server.h" ex="false" tool="3" flavor2="0">
@@ -202,6 +208,10 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <item path="databases.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="databases.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="http_server.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="http_server.h" ex="false" tool="3" flavor2="0">

@@ -12,6 +12,9 @@ RestServer::RestServer() {
     router_.Add("GET", "/_session", boost::bind(&RestServer::GetSession, this, _1, _2, _3));
     router_.Add("GET", "/_all_dbs", boost::bind(&RestServer::GetAllDbs, this, _1, _2, _3));
     router_.Add("GET", "/", boost::bind(&RestServer::GetSignature, this, _1, _2, _3));
+    
+    databases_.AddDatabase("_replicator");
+    databases_.AddDatabase("_users");
 }
 
 void RestServer::RouteRequest(rs::httpserver::socket_ptr, rs::httpserver::request_ptr request, rs::httpserver::response_ptr response) {
@@ -29,7 +32,16 @@ bool RestServer::GetSession(rs::httpserver::request_ptr request, const rs::https
 }
 
 bool RestServer::GetAllDbs(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response) {
-    response->setContentType("application/javascript").Send("[]");
+    auto dbs = databases_.GetDatabases();
+    
+    std::stringstream stream;
+    stream << "[";
+    for (int i = 0; i < dbs.size(); ++i) {
+        stream << (i > 0 ? "," : "") << "\"" << dbs[i] << "\"";
+    }
+    stream << "]";
+    
+    response->setContentType("application/javascript").Send(stream.str());
     return true;
 }
 
