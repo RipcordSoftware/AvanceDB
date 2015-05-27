@@ -7,6 +7,7 @@ Written in C++ 11 with Boost and the following technologies:
 * [RipcordSoftware/libhttpserver](http://github.com/RipcordSoftware/libhttpserver)
 * [RipcordSoftware/libjsapi](http://github.com/RipcordSoftware/libjsapi)
 * [RipcordSoftware/libscriptobject](http://github.com/RipcordSoftware/libscriptobject)
+* [vivkin/gason](https://github.com/vivkin/gason)
 
 ## Building
 To build you'll need:
