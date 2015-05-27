@@ -7,6 +7,7 @@
 #include <boost/uuid/uuid_io.hpp>
 
 RestServer::RestServer() {
+    router_.Add("GET", "/_active_tasks", boost::bind(&RestServer::GetActiveTasks, this, _1, _2, _3));
     router_.Add("GET", "/_uuids", boost::bind(&RestServer::GetUuids, this, _1, _2, _3));
     router_.Add("GET", "/_session", boost::bind(&RestServer::GetSession, this, _1, _2, _3));
     router_.Add("GET", "/_all_dbs", boost::bind(&RestServer::GetAllDbs, this, _1, _2, _3));
@@ -15,6 +16,11 @@ RestServer::RestServer() {
 
 void RestServer::RouteRequest(rs::httpserver::socket_ptr, rs::httpserver::request_ptr request, rs::httpserver::response_ptr response) {
     router_.Match(request, response);
+}
+
+bool RestServer::GetActiveTasks(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response) {
+    response->setContentType("application/javascript").Send("[]");
+    return true;
 }
 
 bool RestServer::GetSession(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response) {
