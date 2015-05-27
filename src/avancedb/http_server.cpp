@@ -10,10 +10,17 @@ void HttpServer::Start() {
 }
 
 void HttpServer::RequestCallback(rs::httpserver::socket_ptr socket, rs::httpserver::request_ptr request, rs::httpserver::response_ptr response) {
-    rest_.RouteRequest(socket, request, response);
     
-    if (!response->HasResponded() && request->getUri().find("/_utils") == 0) {
-        HandleUtilsRequest(request, response);
+    try {
+        rest_.RouteRequest(socket, request, response);
+
+        if (!response->HasResponded() && request->getUri().find("/_utils") == 0) {
+            HandleUtilsRequest(request, response);
+        }
+    } catch (const boost::exception& ex) {
+        InternalErrorResponse(socket, request, response);
+    } catch (const std::exception& ex) {
+        InternalErrorResponse(socket, request, response);
     }
 }
 
@@ -46,4 +53,8 @@ void HttpServer::HandleUtilsRequest(rs::httpserver::request_ptr request, rs::htt
             }
         }
     }
+}
+
+void HttpServer::InternalErrorResponse(rs::httpserver::socket_ptr socket, rs::httpserver::request_ptr request, rs::httpserver::response_ptr response) noexcept {
+    response->setContentType("text/plain").setStatusCode(500).setStatusDescription("Internal Server Error").Send();
 }
