@@ -7,6 +7,8 @@
 #include <boost/uuid/uuid_io.hpp>
 
 RestServer::RestServer() {
+    router_.Add("HEAD", R"(/(?<db>_?[a-z][a-z0-9_\$\+\-\(\)]+))", boost::bind(&RestServer::HeadDatabase, this, _1, _2, _3));
+    
     router_.Add("GET", "/_active_tasks", boost::bind(&RestServer::GetActiveTasks, this, _1, _2, _3));
     router_.Add("GET", "/_uuids", boost::bind(&RestServer::GetUuids, this, _1, _2, _3));
     router_.Add("GET", "/_session", boost::bind(&RestServer::GetSession, this, _1, _2, _3));
@@ -81,4 +83,15 @@ bool RestServer::GetUuids(rs::httpserver::request_ptr request, const rs::httpser
     
     response->setContentType("application/javascript").Send(stream.str());    
     return true;
+}
+
+bool RestServer::HeadDatabase(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
+    auto iter = args.find("db");
+
+    bool found = iter != args.cend() && databases_.IsDatabase(iter->second);
+    if (found) {
+        response->setContentType("application/javascript").Send();            
+    }
+    
+    return found;            
 }
