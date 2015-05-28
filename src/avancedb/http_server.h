@@ -4,7 +4,7 @@
 #include "libhttpserver.h"
 #include "rest_server.h"
 
-class HttpServer {
+class HttpServer final {
 public:
     
     HttpServer(const char* address = "0.0.0.0", int port = 5994);
