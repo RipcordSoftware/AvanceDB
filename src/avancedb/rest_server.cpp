@@ -8,14 +8,24 @@
 
 #include "json_stream.h"
 
+#define REGEX_DBNAME R"(_?[a-z][a-z0-9_\$\+\-\(\)]+)"
+#define REGEX_DBNAME_GROUP "/(?<db>" REGEX_DBNAME ")"
+
 RestServer::RestServer() {
-    router_.Add("HEAD", R"(/(?<db>_?[a-z][a-z0-9_\$\+\-\(\)]+)/?)", boost::bind(&RestServer::HeadDatabase, this, _1, _2, _3));
+    router_.Add("HEAD", REGEX_DBNAME_GROUP "/?", boost::bind(&RestServer::HeadDatabase, this, _1, _2, _3));
+    
+    router_.Add("DELETE", REGEX_DBNAME_GROUP "/?", boost::bind(&RestServer::DeleteDatabase, this, _1, _2, _3));
+    
+    router_.Add("PUT", REGEX_DBNAME_GROUP "/?", boost::bind(&RestServer::PutDatabase, this, _1, _2, _3));
     
     router_.Add("GET", "/_active_tasks", boost::bind(&RestServer::GetActiveTasks, this, _1, _2, _3));
     router_.Add("GET", "/_uuids", boost::bind(&RestServer::GetUuids, this, _1, _2, _3));
     router_.Add("GET", "/_session", boost::bind(&RestServer::GetSession, this, _1, _2, _3));
-    router_.Add("GET", "/_all_dbs", boost::bind(&RestServer::GetAllDbs, this, _1, _2, _3));
-    router_.Add("GET", R"(/(?<db>_?[a-z][a-z0-9_\$\+\-\(\)]+)/?)", boost::bind(&RestServer::GetDatabase, this, _1, _2, _3));
+    router_.Add("GET", "/_all_dbs", boost::bind(&RestServer::GetAllDbs, this, _1, _2, _3));    
+    router_.Add("GET", REGEX_DBNAME_GROUP "/_all_docs", boost::bind(&RestServer::GetDatabaseAllDocs, this, _1, _2, _3));
+    router_.Add("GET", REGEX_DBNAME_GROUP "/?", boost::bind(&RestServer::GetDatabase, this, _1, _2, _3));
+    router_.Add("GET", "/\\_config/query_servers/?", boost::bind(&RestServer::GetConfigQueryServers, this, _1, _2, _3));
+    router_.Add("GET", "/\\_config/native_query_servers/?", boost::bind(&RestServer::GetConfigNativeQueryServers, this, _1, _2, _3));
     router_.Add("GET", "/", boost::bind(&RestServer::GetSignature, this, _1, _2, _3));
     
     databases_.AddDatabase("_replicator");
@@ -126,4 +136,48 @@ bool RestServer::GetDatabase(rs::httpserver::request_ptr request, const rs::http
     }
     
     return found;
+}
+
+// TODO: correctly handle the error cases here
+bool RestServer::PutDatabase(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
+    bool created = false;
+    auto argsIter = args.find("db");
+    
+    if (argsIter != args.cend() && !databases_.IsDatabase(argsIter->second)) {
+        created = databases_.AddDatabase(argsIter->second);
+    }
+    
+    if (created) {
+        response->setStatusCode(201).setContentType("application/javascript").Send("{\"ok\":true}");
+    }
+    
+    return created;
+}
+
+// TODO: correctly handle the error cases here
+bool RestServer::DeleteDatabase(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
+    bool deleted = false;
+    auto argsIter = args.find("db");
+    
+    if (argsIter != args.cend()) {
+        deleted = databases_.RemoveDatabase(argsIter->second);
+    }
+    
+    if (deleted) {
+        response->setContentType("application/javascript").Send("{\"ok\":true}");
+    }
+    
+    return deleted;
+}
+
+bool RestServer::GetDatabaseAllDocs(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
+    response->setContentType("application/javascript").Send("{\"offset\":0,\"rows\":[],\"total_rows\":0}");
+}
+
+bool RestServer::GetConfigQueryServers(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response) {
+    response->setContentType("application/javascript").Send("{\"javascript\":\"libjsapi\"}");
+}
+
+bool RestServer::GetConfigNativeQueryServers(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response) {
+    response->setContentType("application/javascript").Send("{}");
 }
