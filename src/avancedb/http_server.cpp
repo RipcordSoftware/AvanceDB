@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "http_server_exception.h"
+
 HttpServer::HttpServer(const char* address, int port) : server_(rs::httpserver::HttpServer::Create(address, port)) {
 }
 
@@ -17,10 +19,20 @@ void HttpServer::RequestCallback(rs::httpserver::socket_ptr socket, rs::httpserv
         if (!response->HasResponded() && request->getUri().find("/_utils") == 0) {
             HandleUtilsRequest(request, response);
         }
+    } catch (const HttpServerException& ex) {
+        if (!response->HasResponded()) {
+            try {
+                response->setContentType(ex.ContentType()).setStatusCode(ex.StatusCode()).setStatusDescription(ex.Description()).Send(ex.Body());
+            } catch (...) {}
+        }
     } catch (const boost::exception& ex) {
-        InternalErrorResponse(socket, request, response);
+        if (!response->HasResponded()) {
+            InternalErrorResponse(socket, request, response);
+        }
     } catch (const std::exception& ex) {
-        InternalErrorResponse(socket, request, response);
+        if (!response->HasResponded()) {
+            InternalErrorResponse(socket, request, response);
+        }
     }
 }
 
@@ -56,5 +68,7 @@ void HttpServer::HandleUtilsRequest(rs::httpserver::request_ptr request, rs::htt
 }
 
 void HttpServer::InternalErrorResponse(rs::httpserver::socket_ptr socket, rs::httpserver::request_ptr request, rs::httpserver::response_ptr response) noexcept {
-    response->setContentType("text/plain").setStatusCode(500).setStatusDescription("Internal Server Error").Send();
+    try {
+        response->setContentType("text/plain").setStatusCode(500).setStatusDescription("Internal Server Error").Send();
+    } catch (...) {}
 }

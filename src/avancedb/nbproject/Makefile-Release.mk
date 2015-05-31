@@ -40,6 +40,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/http_server.o \
 	${OBJECTDIR}/json_stream.o \
 	${OBJECTDIR}/main.o \
+	${OBJECTDIR}/rest_exceptions.o \
 	${OBJECTDIR}/rest_server.o
 
 
@@ -99,6 +100,11 @@ ${OBJECTDIR}/main.o: main.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi `pkg-config --cflags zlib` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
+
+${OBJECTDIR}/rest_exceptions.o: rest_exceptions.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi `pkg-config --cflags zlib` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/rest_exceptions.o rest_exceptions.cpp
 
 ${OBJECTDIR}/rest_server.o: rest_server.cpp 
 	${MKDIR} -p ${OBJECTDIR}

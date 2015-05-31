@@ -7,7 +7,9 @@
       <itemPath>database.h</itemPath>
       <itemPath>databases.h</itemPath>
       <itemPath>http_server.h</itemPath>
+      <itemPath>http_server_exception.h</itemPath>
       <itemPath>json_stream.h</itemPath>
+      <itemPath>rest_exceptions.h</itemPath>
       <itemPath>rest_server.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
@@ -22,6 +24,7 @@
       <itemPath>http_server.cpp</itemPath>
       <itemPath>json_stream.cpp</itemPath>
       <itemPath>main.cpp</itemPath>
+      <itemPath>rest_exceptions.cpp</itemPath>
       <itemPath>rest_server.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
@@ -126,11 +129,17 @@
       </item>
       <item path="http_server.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="http_server_exception.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="json_stream.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="json_stream.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="rest_exceptions.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="rest_exceptions.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="rest_server.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -234,11 +243,17 @@
       </item>
       <item path="http_server.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="http_server_exception.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="json_stream.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="json_stream.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="rest_exceptions.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="rest_exceptions.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="rest_server.cpp" ex="false" tool="1" flavor2="0">
       </item>

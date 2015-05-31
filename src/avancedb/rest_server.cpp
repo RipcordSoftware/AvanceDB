@@ -1,12 +1,14 @@
 #include "rest_server.h"
 
 #include <sstream>
+#include <cstring>
 
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
 #include "json_stream.h"
+#include "rest_exceptions.h"
 
 #define REGEX_DBNAME R"(_?[a-z][a-z0-9_\$\+\-\(\)]+)"
 #define REGEX_DBNAME_GROUP "/(?<db>" REGEX_DBNAME ")"
@@ -24,8 +26,8 @@ RestServer::RestServer() {
     router_.Add("GET", "/_all_dbs", boost::bind(&RestServer::GetAllDbs, this, _1, _2, _3));    
     router_.Add("GET", REGEX_DBNAME_GROUP "/_all_docs", boost::bind(&RestServer::GetDatabaseAllDocs, this, _1, _2, _3));
     router_.Add("GET", REGEX_DBNAME_GROUP "/?", boost::bind(&RestServer::GetDatabase, this, _1, _2, _3));
-    router_.Add("GET", "/\\_config/query_servers/?", boost::bind(&RestServer::GetConfigQueryServers, this, _1, _2, _3));
-    router_.Add("GET", "/\\_config/native_query_servers/?", boost::bind(&RestServer::GetConfigNativeQueryServers, this, _1, _2, _3));
+    router_.Add("GET", "/_config/query_servers/?", boost::bind(&RestServer::GetConfigQueryServers, this, _1, _2, _3));
+    router_.Add("GET", "/_config/native_query_servers/?", boost::bind(&RestServer::GetConfigNativeQueryServers, this, _1, _2, _3));
     router_.Add("GET", "/", boost::bind(&RestServer::GetSignature, this, _1, _2, _3));
     
     databases_.AddDatabase("_replicator");
@@ -42,7 +44,7 @@ bool RestServer::GetActiveTasks(rs::httpserver::request_ptr request, const rs::h
 }
 
 bool RestServer::GetSession(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response) {
-    response->setContentType("application/javascript").Send("{\"ok\":true,\"userCtx\":{\"name\":null,\"roles\":[\"_admin\"]},\"info\":{\"authentication_db\":\"_users\",\"authentication_handlers\":[\"oauth\",\"cookie\",\"default\"],\"authenticated\":\"default\"}}");
+    response->setContentType("application/javascript").Send(R"({"ok":true,"userCtx":{"name":null,"roles":["_admin"]},"info":{"authentication_db":"_users","authentication_handlers":["oauth","cookie","default"],"authenticated":"default"}})");
     return true;
 }
 
@@ -61,7 +63,7 @@ bool RestServer::GetAllDbs(rs::httpserver::request_ptr request, const rs::httpse
 }
 
 bool RestServer::GetSignature(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response) {
-    response->setContentType("application/javascript").Send("{\"couchdb\":\"Welcome\",\"uuid\":\"a2db86472466bcd02e84ac05a6c86185\",\"version\":\"1.6.1\",\"vendor\":{\"version\":\"1.6.1\",\"name\":\"The Apache Software Foundation\"}}");
+    response->setContentType("application/javascript").Send(R"({"couchdb":"Welcome","uuid":"a2db86472466bcd02e84ac05a6c86185","version":"1.6.1","vendor":{"version":"1.6.1","name":"The Apache Software Foundation"}})");
     return true;
 }
 
@@ -138,44 +140,58 @@ bool RestServer::GetDatabase(rs::httpserver::request_ptr request, const rs::http
     return found;
 }
 
-// TODO: correctly handle the error cases here
 bool RestServer::PutDatabase(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
     bool created = false;
     auto argsIter = args.find("db");
     
-    if (argsIter != args.cend() && !databases_.IsDatabase(argsIter->second)) {
-        created = databases_.AddDatabase(argsIter->second);
-    }
-    
-    if (created) {
-        response->setStatusCode(201).setContentType("application/javascript").Send("{\"ok\":true}");
+    if (argsIter != args.cend()) {
+        auto name = argsIter->second;
+        
+        if (std::strlen(name) <= 0 || name[0] == '_') {
+            throw InvalidDatabaseName();
+        }
+        
+        if (databases_.IsDatabase(name)) {
+            throw DatabaseAlreadyExists();
+        }
+
+        created = databases_.AddDatabase(name);
+        
+        if (created) {
+            response->setStatusCode(201).setContentType("application/javascript").Send(R"({"ok":true})");
+        }
     }
     
     return created;
 }
 
-// TODO: correctly handle the error cases here
 bool RestServer::DeleteDatabase(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
     bool deleted = false;
     auto argsIter = args.find("db");
     
     if (argsIter != args.cend()) {
+        auto name = argsIter->second;
+        
+        if (std::strlen(name) <= 0 || name[0] == '_') {
+            throw InvalidDatabaseName();
+        }
+        
         deleted = databases_.RemoveDatabase(argsIter->second);
-    }
-    
-    if (deleted) {
-        response->setContentType("application/javascript").Send("{\"ok\":true}");
+        
+        if (deleted) {
+            response->setContentType("application/javascript").Send(R"({"ok":true})");
+        }
     }
     
     return deleted;
 }
 
 bool RestServer::GetDatabaseAllDocs(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
-    response->setContentType("application/javascript").Send("{\"offset\":0,\"rows\":[],\"total_rows\":0}");
+    response->setContentType("application/javascript").Send(R"({"offset":0,"rows":[],"total_rows":0})");
 }
 
 bool RestServer::GetConfigQueryServers(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response) {
-    response->setContentType("application/javascript").Send("{\"javascript\":\"libjsapi\"}");
+    response->setContentType("application/javascript").Send(R"({"javascript":"libjsapi"})");
 }
 
 bool RestServer::GetConfigNativeQueryServers(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response) {
