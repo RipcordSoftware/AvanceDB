@@ -20,6 +20,7 @@ install:
 - pushd boost_1_57_0
 - sudo ./b2 --prefix=/usr -d0 install
 - popd
+- popd
 - sudo rm -f /usr/bin/g++
 - sudo rm -f /usr/bin/gcc
 - sudo rm -f /usr/bin/gcov
