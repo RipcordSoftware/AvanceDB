@@ -4,6 +4,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <mutex>
 
 #include "database.h"
 
@@ -18,6 +19,8 @@ public:
     
 private:
     std::map<std::string, Database::database_ptr> databases_;
+    
+    std::mutex databasesMutex_;
 };
 
 #endif	/* DATABASES_H */
