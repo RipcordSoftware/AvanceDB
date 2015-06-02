@@ -42,3 +42,6 @@ externals/
 
 # ignore the root copy of Futon/Fauxton
 src/avancedb/www/**
+
+# ignore any node_modules directories
+node_modules

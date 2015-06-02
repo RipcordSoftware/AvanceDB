@@ -3,6 +3,7 @@
 
 static const char* preconditionFailedDescription = "Precondition Failed";
 static const char* badRequestDescription = "Bad Request";
+static const char* notFoundDescription = "Not Found";
 
 static const char* databaseAlreadyExistsBody = R"({
     "error": "file_exists",
@@ -14,6 +15,11 @@ static const char* invalidDatabaseNameBody = R"({
     "reason": "Only lowercase characters (a-z), digits (0-9), and any of the characters _, $, (, ), +, -, and / are allowed. Must begin with a letter."
 })";
 
+static const char* missingDatabaseBody = R"({
+    "error": "not_found",
+    "reason": "missing"
+})";
+
 static const char* contentType = "application/json";
 
 DatabaseAlreadyExists::DatabaseAlreadyExists() : 
@@ -23,5 +29,10 @@ DatabaseAlreadyExists::DatabaseAlreadyExists() :
 
 InvalidDatabaseName::InvalidDatabaseName() :
     HttpServerException(400, badRequestDescription, invalidDatabaseNameBody, contentType) {
+    
+}
+
+MissingDatabase::MissingDatabase() :
+    HttpServerException(404, notFoundDescription, missingDatabaseBody, contentType) {
     
 }

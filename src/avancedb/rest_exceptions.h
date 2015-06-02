@@ -13,5 +13,10 @@ public:
     InvalidDatabaseName();
 };
 
+class MissingDatabase final : public HttpServerException {
+public:
+    MissingDatabase();
+};
+
 #endif	/* REST_EXCEPTIONS_H */
 

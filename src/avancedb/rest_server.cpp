@@ -16,7 +16,7 @@
 RestServer::RestServer() {
     router_.Add("HEAD", REGEX_DBNAME_GROUP "/?", boost::bind(&RestServer::HeadDatabase, this, _1, _2, _3));
     
-    router_.Add("DELETE", REGEX_DBNAME_GROUP "/?", boost::bind(&RestServer::DeleteDatabase, this, _1, _2, _3));
+    router_.Add("DELETE", REGEX_DBNAME_GROUP "/?/?", boost::bind(&RestServer::DeleteDatabase, this, _1, _2, _3));
     
     router_.Add("PUT", REGEX_DBNAME_GROUP "/?", boost::bind(&RestServer::PutDatabase, this, _1, _2, _3));
     
@@ -63,7 +63,7 @@ bool RestServer::GetAllDbs(rs::httpserver::request_ptr request, const rs::httpse
 }
 
 bool RestServer::GetSignature(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response) {
-    response->setContentType("application/javascript").Send(R"({"couchdb":"Welcome","uuid":"a2db86472466bcd02e84ac05a6c86185","version":"1.6.1","vendor":{"version":"1.6.1","name":"The Apache Software Foundation"}})");
+    response->setContentType("application/javascript").Send(R"({"couchdb":"Welcome","avancedb":"Welcome","uuid":"a2db86472466bcd02e84ac05a6c86185","version":"1.6.1","vendor":{"version":"0.0.1","name":"Ripcord Software"}})");
     return true;
 }
 
@@ -134,6 +134,8 @@ bool RestServer::GetDatabase(rs::httpserver::request_ptr request, const rs::http
             stream.Append("update_seq", db->UpdateSequence());
             
             response->setContentType("application/javascript").Send(stream.Flush());
+        } else {
+            throw MissingDatabase();
         }
     }
     
@@ -180,6 +182,8 @@ bool RestServer::DeleteDatabase(rs::httpserver::request_ptr request, const rs::h
         
         if (deleted) {
             response->setContentType("application/javascript").Send(R"({"ok":true})");
+        } else {
+            throw MissingDatabase();
         }
     }
     
