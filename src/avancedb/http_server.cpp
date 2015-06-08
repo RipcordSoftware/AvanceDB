@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "http_server_exception.h"
+#include "http_server_log.h"
 
 HttpServer::HttpServer(const char* address, int port) : server_(rs::httpserver::HttpServer::Create(address, port)) {
 }
@@ -13,11 +14,17 @@ void HttpServer::Start() {
 
 void HttpServer::RequestCallback(rs::httpserver::socket_ptr socket, rs::httpserver::request_ptr request, rs::httpserver::response_ptr response) {
     
+    auto start = boost::chrono::system_clock::now();
+    
     try {
-        rest_.RouteRequest(socket, request, response);
-
-        if (!response->HasResponded() && request->getUri().find("/_utils") == 0) {
+        if (request->getUri().find("/_utils") == 0) {
             HandleUtilsRequest(request, response);
+        } else {
+            rest_.RouteRequest(socket, request, response);
+        }
+        
+        if (!response->HasResponded()) {
+            response->setContentType("text/plain").setStatusCode(404).setStatusDescription("Not Found").Send(R"({"error":"not_found","reason":"no_db_file"})");
         }
     } catch (const HttpServerException& ex) {
         if (!response->HasResponded()) {
@@ -33,6 +40,13 @@ void HttpServer::RequestCallback(rs::httpserver::socket_ptr socket, rs::httpserv
         if (!response->HasResponded()) {
             InternalErrorResponse(socket, request, response);
         }
+    }           
+    
+    if (response->HasResponded()) {
+        auto duration = boost::chrono::system_clock::now() - start;
+        auto durationMS = boost::chrono::duration_cast<boost::chrono::milliseconds>(duration);
+
+        HttpServerLog::Append(socket, request, response, boost::chrono::system_clock::to_time_t(start), durationMS.count());
     }
 }
 

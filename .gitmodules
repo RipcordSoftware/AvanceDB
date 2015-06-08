@@ -13,3 +13,6 @@
 [submodule "externals/libjsapi"]
 	path = externals/libjsapi
 	url = https://github.com/RipcordSoftware/libjsapi.git
+[submodule "externals/termcolor"]
+	path = externals/termcolor
+	url = https://github.com/ikalnitsky/termcolor.git
