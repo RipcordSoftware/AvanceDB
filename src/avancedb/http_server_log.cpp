@@ -86,7 +86,7 @@ void HttpServerLog::Append(rs::httpserver::socket_ptr socket, rs::httpserver::re
     logRows[index].status = response->getStatusCode();
     std::snprintf(logRows[index].data, sizeof(logRows[0].data), 
         "%04d-%02d-%02d %02d:%02d:%02dZ %d.%d.%d.%d %s %s %s %u %d.%d.%d.%d %s %d %u",
-        year, (month + 1), (day + 1), hour, min, sec,
+        year, month, day, hour, min, sec,
         localEndpoint[2], localEndpoint[3], localEndpoint[4], localEndpoint[5],
         request->getMethod().c_str(),
         request->getUri().c_str(),
