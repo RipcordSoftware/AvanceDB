@@ -16,3 +16,6 @@
 [submodule "externals/termcolor"]
 	path = externals/termcolor
 	url = https://github.com/ikalnitsky/termcolor.git
+[submodule "externals/lazyflatset"]
+	path = externals/lazyflatset
+	url = https://github.com/RipcordSoftware/lazyflatset.git
