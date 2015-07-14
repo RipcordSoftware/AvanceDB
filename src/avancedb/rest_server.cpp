@@ -2,6 +2,7 @@
 
 #include <sstream>
 #include <cstring>
+#include <iomanip>
 
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/random_generator.hpp>
@@ -79,18 +80,16 @@ bool RestServer::GetUuids(rs::httpserver::request_ptr request, const rs::httpser
     }
     
     std::stringstream stream;    
-    stream << std::hex << "{\"uuids\":[";
+    stream << std::hex << std::setfill('0') << "{\"uuids\":[";
     
-    boost::uuids::basic_random_generator<boost::mt19937> gen;
+    boost::uuids::random_generator gen;
     for (int i = 0; i < count; ++i) {                
         stream << (i > 0 ? "," : "") << "\"";
-        
-        stream.width(2);
+
         auto uuid = gen();
-        for (auto iter = uuid.begin(); iter != uuid.end(); iter++) {
-            stream << static_cast<int>(*iter);
+        for (auto iter = uuid.begin(); iter != uuid.end(); ++iter) {
+            stream << std::setw(2) << static_cast<unsigned>(*iter);
         }
-        stream.width(0);
         
         stream << "\"";
     }
