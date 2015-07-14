@@ -6,10 +6,11 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/atomic.hpp>
 
+#include "types.h"
+
 class Database final : public boost::enable_shared_from_this<Database>, private boost::noncopyable {
 public:
-    typedef std::shared_ptr<Database> database_ptr;        
-    
+        
     static database_ptr Create(const char* name);
     
     unsigned long CommitedUpdateSequence() { return committedUpdateSeq_; }
@@ -35,6 +36,8 @@ private:
     boost::atomic<unsigned long> docCount_;
     boost::atomic<unsigned long> docDelCount_;
     const unsigned long instanceStartTime_ ;
+    
+    documents_ptr docs_;
 };
 
 #endif	/* DATABASE_H */

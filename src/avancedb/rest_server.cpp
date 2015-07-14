@@ -9,6 +9,7 @@
 
 #include "json_stream.h"
 #include "rest_exceptions.h"
+#include "database.h"
 
 #define REGEX_DBNAME R"(_?[a-z][a-z0-9_\$\+\-\(\)]+)"
 #define REGEX_DBNAME_GROUP "/(?<db>" REGEX_DBNAME ")"

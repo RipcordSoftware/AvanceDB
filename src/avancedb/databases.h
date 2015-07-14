@@ -6,19 +6,19 @@
 #include <string>
 #include <mutex>
 
-#include "database.h"
+#include "types.h"
 
 class Databases {
 public:
     
     bool AddDatabase(const char*);
     bool RemoveDatabase(const char*);
-    Database::database_ptr GetDatabase(const char*);
+    database_ptr GetDatabase(const char*);
     bool IsDatabase(const char*);
     std::vector<std::string> GetDatabases();
     
 private:
-    std::map<std::string, Database::database_ptr> databases_;
+    std::map<std::string, database_ptr> databases_;
     
     std::mutex databasesMutex_;
 };

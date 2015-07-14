@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include "database.h"
+
 bool Databases::AddDatabase(const char* name) {
     std::lock_guard<std::mutex> lock(databasesMutex_);
     bool added = false;
@@ -24,7 +26,7 @@ bool Databases::IsDatabase(const char* name) {
     return databases_.find(name) != databases_.cend();
 }
 
-Database::database_ptr Databases::GetDatabase(const char* name) {
+database_ptr Databases::GetDatabase(const char* name) {
     std::lock_guard<std::mutex> lock(databasesMutex_);
     
     auto iter = databases_.find(name);
@@ -37,7 +39,7 @@ std::vector<std::string> Databases::GetDatabases() {
     
     if (true) {
         std::lock_guard<std::mutex> lock(databasesMutex_);
-        std::for_each(databases_.cbegin(), databases_.cend(), [&](const std::pair<std::string, Database::database_ptr>& item) {
+        std::for_each(databases_.cbegin(), databases_.cend(), [&](const std::pair<std::string, database_ptr>& item) {
             databases.push_back(item.first);
         });
     }

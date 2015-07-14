@@ -6,12 +6,14 @@
                    projectFiles="true">
       <itemPath>database.h</itemPath>
       <itemPath>databases.h</itemPath>
+      <itemPath>documents.h</itemPath>
       <itemPath>http_server.h</itemPath>
       <itemPath>http_server_exception.h</itemPath>
       <itemPath>http_server_log.h</itemPath>
       <itemPath>json_stream.h</itemPath>
       <itemPath>rest_exceptions.h</itemPath>
       <itemPath>rest_server.h</itemPath>
+      <itemPath>types.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
@@ -22,6 +24,7 @@
                    projectFiles="true">
       <itemPath>database.cpp</itemPath>
       <itemPath>databases.cpp</itemPath>
+      <itemPath>documents.cpp</itemPath>
       <itemPath>http_server.cpp</itemPath>
       <itemPath>http_server_log.cpp</itemPath>
       <itemPath>json_stream.cpp</itemPath>
@@ -129,6 +132,10 @@
       </item>
       <item path="databases.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="documents.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="documents.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="http_server.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="http_server.h" ex="false" tool="3" flavor2="0">
@@ -152,6 +159,8 @@
       <item path="rest_server.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="rest_server.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="types.h" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
     <conf name="Release" type="1">
@@ -249,6 +258,10 @@
       </item>
       <item path="databases.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="documents.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="documents.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="http_server.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="http_server.h" ex="false" tool="3" flavor2="0">
@@ -272,6 +285,8 @@
       <item path="rest_server.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="rest_server.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="types.h" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
   </confs>
