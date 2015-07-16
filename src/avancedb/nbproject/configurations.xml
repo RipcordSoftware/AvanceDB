@@ -7,6 +7,7 @@
       <itemPath>database.h</itemPath>
       <itemPath>databases.h</itemPath>
       <itemPath>documents.h</itemPath>
+      <itemPath>../../externals/gason/src/gason.h</itemPath>
       <itemPath>http_server.h</itemPath>
       <itemPath>http_server_exception.h</itemPath>
       <itemPath>http_server_log.h</itemPath>
@@ -25,6 +26,7 @@
       <itemPath>database.cpp</itemPath>
       <itemPath>databases.cpp</itemPath>
       <itemPath>documents.cpp</itemPath>
+      <itemPath>../../externals/gason/src/gason.cpp</itemPath>
       <itemPath>http_server.cpp</itemPath>
       <itemPath>http_server_log.cpp</itemPath>
       <itemPath>json_stream.cpp</itemPath>
@@ -59,6 +61,7 @@
             <pElem>../../externals/libhttpserver/src/libhttpserver</pElem>
             <pElem>../../externals/libjsapi/src/libjsapi</pElem>
             <pElem>../../externals/termcolor/include</pElem>
+            <pElem>../../externals/gason/src</pElem>
           </incDir>
         </ccTool>
         <linkerTool>
@@ -124,6 +127,13 @@
           <commandLine>--coverage</commandLine>
         </linkerTool>
       </compileType>
+      <item path="../../externals/gason/src/gason.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../externals/gason/src/gason.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="database.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="database.h" ex="false" tool="3" flavor2="0">
@@ -180,6 +190,7 @@
             <pElem>../../externals/libhttpserver/src/libhttpserver</pElem>
             <pElem>../../externals/libjsapi/src/libjsapi</pElem>
             <pElem>../../externals/termcolor/include</pElem>
+            <pElem>../../externals/gason/src</pElem>
           </incDir>
         </ccTool>
         <fortranCompilerTool>
@@ -250,6 +261,13 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <item path="../../externals/gason/src/gason.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../externals/gason/src/gason.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="database.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="database.h" ex="false" tool="3" flavor2="0">
