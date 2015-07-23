@@ -187,14 +187,16 @@ bool RestServer::PutDocument(rs::httpserver::request_ptr request, const rs::http
         auto obj = GetJsonBody(request);        
 
         if (!!obj) {
-            auto doc = db->SetDocument(id, obj);                        
+            auto doc = db->SetDocument(id, obj);
+            
+            auto rev = doc->getRev();
             
             JsonStream stream;
             stream.Append("ok", "true");
             stream.Append("id", doc->getId());
-            stream.Append("rev", doc->getRev());
+            stream.Append("rev", rev);
 
-            response->setStatusCode(201).setContentType("application/json").Send(stream.Flush());
+            response->setStatusCode(201).setContentType("application/json").setETag(rev).Send(stream.Flush());
 
             created = true;
         }
