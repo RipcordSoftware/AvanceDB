@@ -21,7 +21,7 @@ private:
     Document(script_object_ptr obj);
     
     static bool ValidateHashField(const char*);
-    static void FormatRevison(long version, const rs::scriptobject::ScriptObjectHash& digest, RevString& rev);
+    static void FormatRevision(long version, const rs::scriptobject::ScriptObjectHash& digest, RevString& rev);
     
     script_object_ptr obj_;
     const char* id_;

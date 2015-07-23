@@ -20,7 +20,7 @@ document_ptr Document::Create(const char* id, script_object_ptr obj) {
     obj->CalculateHash(digest, &Document::ValidateHashField);
     
     RevString rev;
-    FormatRevison(nextVersion, digest, rev);
+    FormatRevision(nextVersion, digest, rev);
     
     document_ptr doc;
     if (obj->getType("_id") == rs::scriptobject::ScriptObjectType::String &&
@@ -58,7 +58,7 @@ bool Document::ValidateHashField(const char* name) {
     return name != nullptr && std::strcmp(name, "_id") != 0 && std::strcmp(name, "_rev") != 0;
 }
 
-void Document::FormatRevison(long version, const rs::scriptobject::ScriptObjectHash& digest, RevString& rev) {
+void Document::FormatRevision(long version, const rs::scriptobject::ScriptObjectHash& digest, RevString& rev) {
     std::snprintf(rev.data(), rev.size(), "%lu-%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x", 
             version, digest[0], digest[1], digest[2], digest[3], digest[4], digest[5], digest[6], digest[7],
             digest[8], digest[9], digest[10], digest[11], digest[12], digest[13], digest[14], digest[15]);
