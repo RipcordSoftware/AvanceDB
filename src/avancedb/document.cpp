@@ -55,7 +55,7 @@ const char* Document::getRev() {
 }
 
 bool Document::ValidateHashField(const char* name) {
-    return name != nullptr && std::strcmp(name, "_id") != 0 && std::strcmp(name, "_rev");
+    return name != nullptr && std::strcmp(name, "_id") != 0 && std::strcmp(name, "_rev") != 0;
 }
 
 void Document::FormatRevison(long version, const rs::scriptobject::ScriptObjectHash& digest, RevString& rev) {
