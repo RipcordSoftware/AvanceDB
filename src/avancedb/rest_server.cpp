@@ -3,6 +3,7 @@
 #include <sstream>
 #include <cstring>
 #include <iomanip>
+#include <vector>
 
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/random_generator.hpp>
@@ -11,29 +12,40 @@
 #include "json_stream.h"
 #include "rest_exceptions.h"
 #include "database.h"
+#include "document.h"
+
+#include "libscriptobject_gason.h"
 
 #define REGEX_DBNAME R"(_?[a-z][a-z0-9_\$\+\-\(\)]+)"
 #define REGEX_DBNAME_GROUP "/(?<db>" REGEX_DBNAME ")"
 
+#define REGEX_DOCID R"([a-zA-Z0-9_\$\+\-\(\)\:\.\~]+)"
+#define REGEX_DOCID_GROUP "/(?<id>" REGEX_DOCID ")"
+
 RestServer::RestServer() {
-    router_.Add("HEAD", REGEX_DBNAME_GROUP "/?", boost::bind(&RestServer::HeadDatabase, this, _1, _2, _3));
+    AddRoute("HEAD", REGEX_DBNAME_GROUP "/?", &RestServer::HeadDatabase);   
     
-    router_.Add("DELETE", REGEX_DBNAME_GROUP "/?/?", boost::bind(&RestServer::DeleteDatabase, this, _1, _2, _3));
+    AddRoute("DELETE", REGEX_DBNAME_GROUP "/?/?", &RestServer::DeleteDatabase);
     
-    router_.Add("PUT", REGEX_DBNAME_GROUP "/?", boost::bind(&RestServer::PutDatabase, this, _1, _2, _3));
+    AddRoute("PUT", REGEX_DBNAME_GROUP REGEX_DOCID_GROUP, &RestServer::PutDocument);
+    AddRoute("PUT", REGEX_DBNAME_GROUP "/?", &RestServer::PutDatabase);
     
-    router_.Add("GET", "/_active_tasks", boost::bind(&RestServer::GetActiveTasks, this, _1, _2, _3));
-    router_.Add("GET", "/_uuids", boost::bind(&RestServer::GetUuids, this, _1, _2, _3));
-    router_.Add("GET", "/_session", boost::bind(&RestServer::GetSession, this, _1, _2, _3));
-    router_.Add("GET", "/_all_dbs", boost::bind(&RestServer::GetAllDbs, this, _1, _2, _3));    
-    router_.Add("GET", REGEX_DBNAME_GROUP "/_all_docs", boost::bind(&RestServer::GetDatabaseAllDocs, this, _1, _2, _3));
-    router_.Add("GET", REGEX_DBNAME_GROUP "/?", boost::bind(&RestServer::GetDatabase, this, _1, _2, _3));
-    router_.Add("GET", "/_config/query_servers/?", boost::bind(&RestServer::GetConfigQueryServers, this, _1, _2, _3));
-    router_.Add("GET", "/_config/native_query_servers/?", boost::bind(&RestServer::GetConfigNativeQueryServers, this, _1, _2, _3));
-    router_.Add("GET", "/", boost::bind(&RestServer::GetSignature, this, _1, _2, _3));
+    AddRoute("GET", "/_active_tasks", &RestServer::GetActiveTasks);
+    AddRoute("GET", "/_uuids", &RestServer::GetUuids);
+    AddRoute("GET", "/_session", &RestServer::GetSession);
+    AddRoute("GET", "/_all_dbs", &RestServer::GetAllDbs);    
+    AddRoute("GET", REGEX_DBNAME_GROUP "/_all_docs", &RestServer::GetDatabaseAllDocs);
+    AddRoute("GET", REGEX_DBNAME_GROUP "/?", &RestServer::GetDatabase);
+    AddRoute("GET", "/_config/query_servers/?", &RestServer::GetConfigQueryServers);
+    AddRoute("GET", "/_config/native_query_servers/?", &RestServer::GetConfigNativeQueryServers);
+    AddRoute("GET", "/", &RestServer::GetSignature);
     
     databases_.AddDatabase("_replicator");
     databases_.AddDatabase("_users");
+}
+
+void RestServer::AddRoute(const char* method, const char* re, Callback func) {
+    router_.Add(method, re, boost::bind(func, this, _1, _2, _3));
 }
 
 void RestServer::RouteRequest(rs::httpserver::socket_ptr, rs::httpserver::request_ptr request, rs::httpserver::response_ptr response) {
@@ -41,12 +53,12 @@ void RestServer::RouteRequest(rs::httpserver::socket_ptr, rs::httpserver::reques
 }
 
 bool RestServer::GetActiveTasks(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response) {
-    response->setContentType("application/javascript").Send("[]");
+    response->setContentType("application/json").Send("[]");
     return true;
 }
 
 bool RestServer::GetSession(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response) {
-    response->setContentType("application/javascript").Send(R"({"ok":true,"userCtx":{"name":null,"roles":["_admin"]},"info":{"authentication_db":"_users","authentication_handlers":["oauth","cookie","default"],"authenticated":"default"}})");
+    response->setContentType("application/json").Send(R"({"ok":true,"userCtx":{"name":null,"roles":["_admin"]},"info":{"authentication_db":"_users","authentication_handlers":["oauth","cookie","default"],"authenticated":"default"}})");
     return true;
 }
 
@@ -60,12 +72,12 @@ bool RestServer::GetAllDbs(rs::httpserver::request_ptr request, const rs::httpse
     }
     stream << "]";
     
-    response->setContentType("application/javascript").Send(stream.str());
+    response->setContentType("application/json").Send(stream.str());
     return true;
 }
 
 bool RestServer::GetSignature(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response) {
-    response->setContentType("application/javascript").Send(R"({"couchdb":"Welcome","avancedb":"Welcome","uuid":"a2db86472466bcd02e84ac05a6c86185","version":"1.6.1","vendor":{"version":"0.0.1","name":"Ripcord Software"}})");
+    response->setContentType("application/json").Send(R"({"couchdb":"Welcome","avancedb":"Welcome","uuid":"a2db86472466bcd02e84ac05a6c86185","version":"1.6.1","vendor":{"version":"0.0.1","name":"Ripcord Software"}})");
     return true;
 }
 
@@ -79,7 +91,7 @@ bool RestServer::GetUuids(rs::httpserver::request_ptr request, const rs::httpser
         }
     }
     
-    std::stringstream stream;    
+    std::stringstream stream;
     stream << std::hex << std::setfill('0') << "{\"uuids\":[";
     
     boost::uuids::random_generator gen;
@@ -105,7 +117,7 @@ bool RestServer::HeadDatabase(rs::httpserver::request_ptr request, const rs::htt
 
     bool found = iter != args.cend() && databases_.IsDatabase(iter->second);
     if (found) {
-        response->setContentType("application/javascript").Send();            
+        response->setContentType("application/json").Send();            
     }
     
     return found;            
@@ -133,7 +145,7 @@ bool RestServer::GetDatabase(rs::httpserver::request_ptr request, const rs::http
             stream.Append("purge_seq", db->PurgeSequence());
             stream.Append("update_seq", db->UpdateSequence());
             
-            response->setContentType("application/javascript").Send(stream.Flush());
+            response->setContentType("application/json").Send(stream.Flush());
         } else {
             throw MissingDatabase();
         }
@@ -160,10 +172,33 @@ bool RestServer::PutDatabase(rs::httpserver::request_ptr request, const rs::http
         created = databases_.AddDatabase(name);
         
         if (created) {
-            response->setStatusCode(201).setContentType("application/javascript").Send(R"({"ok":true})");
+            response->setStatusCode(201).setContentType("application/json").Send(R"({"ok":true})");
         }
     }
     
+    return created;
+}
+
+bool RestServer::PutDocument(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
+    bool created = false;
+    auto db = GetDatabase(args);
+    if (!!db) {
+        auto id = GetParameter("id", args);
+        auto obj = GetJsonBody(request);        
+
+        if (!!obj) {
+            auto doc = db->SetDocument(id, obj);                        
+            
+            JsonStream stream;
+            stream.Append("ok", "true");
+            stream.Append("id", doc->getId());
+            stream.Append("rev", doc->getRev());
+
+            response->setStatusCode(201).setContentType("application/json").Send(stream.Flush());
+
+            created = true;
+        }
+    }
     return created;
 }
 
@@ -181,7 +216,7 @@ bool RestServer::DeleteDatabase(rs::httpserver::request_ptr request, const rs::h
         deleted = databases_.RemoveDatabase(argsIter->second);
         
         if (deleted) {
-            response->setContentType("application/javascript").Send(R"({"ok":true})");
+            response->setContentType("application/json").Send(R"({"ok":true})");
         } else {
             throw MissingDatabase();
         }
@@ -191,13 +226,59 @@ bool RestServer::DeleteDatabase(rs::httpserver::request_ptr request, const rs::h
 }
 
 bool RestServer::GetDatabaseAllDocs(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
-    response->setContentType("application/javascript").Send(R"({"offset":0,"rows":[],"total_rows":0})");
+    response->setContentType("application/json").Send(R"({"offset":0,"rows":[],"total_rows":0})");
 }
 
 bool RestServer::GetConfigQueryServers(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response) {
-    response->setContentType("application/javascript").Send(R"({"javascript":"libjsapi"})");
+    response->setContentType("application/json").Send(R"({"javascript":"libjsapi"})");
 }
 
 bool RestServer::GetConfigNativeQueryServers(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response) {
-    response->setContentType("application/javascript").Send("{}");
+    response->setContentType("application/json").Send("{}");
+}
+
+database_ptr RestServer::GetDatabase(const rs::httpserver::RequestRouter::CallbackArgs& args) {
+    database_ptr db;
+    auto argsIter = args.find("db");
+    if (argsIter != args.cend()) {
+        auto dbName = argsIter->second;
+        
+        db = databases_.GetDatabase(dbName);
+    }
+    return db;
+}
+
+const char* RestServer::GetDatabaseName(const rs::httpserver::RequestRouter::CallbackArgs& args) {
+    const char* dbName = nullptr;
+    auto argsIter = args.find("db");
+    if (argsIter != args.cend()) {
+        dbName = argsIter->second;
+    }
+    return dbName;
+}
+
+const char* RestServer::GetParameter(const char* param, const rs::httpserver::RequestRouter::CallbackArgs& args) {
+    auto argsIter = args.find(param);
+    if (argsIter == args.cend()) {
+        throw InvalidJson();
+    }
+    
+    return argsIter->second;
+}
+
+rs::scriptobject::ScriptObjectPtr RestServer::GetJsonBody(rs::httpserver::request_ptr request) {
+    if (request->HasBody() && request->getContentType().find("application/json") == 0) {
+        auto& requestStream = request->getRequestStream();
+        auto requestLength = request->getContentLength();
+        
+        std::vector<rs::httpserver::RequestStream::byte> buffer(requestLength);
+        requestStream.Read(&buffer[0], 0, requestLength, false);
+        
+        char* json = reinterpret_cast<char*>(buffer.data());
+        
+        rs::scriptobject::ScriptObjectJsonSource source(json);        
+        return rs::scriptobject::ScriptObjectFactory::CreateObject(source);
+    } else {
+        return rs::scriptobject::ScriptObjectPtr(nullptr);
+    }
 }

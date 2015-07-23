@@ -15,11 +15,13 @@ public:
 
     static documents_ptr Create(database_ptr db);
     
+    document_ptr SetDocument(const char* id, script_object_ptr obj);
+    
 private:
     
     Documents(database_ptr db);
     
-    database_ptr db_;
+    database_wptr db_;
 
 };
 

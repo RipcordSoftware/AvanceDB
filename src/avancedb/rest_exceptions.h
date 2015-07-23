@@ -18,5 +18,10 @@ public:
     MissingDatabase();
 };
 
+class InvalidJson final : public HttpServerException {
+public:
+    InvalidJson();
+};
+
 #endif	/* REST_EXCEPTIONS_H */
 

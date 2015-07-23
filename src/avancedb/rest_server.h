@@ -2,7 +2,9 @@
 #define	REST_SERVER_H
 
 #include "libhttpserver.h"
+#include "libscriptobject.h"
 
+#include "types.h"
 #include "databases.h"
 
 class RestServer final {
@@ -12,6 +14,10 @@ public:
     void RouteRequest(rs::httpserver::socket_ptr socket, rs::httpserver::request_ptr request, rs::httpserver::response_ptr response);
     
 private:
+    
+    using Callback = bool(RestServer::*)(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response);
+    
+    void AddRoute(const char* method, const char* re, Callback func);
     
     bool HeadDatabase(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response);
         
@@ -26,8 +32,14 @@ private:
     bool GetSignature(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response);
     
     bool PutDatabase(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response);
+    bool PutDocument(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response);
     
     bool DeleteDatabase(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response);
+    
+    database_ptr GetDatabase(const rs::httpserver::RequestRouter::CallbackArgs&);
+    const char* GetDatabaseName(const rs::httpserver::RequestRouter::CallbackArgs&);
+    const char* GetParameter(const char* param, const rs::httpserver::RequestRouter::CallbackArgs&);
+    rs::scriptobject::ScriptObjectPtr GetJsonBody(rs::httpserver::request_ptr request);
     
     rs::httpserver::RequestRouter router_;        
     Databases databases_;

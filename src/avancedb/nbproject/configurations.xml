@@ -6,8 +6,8 @@
                    projectFiles="true">
       <itemPath>database.h</itemPath>
       <itemPath>databases.h</itemPath>
+      <itemPath>document.h</itemPath>
       <itemPath>documents.h</itemPath>
-      <itemPath>../../externals/gason/src/gason.h</itemPath>
       <itemPath>http_server.h</itemPath>
       <itemPath>http_server_exception.h</itemPath>
       <itemPath>http_server_log.h</itemPath>
@@ -25,8 +25,8 @@
                    projectFiles="true">
       <itemPath>database.cpp</itemPath>
       <itemPath>databases.cpp</itemPath>
+      <itemPath>document.cpp</itemPath>
       <itemPath>documents.cpp</itemPath>
-      <itemPath>../../externals/gason/src/gason.cpp</itemPath>
       <itemPath>http_server.cpp</itemPath>
       <itemPath>http_server_log.cpp</itemPath>
       <itemPath>json_stream.cpp</itemPath>
@@ -61,7 +61,9 @@
             <pElem>../../externals/libhttpserver/src/libhttpserver</pElem>
             <pElem>../../externals/libjsapi/src/libjsapi</pElem>
             <pElem>../../externals/termcolor/include</pElem>
-            <pElem>../../externals/gason/src</pElem>
+            <pElem>../../externals/libscriptobject/src/libscriptobject</pElem>
+            <pElem>../../externals/libscriptobject/src/libscriptobject_gason</pElem>
+            <pElem>../../externals/libscriptobject/externals/gason/src</pElem>
           </incDir>
         </ccTool>
         <linkerTool>
@@ -91,18 +93,6 @@
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibProjectItem>
-              <makeArtifact PL="../../externals/libscriptobject/src/libscriptobject"
-                            CT="3"
-                            CN="Debug"
-                            AC="true"
-                            BL="true"
-                            WD="../../externals/libscriptobject/src/libscriptobject"
-                            BC="${MAKE}  -f Makefile CONF=Debug"
-                            CC="${MAKE}  -f Makefile CONF=Debug clean"
-                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libscriptobject.a">
-              </makeArtifact>
-            </linkerLibProjectItem>
-            <linkerLibProjectItem>
               <makeArtifact PL="../../externals/libscriptobject/src/libscriptobject_gason"
                             CT="3"
                             CN="Debug"
@@ -112,6 +102,18 @@
                             BC="${MAKE}  -f Makefile CONF=Debug"
                             CC="${MAKE}  -f Makefile CONF=Debug clean"
                             OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liblibscriptobject_gason.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../../externals/libscriptobject/src/libscriptobject"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../../externals/libscriptobject/src/libscriptobject"
+                            BC="${MAKE}  -f Makefile CONF=Debug"
+                            CC="${MAKE}  -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libscriptobject.a">
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibLibItem>boost_regex</linkerLibLibItem>
@@ -127,13 +129,6 @@
           <commandLine>--coverage</commandLine>
         </linkerTool>
       </compileType>
-      <item path="../../externals/gason/src/gason.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../externals/gason/src/gason.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="database.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="database.h" ex="false" tool="3" flavor2="0">
@@ -141,6 +136,10 @@
       <item path="databases.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="databases.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="document.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="document.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="documents.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -190,7 +189,9 @@
             <pElem>../../externals/libhttpserver/src/libhttpserver</pElem>
             <pElem>../../externals/libjsapi/src/libjsapi</pElem>
             <pElem>../../externals/termcolor/include</pElem>
-            <pElem>../../externals/gason/src</pElem>
+            <pElem>../../externals/libscriptobject/src/libscriptobject</pElem>
+            <pElem>../../externals/libscriptobject/src/libscriptobject_gason</pElem>
+            <pElem>../../externals/libscriptobject/externals/gason/src</pElem>
           </incDir>
         </ccTool>
         <fortranCompilerTool>
@@ -226,18 +227,6 @@
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibProjectItem>
-              <makeArtifact PL="../../externals/libscriptobject/src/libscriptobject"
-                            CT="3"
-                            CN="Release"
-                            AC="false"
-                            BL="true"
-                            WD="../../externals/libscriptobject/src/libscriptobject"
-                            BC="${MAKE}  -f Makefile CONF=Release"
-                            CC="${MAKE}  -f Makefile CONF=Release clean"
-                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libscriptobject.a">
-              </makeArtifact>
-            </linkerLibProjectItem>
-            <linkerLibProjectItem>
               <makeArtifact PL="../../externals/libscriptobject/src/libscriptobject_gason"
                             CT="3"
                             CN="Release"
@@ -247,6 +236,18 @@
                             BC="${MAKE}  -f Makefile CONF=Release"
                             CC="${MAKE}  -f Makefile CONF=Release clean"
                             OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liblibscriptobject_gason.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../../externals/libscriptobject/src/libscriptobject"
+                            CT="3"
+                            CN="Release"
+                            AC="false"
+                            BL="true"
+                            WD="../../externals/libscriptobject/src/libscriptobject"
+                            BC="${MAKE}  -f Makefile CONF=Release"
+                            CC="${MAKE}  -f Makefile CONF=Release clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libscriptobject.a">
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibLibItem>boost_regex</linkerLibLibItem>
@@ -261,13 +262,6 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
-      <item path="../../externals/gason/src/gason.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../externals/gason/src/gason.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="database.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="database.h" ex="false" tool="3" flavor2="0">
@@ -275,6 +269,10 @@
       <item path="databases.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="databases.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="document.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="document.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="documents.cpp" ex="false" tool="1" flavor2="0">
       </item>

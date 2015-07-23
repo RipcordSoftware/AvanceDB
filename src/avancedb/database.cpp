@@ -22,3 +22,7 @@ unsigned long Database::Now() {
     auto now = boost::chrono::system_clock::now().time_since_epoch();
     return boost::chrono::duration_cast<boost::chrono::microseconds>(now).count();
 }
+
+document_ptr Database::SetDocument(const char* id, script_object_ptr obj) {
+    return docs_->SetDocument(id, obj);
+}

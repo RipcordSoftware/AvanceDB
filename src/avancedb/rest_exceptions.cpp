@@ -20,6 +20,11 @@ static const char* missingDatabaseBody = R"({
     "reason": "missing"
 })";
 
+static const char* invalidJsonBody = R"({
+    "error":"bad_request",
+    "reason":"invalid_json"
+})";
+
 static const char* contentType = "application/json";
 
 DatabaseAlreadyExists::DatabaseAlreadyExists() : 
@@ -34,5 +39,10 @@ InvalidDatabaseName::InvalidDatabaseName() :
 
 MissingDatabase::MissingDatabase() :
     HttpServerException(404, notFoundDescription, missingDatabaseBody, contentType) {
+    
+}
+
+InvalidJson::InvalidJson() :
+    HttpServerException(400, badRequestDescription, invalidJsonBody, contentType) {
     
 }

@@ -22,6 +22,8 @@ public:
     unsigned long DocDelCount() { return docDelCount_; }
     unsigned long InstanceStartTime() { return instanceStartTime_; }
     
+    document_ptr SetDocument(const char* id, script_object_ptr);
+    
 private:
     Database(const char*);
     
