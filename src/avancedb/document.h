@@ -5,10 +5,38 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/shared_ptr.hpp>
 
+#include <cstring>
+
 #include "types.h"
 
 class Document final : public boost::enable_shared_from_this<Document>, private boost::noncopyable {
 public:
+    
+    class Less {
+    public:
+        bool operator()(const document_ptr& a, const document_ptr& b) {
+            return std::strcmp(a->id_, b->id_) < 0;
+        }
+    };
+    
+    class Equal {
+    public:
+        bool operator()(const document_ptr& a, const document_ptr& b) {
+            return std::strcmp(a->id_, b->id_) == 0;
+        }
+    };
+    
+    class Compare {
+    public:      
+        Compare(const char* id) : id_(id) {}
+        
+        int operator()(const document_ptr& doc) {
+            return std::strcmp(id_, doc->id_);
+        }
+        
+    private:
+        const char* id_;
+    };
     
     static document_ptr Create(const char* id, script_object_ptr obj);
     

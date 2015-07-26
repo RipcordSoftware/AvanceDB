@@ -4,6 +4,7 @@
 static const char* preconditionFailedDescription = "Precondition Failed";
 static const char* badRequestDescription = "Bad Request";
 static const char* notFoundDescription = "Not Found";
+static const char* conflictDescription = "Conflict";
 
 static const char* databaseAlreadyExistsBody = R"({
     "error": "file_exists",
@@ -25,6 +26,11 @@ static const char* invalidJsonBody = R"({
     "reason":"invalid_json"
 })";
 
+static const char* documentConflictJsonBody = R"({
+    "error":"conflict",
+    "reason":"Document update conflict."
+})";
+
 static const char* contentType = "application/json";
 
 DatabaseAlreadyExists::DatabaseAlreadyExists() : 
@@ -44,5 +50,10 @@ MissingDatabase::MissingDatabase() :
 
 InvalidJson::InvalidJson() :
     HttpServerException(400, badRequestDescription, invalidJsonBody, contentType) {
+    
+}
+
+DocumentConflict::DocumentConflict() :
+    HttpServerException(409, conflictDescription, documentConflictJsonBody, contentType) {
     
 }

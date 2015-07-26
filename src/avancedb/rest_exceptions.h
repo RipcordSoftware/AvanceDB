@@ -23,5 +23,10 @@ public:
     InvalidJson();
 };
 
+class DocumentConflict final : public HttpServerException {
+public:
+    DocumentConflict();
+};
+
 #endif	/* REST_EXCEPTIONS_H */
 

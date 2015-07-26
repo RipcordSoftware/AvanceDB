@@ -269,17 +269,36 @@ const char* RestServer::GetParameter(const char* param, const rs::httpserver::Re
 }
 
 rs::scriptobject::ScriptObjectPtr RestServer::GetJsonBody(rs::httpserver::request_ptr request) {
-    if (request->HasBody() && request->getContentType().find("application/json") == 0) {
+    if (request->HasBody()) {
+        if (request->getContentType().find("application/json") == std::string::npos) {
+            throw InvalidJson();
+        }
+
         auto& requestStream = request->getRequestStream();
         auto requestLength = request->getContentLength();
         
         std::vector<rs::httpserver::RequestStream::byte> buffer(requestLength);
-        requestStream.Read(&buffer[0], 0, requestLength, false);
         
-        char* json = reinterpret_cast<char*>(buffer.data());
+        decltype(requestLength) offset = 0;
+        while (offset < requestLength) {
+            auto remaining = requestLength - offset;
+            auto bytesRead = requestStream.Read(&buffer[offset], 0, remaining, false);
+            
+            if (bytesRead <= 0) {
+                throw InvalidJson();
+            }
+            
+            offset += bytesRead;
+        }
         
-        rs::scriptobject::ScriptObjectJsonSource source(json);        
-        return rs::scriptobject::ScriptObjectFactory::CreateObject(source);
+        auto json = reinterpret_cast<char*>(buffer.data());
+        
+        try {
+            rs::scriptobject::ScriptObjectJsonSource source(json);        
+            return rs::scriptobject::ScriptObjectFactory::CreateObject(source);
+        } catch (const std::exception&) {
+            throw InvalidJson();
+        }
     } else {
         return rs::scriptobject::ScriptObjectPtr(nullptr);
     }

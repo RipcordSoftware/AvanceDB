@@ -18,7 +18,7 @@ public:
     unsigned long PurgeSequence() { return purgeSeq_; }
     unsigned long DataSize() { return dataSize_; }
     unsigned long DiskSize() { return diskSize_; }
-    unsigned long DocCount() { return docCount_; }
+    unsigned long DocCount();
     unsigned long DocDelCount() { return docDelCount_; }
     unsigned long InstanceStartTime() { return instanceStartTime_; }
     
@@ -35,7 +35,6 @@ private:
     boost::atomic<unsigned long> purgeSeq_;
     boost::atomic<unsigned long> dataSize_;
     boost::atomic<unsigned long> diskSize_;
-    boost::atomic<unsigned long> docCount_;
     boost::atomic<unsigned long> docDelCount_;
     const unsigned long instanceStartTime_ ;
     
