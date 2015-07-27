@@ -28,6 +28,19 @@ document_ptr Documents::GetDocument(const char* id) {
     return doc;
 }
 
+document_ptr Documents::DeleteDocument(const char* id) {
+    Document::Compare compare{id};
+    auto doc = docs_.find_fn(compare);
+    
+    if (!doc) {
+        throw DocumentMissing();
+    }
+    
+    docs_.erase(doc);
+    
+    return doc;
+}
+
 document_ptr Documents::SetDocument(const char* id, script_object_ptr obj) {
     Document::Compare compare{id};
     auto doc = docs_.find_fn(compare);

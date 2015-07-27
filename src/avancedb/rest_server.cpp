@@ -25,8 +25,10 @@
 
 RestServer::RestServer() {
     AddRoute("HEAD", REGEX_DBNAME_GROUP "/?", &RestServer::HeadDatabase);   
+    AddRoute("HEAD", REGEX_DBNAME_GROUP REGEX_DOCID_GROUP, &RestServer::HeadDocument);
     
     AddRoute("DELETE", REGEX_DBNAME_GROUP "/?/?", &RestServer::DeleteDatabase);
+    AddRoute("DELETE", REGEX_DBNAME_GROUP REGEX_DOCID_GROUP, &RestServer::DeleteDocument);
     
     AddRoute("PUT", REGEX_DBNAME_GROUP REGEX_DOCID_GROUP, &RestServer::PutDocument);
     AddRoute("PUT", REGEX_DBNAME_GROUP "/?", &RestServer::PutDatabase);
@@ -223,6 +225,46 @@ bool RestServer::PutDocument(rs::httpserver::request_ptr request, const rs::http
         }
     }
     return created;
+}
+
+bool RestServer::DeleteDocument(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
+    bool deleted = false;
+    auto db = GetDatabase(args);
+    if (!!db) {
+        auto id = GetParameter("id", args);
+        
+        auto doc = db->DeleteDocument(id);
+        
+        auto rev = doc->getRev();
+            
+        JsonStream stream;
+        stream.Append("ok", "true");
+        stream.Append("id", doc->getId());
+        stream.Append("rev", rev);
+
+        response->setStatusCode(200).setContentType("application/json").setETag(rev).Send(stream.Flush());
+        
+        deleted = true;        
+    }
+    
+    return deleted;
+}
+
+bool RestServer::HeadDocument(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
+    bool gotHead = false;
+    auto db = GetDatabase(args);
+    if (!!db) {
+        auto id = GetParameter("id", args);
+        
+        auto doc = db->GetDocument(id);        
+        auto rev = doc->getRev();
+        
+        response->setStatusCode(200).setContentType("application/json").setETag(rev).Send();
+        
+        gotHead = true;
+    }
+    
+    return gotHead;
 }
 
 bool RestServer::DeleteDatabase(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
