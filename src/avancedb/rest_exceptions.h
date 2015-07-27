@@ -28,5 +28,10 @@ public:
     DocumentConflict();
 };
 
+class DocumentMissing final : public HttpServerException {
+public:
+    DocumentMissing();
+};
+
 #endif	/* REST_EXCEPTIONS_H */
 

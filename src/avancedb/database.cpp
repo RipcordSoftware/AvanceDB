@@ -27,6 +27,10 @@ unsigned long Database::DocCount() {
     return docs_->getCount(); 
 }
 
+document_ptr Database::GetDocument(const char* id) {
+    return docs_->GetDocument(id);
+}
+
 document_ptr Database::SetDocument(const char* id, script_object_ptr obj) {
     return docs_->SetDocument(id, obj);
 }

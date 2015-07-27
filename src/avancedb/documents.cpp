@@ -17,6 +17,17 @@ Documents::collection::size_type Documents::getCount() {
     return docs_.size();
 }
 
+document_ptr Documents::GetDocument(const char* id) {
+    Document::Compare compare{id};
+    auto doc = docs_.find_fn(compare);
+    
+    if (!doc) {
+        throw DocumentMissing();
+    }
+    
+    return doc;
+}
+
 document_ptr Documents::SetDocument(const char* id, script_object_ptr obj) {
     Document::Compare compare{id};
     auto doc = docs_.find_fn(compare);

@@ -13,13 +13,14 @@
 #include "rest_exceptions.h"
 #include "database.h"
 #include "document.h"
+#include "script_object_stream.h"
 
 #include "libscriptobject_gason.h"
 
 #define REGEX_DBNAME R"(_?[a-z][a-z0-9_\$\+\-\(\)]+)"
 #define REGEX_DBNAME_GROUP "/(?<db>" REGEX_DBNAME ")"
 
-#define REGEX_DOCID R"([a-zA-Z0-9_\$\+\-\(\)\:\.\~]+)"
+#define REGEX_DOCID R"([a-zA-Z0-9\$\+\-\(\)\:\.\~][a-zA-Z0-9_\$\+\-\(\)\:\.\~]*)"
 #define REGEX_DOCID_GROUP "/(?<id>" REGEX_DOCID ")"
 
 RestServer::RestServer() {
@@ -34,6 +35,7 @@ RestServer::RestServer() {
     AddRoute("GET", "/_uuids", &RestServer::GetUuids);
     AddRoute("GET", "/_session", &RestServer::GetSession);
     AddRoute("GET", "/_all_dbs", &RestServer::GetAllDbs);    
+    AddRoute("GET", REGEX_DBNAME_GROUP REGEX_DOCID_GROUP, &RestServer::GetDocument);
     AddRoute("GET", REGEX_DBNAME_GROUP "/_all_docs", &RestServer::GetDatabaseAllDocs);
     AddRoute("GET", REGEX_DBNAME_GROUP "/?", &RestServer::GetDatabase);
     AddRoute("GET", "/_config/query_servers/?", &RestServer::GetConfigQueryServers);
@@ -177,6 +179,25 @@ bool RestServer::PutDatabase(rs::httpserver::request_ptr request, const rs::http
     }
     
     return created;
+}
+
+bool RestServer::GetDocument(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
+    bool gotDoc = false;
+    auto db = GetDatabase(args);
+    if (!!db) {
+        auto id = GetParameter("id", args);
+        
+        auto doc = db->GetDocument(id);
+        auto obj = doc->getObject();
+        
+        auto rev = doc->getRev();
+        auto json = ScriptObjectStream::Serialize(obj);
+        response->setStatusCode(200).setContentType("application/json").setETag(rev).Send(json);
+        
+        gotDoc = true;
+    }
+    
+    return gotDoc;
 }
 
 bool RestServer::PutDocument(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {

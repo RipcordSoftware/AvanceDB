@@ -40,9 +40,11 @@ public:
     
     static document_ptr Create(const char* id, script_object_ptr obj);
     
-    const char* getId();
-    const char* getRev();
+    const char* getId() const;
+    const char* getRev() const;
     
+    const script_object_ptr getObject() const;
+        
 private:        
     using RevString = std::array<char, 20 + 1 + 32 + 1>;
     

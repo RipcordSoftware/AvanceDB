@@ -16,6 +16,7 @@ class Document;
 using document_ptr = boost::shared_ptr<Document>;
 
 using script_object_ptr = rs::scriptobject::ScriptObjectPtr;
+using script_array_ptr = rs::scriptobject::ScriptArrayPtr;
 
 #endif	/* TYPES_H */
 

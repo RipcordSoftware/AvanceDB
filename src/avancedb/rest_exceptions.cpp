@@ -31,6 +31,11 @@ static const char* documentConflictJsonBody = R"({
     "reason":"Document update conflict."
 })";
 
+static const char* missingDocumentJsonBody = R"({
+    "error": "not_found",
+    "reason": "missing"
+})";
+
 static const char* contentType = "application/json";
 
 DatabaseAlreadyExists::DatabaseAlreadyExists() : 
@@ -55,5 +60,10 @@ InvalidJson::InvalidJson() :
 
 DocumentConflict::DocumentConflict() :
     HttpServerException(409, conflictDescription, documentConflictJsonBody, contentType) {
+    
+}
+
+DocumentMissing::DocumentMissing() :
+    HttpServerException(404, notFoundDescription, missingDocumentJsonBody, contentType) {
     
 }

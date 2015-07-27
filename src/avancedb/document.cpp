@@ -46,12 +46,16 @@ document_ptr Document::Create(const char* id, script_object_ptr obj) {
     return doc;
 }
 
-const char* Document::getId() {
+const char* Document::getId() const {
     return id_;
 }
 
-const char* Document::getRev() {
+const char* Document::getRev() const {
     return rev_;
+}
+
+const script_object_ptr Document::getObject() const {
+    return obj_;
 }
 
 bool Document::ValidateHashField(const char* name) {
