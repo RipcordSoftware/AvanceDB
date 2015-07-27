@@ -28,12 +28,17 @@ document_ptr Documents::GetDocument(const char* id) {
     return doc;
 }
 
-document_ptr Documents::DeleteDocument(const char* id) {
+document_ptr Documents::DeleteDocument(const char* id, const char* rev) {
     Document::Compare compare{id};
     auto doc = docs_.find_fn(compare);
     
     if (!doc) {
         throw DocumentMissing();
+    }
+    
+    auto docRev = doc->getRev();
+    if (std::strcmp(rev, docRev) != 0) {
+        throw DocumentConflict();
     }
     
     docs_.erase(doc);

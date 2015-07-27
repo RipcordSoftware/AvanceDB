@@ -215,7 +215,7 @@ bool RestServer::PutDocument(rs::httpserver::request_ptr request, const rs::http
             auto rev = doc->getRev();
             
             JsonStream stream;
-            stream.Append("ok", "true");
+            stream.Append("ok", true);
             stream.Append("id", doc->getId());
             stream.Append("rev", rev);
 
@@ -232,13 +232,14 @@ bool RestServer::DeleteDocument(rs::httpserver::request_ptr request, const rs::h
     auto db = GetDatabase(args);
     if (!!db) {
         auto id = GetParameter("id", args);
+        auto rev = GetParameter("rev", request->getQueryString(), false);
         
-        auto doc = db->DeleteDocument(id);
+        auto doc = db->DeleteDocument(id, rev);
         
-        auto rev = doc->getRev();
+        rev = doc->getRev();
             
         JsonStream stream;
-        stream.Append("ok", "true");
+        stream.Append("ok", true);
         stream.Append("id", doc->getId());
         stream.Append("rev", rev);
 
@@ -256,7 +257,7 @@ bool RestServer::HeadDocument(rs::httpserver::request_ptr request, const rs::htt
     if (!!db) {
         auto id = GetParameter("id", args);
         
-        auto doc = db->GetDocument(id);        
+        auto doc = db->GetDocument(id);
         auto rev = doc->getRev();
         
         response->setStatusCode(200).setContentType("application/json").setETag(rev).Send();
@@ -329,6 +330,15 @@ const char* RestServer::GetParameter(const char* param, const rs::httpserver::Re
     }
     
     return argsIter->second;
+}
+
+const char* RestServer::GetParameter(const char* param, const rs::httpserver::QueryString& qs, bool throwIfMissing) {
+    if (throwIfMissing && !qs.IsKey(param)) {
+        // TODO: this isn't the best exception message to return, however there are no obvious alterates that CouchDB uses
+        throw InvalidJson();
+    }
+    
+    return qs.getValue(param).c_str();
 }
 
 rs::scriptobject::ScriptObjectPtr RestServer::GetJsonBody(rs::httpserver::request_ptr request) {

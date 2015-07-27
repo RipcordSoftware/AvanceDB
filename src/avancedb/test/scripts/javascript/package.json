@@ -1,5 +1,6 @@
 {
     "dependencies": {
-        "cradle": "*"
+	"cradle": "*",
+	"underscore": "*"
     }
 }

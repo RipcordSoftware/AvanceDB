@@ -41,6 +41,7 @@ private:
     
     database_ptr GetDatabase(const rs::httpserver::RequestRouter::CallbackArgs&);
     const char* GetDatabaseName(const rs::httpserver::RequestRouter::CallbackArgs&);
+    const char* GetParameter(const char* param, const rs::httpserver::QueryString&, bool throwIfMissing = true);
     const char* GetParameter(const char* param, const rs::httpserver::RequestRouter::CallbackArgs&);
     rs::scriptobject::ScriptObjectPtr GetJsonBody(rs::httpserver::request_ptr request);
     

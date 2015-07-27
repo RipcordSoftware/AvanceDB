@@ -23,7 +23,7 @@ public:
     unsigned long InstanceStartTime() { return instanceStartTime_; }
     
     document_ptr GetDocument(const char* id);
-    document_ptr DeleteDocument(const char* id);
+    document_ptr DeleteDocument(const char* id, const char* rev);
     document_ptr SetDocument(const char* id, script_object_ptr);
     
 private:
