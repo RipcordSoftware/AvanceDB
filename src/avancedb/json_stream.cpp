@@ -39,6 +39,11 @@ void JsonStream::Append(const char* name, bool value) {
     count_++;
 }
 
+void JsonStream::Append(const char* name) {
+    stream_ << (count_ > 0 ? "," : "")  << "\"" << name << "\":" << "null";
+    count_++;
+}
+
 std::string JsonStream::Flush() {
     stream_ << "}";
     

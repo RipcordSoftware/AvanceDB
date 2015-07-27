@@ -14,6 +14,7 @@ public:
     void Append(const char* name, int64_t value);
     void Append(const char* name, double value);
     void Append(const char* name, bool value);
+    void Append(const char* name);
     
     std::string Flush();
     
