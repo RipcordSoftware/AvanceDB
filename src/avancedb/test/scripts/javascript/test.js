@@ -61,6 +61,17 @@ describe('avancedb -- db --', function() {
             done();
         });
     });
+    
+    it('shouldn\'t create a database: bad name', function(done) {
+        var db = conn.database('_' + testDbName);
+        db.create(function(err, res) {
+            assert.notEqual(null, err);
+            assert.equal('illegal_database_name', err.error);
+            assert.equal(400, err.headers.status);
+            assert.equal(null, res);
+            done();
+        });
+    });
 
     it('should create a database', function(done) {
         var db = conn.database(testDbName);
@@ -68,6 +79,17 @@ describe('avancedb -- db --', function() {
             assert.equal(null, err);
             assert.notEqual(null, res);
             assert.notEqual(res.ok, 'true');
+            done();
+        });
+    });
+    
+    it('create fails: should find an existing database', function(done) {
+        var db = conn.database(testDbName);
+        db.create(function(err, res) {
+            assert.notEqual(null, err);
+            assert.equal('file_exists', err.error);
+            assert.equal(412, err.headers.status);
+            assert.equal(null, res);
             done();
         });
     });
@@ -103,7 +125,7 @@ describe('avancedb -- db --', function() {
 
 describe('avancedb -- docs --', function() {
     var testDbName = 'avancedb-test';
-    var testDocument = { 'lorem' : 'ipsum' };
+    var testDocument = { 'lorem' : 'ipsum', pi: 3.14159, sunny: true, the_answer: 42, taxRate: null, fibonnaci: [0, 1, 1, 2, 3, 5, 8, 13 ], child: { 'hello': 'world' }, events: [ null, 1969, 'avance', true, {}, [] ] };
     
     it('should create a database', function(done) {
         var db = conn.database(testDbName);
@@ -153,8 +175,10 @@ describe('avancedb -- docs --', function() {
         db.get('test0', function(err, doc) {
             assert.equal(null, err);
             assert.notEqual(null, doc);
-            assert.equal('test0', doc._id);
-            assert.equal(testDocument.hello, doc.hello);
+            var compDoc = _.extend({}, testDocument);
+            compDoc._id = doc._id;
+            compDoc._rev = doc._rev;
+            assert.deepEqual(doc, compDoc);
             done();
         });
     });
@@ -174,6 +198,18 @@ describe('avancedb -- docs --', function() {
                 assert.equal(null, doc);
                 done();
             });
+        });
+    });
+    
+    it('delete a non-existant document with an id', function(done) {
+        var db = conn.database(testDbName);
+
+        db.remove('test0', function(err, res) {
+            assert.notEqual(null, err);
+            assert.equal('not_found', err.error);
+            assert.equal(404, err.headers.status);
+            assert.equal(null, res);
+            done();
         });
     });
     
@@ -215,8 +251,10 @@ describe('avancedb -- docs --', function() {
                 db.get(id, function(err, doc) {
                     assert.equal(null, err);
                     assert.notEqual(null, doc);
-                    assert.equal(id, doc._id);
-                    assert.equal(testDocument.hello, doc.hello);
+                    var compDoc = _.extend({}, test);
+                    compDoc._id = doc._id;
+                    compDoc._rev = doc._rev;
+                    assert.deepEqual(doc, compDoc);
                     
                     // countdown the number of callbacks
                     --callbackCount;
