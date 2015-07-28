@@ -125,22 +125,23 @@ bool RestServer::GetUuids(rs::httpserver::request_ptr request, const rs::httpser
 }
 
 bool RestServer::HeadDatabase(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
-    auto iter = args.find("db");
-
-    bool found = iter != args.cend() && databases_.IsDatabase(iter->second);
-    if (found) {
+    bool found = false;
+    
+    auto name = GetDatabaseName(args);
+    if (name != nullptr && databases_.IsDatabase(name)) {
         response->setContentType("application/json").Send();            
+        found = true;
     }
     
     return found;            
 }
 
 bool RestServer::GetDatabase(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
-    auto argsIter = args.find("db");
-    
-    bool found = argsIter != args.cend();
-    if (found) {
-        auto db = databases_.GetDatabase(argsIter->second);
+    bool found = false;
+
+    auto name = GetDatabaseName(args);
+    if (name != nullptr) {
+        auto db = databases_.GetDatabase(name);
         
         found = !!db;
         if (found) {
@@ -148,7 +149,7 @@ bool RestServer::GetDatabase(rs::httpserver::request_ptr request, const rs::http
             stream.Append("committed_update_seq", db->CommitedUpdateSequence());
             stream.Append("compact_running", false);
             stream.Append("data_size", db->DataSize());
-            stream.Append("db_name", argsIter->second);
+            stream.Append("db_name", name);
             stream.Append("disk_format_version", 6);
             stream.Append("disk_size", db->DiskSize());
             stream.Append("doc_count", db->DocCount());
@@ -168,11 +169,9 @@ bool RestServer::GetDatabase(rs::httpserver::request_ptr request, const rs::http
 
 bool RestServer::PutDatabase(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
     bool created = false;
-    auto argsIter = args.find("db");
     
-    if (argsIter != args.cend()) {
-        auto name = argsIter->second;
-        
+    auto name = GetDatabaseName(args);
+    if (name != nullptr) {
         if (std::strlen(name) <= 0 || name[0] == '_') {
             throw InvalidDatabaseName();
         }
@@ -189,6 +188,27 @@ bool RestServer::PutDatabase(rs::httpserver::request_ptr request, const rs::http
     }
     
     return created;
+}
+
+bool RestServer::DeleteDatabase(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
+    bool deleted = false;
+    
+    auto name = GetDatabaseName(args);    
+    if (name != nullptr) {                
+        if (std::strlen(name) <= 0 || name[0] == '_') {
+            throw InvalidDatabaseName();
+        }
+        
+        deleted = databases_.RemoveDatabase(name);
+        
+        if (deleted) {
+            response->setContentType("application/json").Send(R"({"ok":true})");
+        } else {
+            throw MissingDatabase();
+        }
+    }
+    
+    return deleted;
 }
 
 bool RestServer::GetDocument(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
@@ -276,29 +296,6 @@ bool RestServer::HeadDocument(rs::httpserver::request_ptr request, const rs::htt
     return gotHead;
 }
 
-bool RestServer::DeleteDatabase(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
-    bool deleted = false;
-    auto argsIter = args.find("db");
-    
-    if (argsIter != args.cend()) {
-        auto name = argsIter->second;
-        
-        if (std::strlen(name) <= 0 || name[0] == '_') {
-            throw InvalidDatabaseName();
-        }
-        
-        deleted = databases_.RemoveDatabase(argsIter->second);
-        
-        if (deleted) {
-            response->setContentType("application/json").Send(R"({"ok":true})");
-        } else {
-            throw MissingDatabase();
-        }
-    }
-    
-    return deleted;
-}
-
 bool RestServer::GetDatabaseAllDocs(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
     response->setContentType("application/json").Send(R"({"offset":0,"rows":[],"total_rows":0})");
 }
@@ -313,10 +310,8 @@ bool RestServer::GetConfigNativeQueryServers(rs::httpserver::request_ptr request
 
 database_ptr RestServer::GetDatabase(const rs::httpserver::RequestRouter::CallbackArgs& args) {
     database_ptr db;
-    auto argsIter = args.find("db");
-    if (argsIter != args.cend()) {
-        auto dbName = argsIter->second;
-        
+    auto dbName = GetDatabaseName(args);
+    if (dbName != nullptr) {                
         db = databases_.GetDatabase(dbName);
     }
     return db;
