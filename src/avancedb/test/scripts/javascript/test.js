@@ -10,16 +10,20 @@ var port = 15994;
 var conn = new cradle.Connection(host, port, { cache: false });
 
 describe('avancedb -- server info --', function() {
-    conn.info(function (err, res) {
-        assert.deepEqual(res, {
-            "couchdb":"Welcome",
-            "avancedb":"Welcome",
-            "uuid":"a2db86472466bcd02e84ac05a6c86185",
-            "version":"1.6.1",
-            "vendor":{
-                "version":"0.0.1",
-                "name":"Ripcord Software"
-            }
+    it('should validate server signature', function(done) {
+        conn.info(function (err, res) {
+            assert.equal(null, err);
+            assert.deepEqual(res, {
+                "couchdb":"Welcome",
+                "avancedb":"Welcome",
+                "uuid":"a2db86472466bcd02e84ac05a6c86185",
+                "version":"1.6.1",
+                "vendor":{
+                    "version":"0.0.1",
+                    "name":"Ripcord Software"
+                }
+            });
+            done();
         });
     });
 });

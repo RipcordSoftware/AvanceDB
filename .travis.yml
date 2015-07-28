@@ -1,6 +1,6 @@
 language: cpp
 compiler: gcc
-script: make all
+script: make all && make test
 
 before_install:
 - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test

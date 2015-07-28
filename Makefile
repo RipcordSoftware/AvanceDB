@@ -10,6 +10,9 @@ all: force_true
 	cd externals/libhttpserver && $(MAKE) $(MFLAGS) $(MAKEOVERRIDES) all
 	cd src/avancedb && $(MAKE) $(MFLAGS) $(MAKEOVERRIDES) all
 
+test: force_true
+	cd src/avancedb/test/scripts/javascript && ./test.sh
+
 clean: force_true
 	cd externals/libscriptobject && $(MAKE) $(MFLAGS) $(MAKEOVERRIDES) clean
 	cd externals/libjsapi && $(MAKE) $(MFLAGS) $(MAKEOVERRIDES) clean
