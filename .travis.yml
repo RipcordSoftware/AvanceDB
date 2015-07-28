@@ -3,29 +3,27 @@ compiler: gcc
 script: make all
 
 before_install:
-# g++ 4.8.1
 - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
 - sudo apt-get update -qq
 
 install:
-# g++4.8.1
-- sudo apt-get install -qq g++-4.8 zlib1g-dev doxygen
-- export CC="gcc-4.8"
-- export CXX="g++-4.8"
-- pushd ~
-- mkdir Downloads
-- cd Downloads
-- curl ftp://ftp.ripcordsoftware.com/pub/boost_1_57_0-travis-ci.tar.bz2 -O
-- tar xfj boost_1_57_0-travis-ci.tar.bz2
-- pushd boost_1_57_0
-- sudo ./b2 --prefix=/usr -d0 install
-- popd
-- popd
-- sudo rm -f /usr/bin/g++
-- sudo rm -f /usr/bin/gcc
-- sudo rm -f /usr/bin/gcov
-- sudo ln -s /usr/bin/g++-4.8 /usr/bin/g++
-- sudo ln -s /usr/bin/gcc-4.8 /usr/bin/gcc
-- sudo ln -s /usr/bin/gcov-4.8 /usr/bin/gcov
-- sudo apt-get install npm
+#- sudo apt-get install -qq g++-4.8 zlib1g-dev doxygen
+#- export CC="gcc-4.8"
+#- export CXX="g++-4.8"
+#- pushd ~
+#- mkdir Downloads
+#- cd Downloads
+#- curl ftp://ftp.ripcordsoftware.com/pub/boost_1_57_0-travis-ci.tar.bz2 -O
+#- tar xfj boost_1_57_0-travis-ci.tar.bz2
+#- pushd boost_1_57_0
+#- sudo ./b2 --prefix=/usr -d0 install
+#- popd
+#- popd
+#- sudo rm -f /usr/bin/g++
+#- sudo rm -f /usr/bin/gcc
+#- sudo rm -f /usr/bin/gcov
+#- sudo ln -s /usr/bin/g++-4.8 /usr/bin/g++
+#- sudo ln -s /usr/bin/gcc-4.8 /usr/bin/gcc
+#- sudo ln -s /usr/bin/gcov-4.8 /usr/bin/gcov
+- sudo apt-get install -qq npm
 - sudo npm install -g mocha
