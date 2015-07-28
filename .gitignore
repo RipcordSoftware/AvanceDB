@@ -48,3 +48,7 @@ node_modules
 
 # ignore test output
 avance_test.log
+
+# ignore the coverage output files
+coverage.info
+coverage/*
