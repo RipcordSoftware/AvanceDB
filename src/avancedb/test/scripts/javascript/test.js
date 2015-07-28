@@ -113,6 +113,21 @@ describe('avancedb -- tasks --', function() {
     });
 });
 
+describe('avancedb -- session --', function() {
+    it('should get the default session response', function(done) {
+        http.get(url + '/_session', function(res) {
+            assert.equal(200, res.statusCode);
+            assert.equal('application/json', res.headers['content-type']);
+            res.on('data', function(chunk) {
+                var session = JSON.parse(chunk);
+                assert.notEqual(null, session.ok);
+                assert.notEqual(null, session.userCtx);
+                done();
+            });
+        });
+    }); 
+});
+
 describe('avancedb -- uuids --', function() {
     it('should get one uuid', function(done) {
         conn.uuids(1, function(err, uuids) {
