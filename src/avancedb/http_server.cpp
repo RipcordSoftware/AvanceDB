@@ -19,13 +19,13 @@ void HttpServer::RequestCallback(rs::httpserver::socket_ptr socket, rs::httpserv
     try {
         if (request->getUri().find("/_utils") == 0) {
             HandleUtilsRequest(request, response);
+            
+            if (!response->HasResponded()) {
+                response->setStatusCode(404).setStatusDescription("Not Found").Send();
+            }
         } else {
             rest_.RouteRequest(socket, request, response);
-        }
-        
-        if (!response->HasResponded()) {
-            response->setContentType("text/plain").setStatusCode(404).setStatusDescription("Not Found").Send(R"({"error":"not_found","reason":"no_db_file"})");
-        }
+        }                
     } catch (const HttpServerException& ex) {
         if (!response->HasResponded()) {
             try {

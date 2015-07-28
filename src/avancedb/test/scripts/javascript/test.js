@@ -3,10 +3,12 @@
 var assert = require('assert');
 var cradle = require('cradle');
 var _ = require('underscore');
+var http = require('http');
 
 var host = 'http://localhost';
 var port = 15994;
 //var port = 5994;
+var url = host + ':' + port;
 var conn = new cradle.Connection(host, port, { cache: false });
 
 describe('avancedb -- server info --', function() {
@@ -25,6 +27,48 @@ describe('avancedb -- server info --', function() {
             });
             done();
         });
+    });
+});
+
+describe('avancedb -- futon --', function() {
+    it('should get a redirect', function(done) {
+        http.get(url + '/_utils', function(res) {
+            assert.equal(307, res.statusCode);
+            assert.equal('/_utils/index.html', res.headers.location);
+            done();
+        }).end();
+    });    
+    
+    it('should get html', function(done) {
+        http.get(url + '/_utils/index.html', function(res) {
+            assert.equal(200, res.statusCode);
+            assert.equal('text/html', res.headers['content-type']);
+            done();
+        }).end();
+    });
+    
+    it('should get the favicon', function(done) {
+        http.get(url + '/_utils/favicon.ico', function(res) {
+            assert.equal(200, res.statusCode);
+            assert.equal('image/ico', res.headers['content-type']);
+            done();
+        }).end();
+    });
+    
+    it('should get the logo', function(done) {
+        http.get(url + '/_utils/image/logo.png', function(res) {
+            assert.equal(200, res.statusCode);
+            assert.equal('image/png', res.headers['content-type']);
+            done();
+        }).end();
+    });
+    
+    it('shouldn\'t get a valid response', function(done) {
+        http.get(url + '/_utils/nothing_to_see_here', function(res) {
+            assert.equal(404, res.statusCode);
+            assert.equal(0, res.headers['content-length']);
+            done();
+        }).end();
     });
 });
 

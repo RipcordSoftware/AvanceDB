@@ -54,6 +54,10 @@ void RestServer::AddRoute(const char* method, const char* re, Callback func) {
 
 void RestServer::RouteRequest(rs::httpserver::socket_ptr, rs::httpserver::request_ptr request, rs::httpserver::response_ptr response) {
     router_.Match(request, response);
+    
+    if (!response->HasResponded()) {
+        response->setContentType("text/plain").setStatusCode(404).setStatusDescription("Not Found").Send(R"({"error":"not_found","reason":"no_db_file"})");
+    }
 }
 
 bool RestServer::GetActiveTasks(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response) {
