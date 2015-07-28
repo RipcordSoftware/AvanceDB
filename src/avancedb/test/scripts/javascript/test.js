@@ -74,6 +74,17 @@ describe('avancedb -- futon --', function() {
 
 describe('avancedb -- db --', function() {
     var testDbName = 'avancedb-test';
+    
+    it('should get the standard databases', function(done) {
+        conn.databases(function(err, dbs) {
+            assert.equal(null, err);
+            assert.notEqual(false, dbs);
+            assert.equal(2, dbs.length);
+            assert.equal('_replicator', dbs[0]);
+            assert.equal('_users', dbs[1]);
+            done();
+        });
+    });
 
     it('shouldn\'t find a database', function(done) {
         var db = conn.database(testDbName);
@@ -123,6 +134,18 @@ describe('avancedb -- db --', function() {
             assert.equal(null, err);
             assert.notEqual(null, res);
             assert.notEqual(res.ok, 'true');
+            done();
+        });
+    });
+    
+    it('should get the standard databases and the new db', function(done) {
+        conn.databases(function(err, dbs) {
+            assert.equal(null, err);
+            assert.notEqual(false, dbs);
+            assert.equal(3, dbs.length);
+            assert.equal('_replicator', dbs[0]);
+            assert.equal('_users', dbs[1]);
+            assert.equal(testDbName, dbs[2]);
             done();
         });
     });
