@@ -1,7 +1,9 @@
 {
+    "name": "avancedb-test",
+    "version": "0.0.1",
     "dependencies": {
-	"cradle": "*",
-	"underscore": "*",
-	"mocha": "*"
+        "cradle": "*",
+        "underscore": "*",
+        "mocha": "*"
     }
 }

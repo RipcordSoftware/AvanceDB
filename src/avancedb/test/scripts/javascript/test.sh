@@ -2,7 +2,7 @@
 
 npm --version &> /dev/null
 if [ $? -eq 127 ]; then
-    echo 'You should install node/npm before running this test'
+    echo 'You should install nodejs & npm before running this test'
     exit 1
 fi
 
@@ -18,16 +18,22 @@ if [ "$CONFIGURATION" == "" ]; then
     CONFIGURATION=Debug
 fi
 
+DELAY=2
+if [ "${CI}" = "true" ]; then
+    DELAY=10
+fi
+
 TEST_DIR=$PWD
 
 pushd ../../../dist/${CONFIGURATION}/GNU-Linux-x86
 ./avancedb -p 15994 &> ${TEST_DIR}/avance_test.log  &
 ADB_PID=$!
-sleep 2
+sleep ${DELAY}
 popd
 
-node_modules/mocha/bin/mocha
+node_modules/mocha/bin/mocha -t `expr ${DELAY} \* 1000`
 STATUS=$?
-sleep 2
+sleep ${DELAY}
 kill $ADB_PID
+
 exit $STATUS
