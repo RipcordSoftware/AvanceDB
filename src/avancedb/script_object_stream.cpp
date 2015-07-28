@@ -69,21 +69,6 @@ void ScriptObjectStream::Append(std::stringstream& stream, const char* name, int
     Append(stream, value);
 }
 
-void ScriptObjectStream::Append(std::stringstream& stream, const char* name, unsigned value) {
-    stream << "\"" << name << "\":";
-    Append(stream, value);
-}
-
-void ScriptObjectStream::Append(std::stringstream& stream, const char* name, int64_t value) {
-    stream << "\"" << name << "\":";
-    Append(stream, value);
-}
-
-void ScriptObjectStream::Append(std::stringstream& stream, const char* name, uint64_t value) {
-    stream << "\"" << name << "\":";
-    Append(stream, value);
-}
-
 void ScriptObjectStream::Append(std::stringstream& stream, const char* name, double value) {
     stream << "\"" << name << "\":";
     Append(stream, value);
@@ -114,18 +99,6 @@ void ScriptObjectStream::Append(std::stringstream& stream, const char* value) {
 }
 
 void ScriptObjectStream::Append(std::stringstream& stream, int value) {
-    stream << value;
-}
-
-void ScriptObjectStream::Append(std::stringstream& stream, unsigned value) {
-    stream << value;
-}
-
-void ScriptObjectStream::Append(std::stringstream& stream, int64_t value) {
-    stream << value;
-}
-
-void ScriptObjectStream::Append(std::stringstream& stream, uint64_t value) {
     stream << value;
 }
 
