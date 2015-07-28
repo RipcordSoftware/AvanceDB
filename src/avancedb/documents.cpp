@@ -18,6 +18,8 @@ Documents::collection::size_type Documents::getCount() {
 }
 
 document_ptr Documents::GetDocument(const char* id) {
+    boost::lock_guard<boost::mutex> guard(docsMtx_);
+    
     Document::Compare compare{id};
     auto doc = docs_.find_fn(compare);
     
@@ -29,6 +31,8 @@ document_ptr Documents::GetDocument(const char* id) {
 }
 
 document_ptr Documents::DeleteDocument(const char* id, const char* rev) {
+    boost::lock_guard<boost::mutex> guard(docsMtx_);
+    
     Document::Compare compare{id};
     auto doc = docs_.find_fn(compare);
     
@@ -47,6 +51,8 @@ document_ptr Documents::DeleteDocument(const char* id, const char* rev) {
 }
 
 document_ptr Documents::SetDocument(const char* id, script_object_ptr obj) {
+    boost::lock_guard<boost::mutex> guard(docsMtx_);
+    
     Document::Compare compare{id};
     auto doc = docs_.find_fn(compare);
 

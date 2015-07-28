@@ -5,6 +5,7 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/atomic.hpp>
+#include <boost/thread.hpp>
 
 #include "../../externals/lazyflatset/lazyflatset.hpp"
 
@@ -32,6 +33,7 @@ private:
     
     database_wptr db_;
     
+    boost::mutex docsMtx_;
     collection docs_;
 
 };
