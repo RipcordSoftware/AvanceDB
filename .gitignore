@@ -45,3 +45,6 @@ src/avancedb/www/**
 
 # ignore any node_modules directories
 node_modules
+
+# ignore test output
+avance_test.log
