@@ -102,6 +102,17 @@ describe('avancedb -- config --', function() {
     });
 });
 
+describe('avancedb -- tasks --', function() {
+    it('should get no tasks', function(done) {
+        conn.activeTasks(function(err, tasks) {
+            assert.equal(null, err);
+            assert.notEqual(null, tasks);
+            assert.equal(0, tasks.length);
+            done();
+        });
+    });
+});
+
 describe('avancedb -- uuids --', function() {
     it('should get one uuid', function(done) {
         conn.uuids(1, function(err, uuids) {
