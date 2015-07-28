@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/RipcordSoftware/AvanceDB.svg)](https://travis-ci.org/RipcordSoftware/AvanceDB)
+[![Coverage Status](https://coveralls.io/repos/RipcordSoftware/AvanceDB/badge.svg?branch=master&service=github)](https://coveralls.io/github/RipcordSoftware/AvanceDB?branch=master)
 [![License](http://img.shields.io/:license-agpl-blue.svg)](http://doge.agpl-license.org)
 # AvanceDB
 An in-memory database based on the CouchDB REST API and containing the CouchDB Futon and Fauxton web sites.
