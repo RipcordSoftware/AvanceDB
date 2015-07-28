@@ -33,5 +33,10 @@ public:
     DocumentMissing();
 };
 
+class UuidCountLimit final : public HttpServerException {
+public:
+    UuidCountLimit();
+};
+
 #endif	/* REST_EXCEPTIONS_H */
 

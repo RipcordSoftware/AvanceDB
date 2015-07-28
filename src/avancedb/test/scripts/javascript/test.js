@@ -72,13 +72,70 @@ describe('avancedb -- futon --', function() {
     });
 });
 
+describe('avancedb -- uuids --', function() {
+    it('should get one uuid', function(done) {
+        conn.uuids(1, function(err, uuids) {
+            assert.equal(null, err);
+            assert.notEqual(null, uuids);
+            assert.equal(1, uuids.length);
+            done();
+        });
+    });
+    
+    it('ask for zero uuids get one (the default)', function(done) {
+        conn.uuids(0, function(err, uuids) {
+            assert.equal(null, err);
+            assert.notEqual(null, uuids);
+            assert.equal(1, uuids.length);
+            done();
+        });
+    });
+    
+    it('should get minus one uuid', function(done) {
+        conn.uuids(-1, function(err, uuids) {
+            assert.equal(null, err);
+            assert.notEqual(null, uuids);
+            assert.equal(0, uuids.length);
+            done();
+        });
+    });
+    
+    it('should get one hundred uuids', function(done) {
+        conn.uuids(100, function(err, uuids) {
+            assert.equal(null, err);
+            assert.notEqual(null, uuids);
+            assert.equal(100, uuids.length);
+            done();
+        });
+    });
+    
+    it('should get one thousand uuids', function(done) {
+        conn.uuids(1000, function(err, uuids) {
+            assert.equal(null, err);
+            assert.notEqual(null, uuids);
+            assert.equal(1000, uuids.length);
+            done();
+        });
+    });
+    
+    it('should get ten thousand uuids', function(done) {
+        conn.uuids(10000, function(err, uuids) {
+            assert.notEqual(null, err);
+            assert.equal('forbidden', err.error);
+            assert.equal(403, err.headers.status);
+            assert.equal(null, uuids);
+            done();
+        });
+    });
+});
+
 describe('avancedb -- db --', function() {
     var testDbName = 'avancedb-test';
     
     it('should get the standard databases', function(done) {
         conn.databases(function(err, dbs) {
             assert.equal(null, err);
-            assert.notEqual(false, dbs);
+            assert.notEqual(null, dbs);
             assert.equal(2, dbs.length);
             assert.equal('_replicator', dbs[0]);
             assert.equal('_users', dbs[1]);

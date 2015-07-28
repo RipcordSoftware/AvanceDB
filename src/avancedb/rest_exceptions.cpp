@@ -5,6 +5,7 @@ static const char* preconditionFailedDescription = "Precondition Failed";
 static const char* badRequestDescription = "Bad Request";
 static const char* notFoundDescription = "Not Found";
 static const char* conflictDescription = "Conflict";
+static const char* forbiddenDescription = "Forbidden";
 
 static const char* databaseAlreadyExistsBody = R"({
     "error": "file_exists",
@@ -36,6 +37,11 @@ static const char* missingDocumentJsonBody = R"({
     "reason": "missing"
 })";
 
+static const char* uuidCountLimitJsonBody = R"({
+    "error": "forbidden",
+    "reason": "count parameter too large"
+})";
+
 static const char* contentType = "application/json";
 
 DatabaseAlreadyExists::DatabaseAlreadyExists() : 
@@ -65,5 +71,10 @@ DocumentConflict::DocumentConflict() :
 
 DocumentMissing::DocumentMissing() :
     HttpServerException(404, notFoundDescription, missingDocumentJsonBody, contentType) {
+    
+}
+
+UuidCountLimit::UuidCountLimit() :
+    HttpServerException(403, forbiddenDescription, uuidCountLimitJsonBody, contentType) {
     
 }

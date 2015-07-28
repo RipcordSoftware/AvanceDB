@@ -99,6 +99,10 @@ bool RestServer::GetUuids(rs::httpserver::request_ptr request, const rs::httpser
         }
     }
     
+    if (count > 1000) {
+        throw UuidCountLimit();
+    }
+    
     std::stringstream stream;
     stream << std::hex << std::setfill('0') << "{\"uuids\":[";
     
