@@ -27,4 +27,5 @@ install:
 - sudo ln -s /usr/bin/g++-4.8 /usr/bin/g++
 - sudo ln -s /usr/bin/gcc-4.8 /usr/bin/gcc
 - sudo ln -s /usr/bin/gcov-4.8 /usr/bin/gcov
+- sudo apt-get install npm
 - sudo npm install -g mocha
