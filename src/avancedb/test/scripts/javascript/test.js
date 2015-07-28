@@ -230,6 +230,28 @@ describe('avancedb -- db --', function() {
         });
     });
     
+    it('shouldn\'t delete the _replicator database', function(done) {
+        var db = conn.database('_replicator');
+        db.destroy(function(err, res) {
+            assert.notEqual(null, err);
+            assert.equal('illegal_database_name', err.error);
+            assert.equal(400, err.headers.status);
+            assert.equal(null, res);
+            done();
+        });
+    });
+    
+    it('shouldn\'t delete the _users database', function(done) {
+        var db = conn.database('_users');
+        db.destroy(function(err, res) {
+            assert.notEqual(null, err);
+            assert.equal('illegal_database_name', err.error);
+            assert.equal(400, err.headers.status);
+            assert.equal(null, res);
+            done();
+        });
+    });
+    
     it('shouldn\'t create a database: bad name', function(done) {
         var db = conn.database('_' + testDbName);
         db.create(function(err, res) {
