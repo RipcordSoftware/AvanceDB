@@ -35,40 +35,70 @@ describe('avancedb -- futon --', function() {
         http.get(url + '/_utils', function(res) {
             assert.equal(307, res.statusCode);
             assert.equal('/_utils/index.html', res.headers.location);
+            res.on('data', function(){});
             done();
-        }).end();
+        });
     });    
     
     it('should get html', function(done) {
         http.get(url + '/_utils/index.html', function(res) {
             assert.equal(200, res.statusCode);
             assert.equal('text/html', res.headers['content-type']);
+            res.on('data', function(){});
             done();
-        }).end();
+        });
     });
     
     it('should get the favicon', function(done) {
         http.get(url + '/_utils/favicon.ico', function(res) {
             assert.equal(200, res.statusCode);
             assert.equal('image/ico', res.headers['content-type']);
+            res.on('data', function(){});
             done();
-        }).end();
+        });
     });
     
     it('should get the logo', function(done) {
         http.get(url + '/_utils/image/logo.png', function(res) {
             assert.equal(200, res.statusCode);
             assert.equal('image/png', res.headers['content-type']);
+            res.on('data', function(){});
             done();
-        }).end();
+        });
     });
     
     it('shouldn\'t get a valid response', function(done) {
         http.get(url + '/_utils/nothing_to_see_here', function(res) {
             assert.equal(404, res.statusCode);
             assert.equal(0, res.headers['content-length']);
+            res.on('data', function(){});
             done();
-        }).end();
+        });
+    });
+});
+
+describe('avancedb -- config --', function() {
+    it('should get the query server config', function(done) {
+        http.get(url + '/_config/query_servers', function(res) {
+            assert.equal(200, res.statusCode);
+            assert.equal('application/json', res.headers['content-type']);
+            res.on('data', function(chunk) {
+                var config = JSON.parse(chunk);
+                assert.notEqual(null, config.javascript);
+                done();
+            });
+        });
+    });    
+    
+    it('should get the native query server config', function(done) {
+        http.get(url + '/_config/native_query_servers', function(res) {
+            assert.equal(200, res.statusCode);
+            assert.equal('application/json', res.headers['content-type']);
+            res.on('data', function(chunk) {
+                assert.equal('{}', chunk);
+                done();
+            });
+        });
     });
 });
 
