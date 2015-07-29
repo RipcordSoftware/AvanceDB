@@ -38,7 +38,7 @@ RestServer::RestServer() {
     AddRoute("GET", "/_session", &RestServer::GetSession);
     AddRoute("GET", "/_all_dbs", &RestServer::GetAllDbs);    
     AddRoute("GET", REGEX_DBNAME_GROUP REGEX_DOCID_GROUP, &RestServer::GetDocument);
-    AddRoute("GET", REGEX_DBNAME_GROUP "/_all_docs", &RestServer::GetDatabaseAllDocs);
+    AddRoute("GET", REGEX_DBNAME_GROUP "/+_all_docs", &RestServer::GetDatabaseAllDocs);
     AddRoute("GET", REGEX_DBNAME_GROUP "/?", &RestServer::GetDatabase);
     AddRoute("GET", "/_config/query_servers/?", &RestServer::GetConfigQueryServers);
     AddRoute("GET", "/_config/native_query_servers/?", &RestServer::GetConfigNativeQueryServers);
@@ -260,7 +260,7 @@ bool RestServer::DeleteDocument(rs::httpserver::request_ptr request, const rs::h
     auto db = GetDatabase(args);
     if (!!db) {
         auto id = GetParameter("id", args);
-        auto rev = GetParameter("rev", request->getQueryString(), false);
+        auto rev = GetParameter("rev", request->getQueryString()).c_str();
         
         auto doc = db->DeleteDocument(id, rev);
         
@@ -297,7 +297,37 @@ bool RestServer::HeadDocument(rs::httpserver::request_ptr request, const rs::htt
 }
 
 bool RestServer::GetDatabaseAllDocs(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
-    response->setContentType("application/json").Send(R"({"offset":0,"rows":[],"total_rows":0})");
+    auto db = GetDatabase(args);
+    if (!!db) {
+        auto docs = db->GetDocuments();
+        auto startkey = GetParameter("startkey", request->getQueryString());
+        
+        std::stringstream body;
+        body << R"({"offset":0,"total_rows":)" << docs.size() << R"(,"rows":[)";
+        
+        if (startkey.size() == 0) {
+            for (decltype(docs)::size_type i = 0, size = docs.size(); i < size; ++i) {
+                if (i > 0) {
+                    body << ',';
+                }
+
+                auto doc = docs[i];
+
+                auto id = doc->getId();
+                auto rev= doc->getRev();
+
+                body << '{' << R"("id":")" << id << R"(",)";
+                body << R"("key":")" << id << R"(",)";
+                body << R"("value":{"rev":")" << rev << R"("}})";
+
+                //body << ScriptObjectStream::Serialize(doc->getObject());
+            }
+        }
+        
+        body << "]}";
+        
+        response->setContentType("application/json").Send(body.str());
+    }
 }
 
 bool RestServer::GetConfigQueryServers(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response) {
@@ -335,13 +365,13 @@ const char* RestServer::GetParameter(const char* param, const rs::httpserver::Re
     return argsIter->second;
 }
 
-const char* RestServer::GetParameter(const char* param, const rs::httpserver::QueryString& qs, bool throwIfMissing) {
+const std::string& RestServer::GetParameter(const char* param, const rs::httpserver::QueryString& qs, bool throwIfMissing) {
     if (throwIfMissing && !qs.IsKey(param)) {
-        // TODO: this isn't the best exception message to return, however there are no obvious alterates that CouchDB uses
+        // TODO: this isn't the best exception message to return, however there are no obvious alternatives that CouchDB uses
         throw InvalidJson();
     }
     
-    return qs.getValue(param).c_str();
+    return qs.getValue(param);
 }
 
 rs::scriptobject::ScriptObjectPtr RestServer::GetJsonBody(rs::httpserver::request_ptr request) {

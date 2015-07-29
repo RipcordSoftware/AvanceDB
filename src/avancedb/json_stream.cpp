@@ -4,6 +4,11 @@ JsonStream::JsonStream() : count_(0) {
     stream_ << "{";
 }
 
+void JsonStream::Append(const char* name, const std::string& value) {
+    stream_ << (count_ > 0 ? "," : "") << "\"" << name << "\":\"" << value << "\"";
+    count_++;
+}
+
 void JsonStream::Append(const char* name, const char* value) {
     stream_ << (count_ > 0 ? "," : "") << "\"" << name << "\":\"" << value << "\"";
     count_++;

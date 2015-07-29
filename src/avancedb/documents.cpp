@@ -76,3 +76,9 @@ document_ptr Documents::SetDocument(const char* id, script_object_ptr obj) {
 
     return doc;
 }
+
+document_array Documents::GetDocuments() {
+    boost::lock_guard<boost::mutex> guard(docsMtx_);
+    
+    return document_array{docs_.cbegin(), docs_.cend()};
+}

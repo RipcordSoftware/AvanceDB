@@ -38,3 +38,7 @@ document_ptr Database::DeleteDocument(const char* id, const char* rev) {
 document_ptr Database::SetDocument(const char* id, script_object_ptr obj) {
     return docs_->SetDocument(id, obj);
 }
+
+document_array Database::GetDocuments() {
+    return docs_->GetDocuments();
+}

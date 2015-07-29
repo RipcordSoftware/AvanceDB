@@ -25,6 +25,8 @@ public:
     document_ptr DeleteDocument(const char* id, const char* rev);
     document_ptr SetDocument(const char* id, script_object_ptr obj);
     
+    document_array GetDocuments();
+    
     collection::size_type getCount();
     
 private:

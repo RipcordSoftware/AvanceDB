@@ -385,6 +385,20 @@ describe('avancedb -- docs --', function() {
         });
     });
     
+    it('get a document via _all_docs', function(done) {
+        var db = conn.database(testDbName);
+        db.all(function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            assert.equal(1, docs.length);
+            assert.notEqual(null, docs[0].id);
+            assert.equal(docs[0].id, docs[0].key);
+            assert.notEqual(null, docs[0].value);
+            assert.notEqual(null, docs[0].value.rev);
+            done();
+        });
+    });
+    
     it('delete a document with an id', function(done) {
         var db = conn.database(testDbName);
 
@@ -433,12 +447,12 @@ describe('avancedb -- docs --', function() {
         });
     });
     
-    it('create a document with an id, then get by that id - 10 times', function(done) {
+    it('create a document with an id, then get by that id - 100 times - ascending', function(done) {
         var db = conn.database(testDbName);
 
         var now = new Date().getTime();
         var testPrefix = '' + now + '-';
-        var maxDocs = 10, callbackCount = maxDocs;
+        var maxDocs = 100, callbackCount = maxDocs;
 
         for (var i = 0; i < maxDocs; i++) (function() {
             var test = _.extend({}, testDocument);
@@ -469,12 +483,145 @@ describe('avancedb -- docs --', function() {
         })();
     });
     
+    it('create a document with an id, then get by that id - 100 times - descending', function(done) {
+        var db = conn.database(testDbName);
+
+        var now = new Date().getTime();
+        var testPrefix = '' + now + '-';
+        var maxDocs = 100, callbackCount = maxDocs;
+
+        for (var i = 0; i < maxDocs; i++) (function() {
+            var test = _.extend({}, testDocument);
+
+            // make a unique id
+            var id = testPrefix + (maxDocs - i);
+
+            // save the doc and then get it back
+            db.save(id, test, function(err, doc) {
+                assert.equal(null, err);
+
+                db.get(id, function(err, doc) {
+                    assert.equal(null, err);
+                    assert.notEqual(null, doc);
+                    var compDoc = _.extend({}, test);
+                    compDoc._id = doc._id;
+                    compDoc._rev = doc._rev;
+                    assert.deepEqual(doc, compDoc);
+                    
+                    // countdown the number of callbacks
+                    --callbackCount;
+                    
+                    if (!callbackCount) {
+                        done();
+                    }
+                });
+            });
+        })();
+    });
+    
+    it('create a document with an id, then get by that id - 100 times - shuffled', function(done) {
+        var db = conn.database(testDbName);
+
+        var now = new Date().getTime();
+        var testPrefix = '' + now + '-';
+        var maxDocs = 100, callbackCount = maxDocs;
+        var indexes = [];
+        
+        for (var i = 0; i < maxDocs; i++) {
+            indexes[i] = i;
+        }
+        
+        indexes = _.shuffle(indexes);
+
+        for (var i = 0; i < maxDocs; i++) (function() {
+            var test = _.extend({}, testDocument);
+
+            // make a unique id
+            var id = testPrefix + indexes[i];
+
+            // save the doc and then get it back
+            db.save(id, test, function(err, doc) {
+                assert.equal(null, err);
+
+                db.get(id, function(err, doc) {
+                    assert.equal(null, err);
+                    assert.notEqual(null, doc);
+                    var compDoc = _.extend({}, test);
+                    compDoc._id = doc._id;
+                    compDoc._rev = doc._rev;
+                    assert.deepEqual(doc, compDoc);
+                    
+                    // countdown the number of callbacks
+                    --callbackCount;
+                    
+                    if (!callbackCount) {
+                        done();
+                    }
+                });
+            });
+        })();
+    });
+    
+    it('create a document with an id, then get by that id - 100 times - uuid', function(done) {
+        conn.uuids(100, function(err, uuids) {
+            assert.equal(null, err);
+            assert.notEqual(null, uuids);
+            
+            var maxDocs = uuids.length, callbackCount = maxDocs;
+            var db = conn.database(testDbName);
+
+            for (var i = 0; i < maxDocs; i++) (function() {
+                var test = _.extend({}, testDocument);
+
+                // a unique id
+                var id = uuids[i];
+
+                // save the doc and then get it back
+                db.save(id, test, function(err, doc) {
+                    assert.equal(null, err);
+
+                    db.get(id, function(err, doc) {
+                        assert.equal(null, err);
+                        assert.notEqual(null, doc);
+                        var compDoc = _.extend({}, test);
+                        compDoc._id = doc._id;
+                        compDoc._rev = doc._rev;
+                        assert.deepEqual(doc, compDoc);
+                        
+                        // countdown the number of callbacks
+                        --callbackCount;
+                        
+                        if (!callbackCount) {
+                            done();
+                        }
+                    });
+                });
+            })();
+        });
+    });
+    
+    it('get documents via _all_docs', function(done) {
+        var db = conn.database(testDbName);
+        db.all(function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            assert.equal(401, docs.length);
+            for (var i = 0; i < docs.length; ++i) {
+                assert.notEqual(null, docs[i].id);
+                assert.equal(docs[i].id, docs[i].key);
+                assert.notEqual(null, docs[i].value);
+                assert.notEqual(null, docs[i].value.rev);
+            }
+            done();
+        });
+    });
+    
     it('should get document count', function(done) {
         var db = conn.database(testDbName);
         db.info(function(err, info) {
             assert.equal(null, err);
             assert.notEqual(null, info);
-            assert.equal(11, info.doc_count);
+            assert.equal(401, info.doc_count);
             done();
         });
     });

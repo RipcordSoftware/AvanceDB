@@ -2,11 +2,13 @@
 #define	JSON_STREAM_H
 
 #include <sstream>
+#include <string>
 
 class JsonStream final {
 public:
     JsonStream();
     
+    void Append(const char* name, const std::string& value);
     void Append(const char* name, const char* value);
     void Append(const char* name, int value);
     void Append(const char* name, unsigned value);
