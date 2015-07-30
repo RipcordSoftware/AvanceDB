@@ -10,6 +10,10 @@ public:
     HttpServerException(unsigned statusCode, const char* description, const char* body = nullptr, const char* contentType = nullptr) : 
         statusCode_(statusCode), description_(description), body_(body), contentType_(contentType) {        
     }
+        
+    HttpServerException(unsigned statusCode, const char* description, const std::string& body = "", const char* contentType = nullptr) : 
+        HttpServerException(statusCode, description, body.c_str(), contentType) {
+    }
     
     virtual const char* what() const noexcept { return Description(); }
     

@@ -38,5 +38,10 @@ public:
     UuidCountLimit();
 };
 
+class QueryParseError final : public HttpServerException {
+public:
+    QueryParseError(const char* type, const std::string& value);    
+};
+
 #endif	/* REST_EXCEPTIONS_H */
 

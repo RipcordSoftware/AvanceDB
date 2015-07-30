@@ -1,4 +1,7 @@
 #include "rest_exceptions.h"
+
+#include <boost/format.hpp>
+
 #include "database.h"
 
 static const char* preconditionFailedDescription = "Precondition Failed";
@@ -42,6 +45,11 @@ static const char* uuidCountLimitJsonBody = R"({
     "reason": "count parameter too large"
 })";
 
+static const char* queryParseErrorJsonBody = R"({
+    "error": "query_parse_error",
+    "reason": "Invalid value for %s: \"%s\""
+})";
+
 static const char* contentType = "application/json";
 
 DatabaseAlreadyExists::DatabaseAlreadyExists() : 
@@ -76,5 +84,10 @@ DocumentMissing::DocumentMissing() :
 
 UuidCountLimit::UuidCountLimit() :
     HttpServerException(403, forbiddenDescription, uuidCountLimitJsonBody, contentType) {
+    
+}
+
+QueryParseError::QueryParseError(const char* type, const std::string& value) :
+    HttpServerException(400, badRequestDescription, (boost::format(queryParseErrorJsonBody) % type % value).str(), contentType) {
     
 }

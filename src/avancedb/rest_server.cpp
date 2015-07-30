@@ -4,6 +4,7 @@
 #include <cstring>
 #include <iomanip>
 #include <vector>
+#include <algorithm>
 
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/random_generator.hpp>
@@ -14,6 +15,7 @@
 #include "database.h"
 #include "document.h"
 #include "script_object_stream.h"
+#include "get_all_documents_options.h"
 
 #include "libscriptobject_gason.h"
 
@@ -299,8 +301,15 @@ bool RestServer::HeadDocument(rs::httpserver::request_ptr request, const rs::htt
 bool RestServer::GetDatabaseAllDocs(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
     auto db = GetDatabase(args);
     if (!!db) {
+        GetAllDocumentsOptions options(request->getQueryString());
+        
         auto docs = db->GetDocuments();
-        auto startkey = GetParameter("startkey", request->getQueryString());
+        
+        if (options.Descending()) {
+            std::reverse(docs.begin(), docs.end());
+        }
+        
+        auto startkey = options.StartKey();
         
         std::stringstream body;
         body << R"({"offset":0,"total_rows":)" << docs.size() << R"(,"rows":[)";
@@ -318,9 +327,13 @@ bool RestServer::GetDatabaseAllDocs(rs::httpserver::request_ptr request, const r
 
                 body << '{' << R"("id":")" << id << R"(",)";
                 body << R"("key":")" << id << R"(",)";
-                body << R"("value":{"rev":")" << rev << R"("}})";
+                body << R"("value":{"rev":")" << rev << R"(")";
 
-                //body << ScriptObjectStream::Serialize(doc->getObject());
+                if (options.IncludeDocs()) {
+                    body << R"(,"doc":)" << ScriptObjectStream::Serialize(doc->getObject());
+                }
+
+                body << "}}";
             }
         }
         
