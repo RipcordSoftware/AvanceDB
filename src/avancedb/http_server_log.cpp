@@ -122,7 +122,7 @@ unsigned HttpServerLog::GetMonth(long elapsedSeconds, bool isLeap) {
     const unsigned* lookup = isLeap ? cumulativeSecsPerMonthLeap : cumulativeSecsPerMonth;
     
     int i = 6, left = 0, right = 12;
-    for (; left != right; i = left + ((right - left) / 2)) {
+    for (; left < right; i = left + ((right - left) / 2)) {
         if (elapsedSeconds < lookup[i]) {
             right = i - 1;
         } else {
