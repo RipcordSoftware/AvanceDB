@@ -327,7 +327,14 @@ describe('avancedb -- db --', function() {
 
 describe('avancedb -- docs --', function() {
     var testDbName = 'avancedb-test';
-    var testDocument = { 'lorem' : 'ipsum', pi: 3.14159, sunny: true, the_answer: 42, taxRate: null, fibonnaci: [0, 1, 1, 2, 3, 5, 8, 13 ], child: { 'hello': 'world' }, events: [ null, 1969, 'avance', true, {}, [] ] };
+    var testDocument = { 'lorem' : 'ipsum', pi: 3.14159, sunny: true, free_lunch: false, the_answer: 42, 
+        taxRate: null, fibonnaci: [0, 1, 1, 2, 3, 5, 8, 13 ], child: { 'hello': 'world' }, 
+        events: [ null, 1969, 'avance', true, {}, [] ], //minNUm: Number.MIN_VALUE , maxNum: Number.MAX_VALUE,
+        data: '0123456789' };
+        
+    for (var i = 0; i < 8; ++i) {
+        testDocument.data += testDocument.data;
+    }
     
     it('should create a database', function(done) {
         var db = conn.database(testDbName);

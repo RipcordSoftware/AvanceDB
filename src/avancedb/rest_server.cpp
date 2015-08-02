@@ -14,8 +14,8 @@
 #include "rest_exceptions.h"
 #include "database.h"
 #include "document.h"
-#include "script_object_stream.h"
 #include "get_all_documents_options.h"
+#include "script_object_response_stream.h"
 
 #include "libscriptobject_gason.h"
 
@@ -223,8 +223,11 @@ bool RestServer::GetDocument(rs::httpserver::request_ptr request, const rs::http
         auto obj = doc->getObject();
         
         auto rev = doc->getRev();
-        auto json = ScriptObjectStream::Serialize(obj);
-        response->setStatusCode(200).setContentType("application/json").setETag(rev).Send(json);
+
+        auto& stream = response->setStatusCode(200).setContentType("application/json").setETag(rev).getResponseStream();
+        ScriptObjectResponseStream<> objStream{stream};
+        objStream << obj;
+        objStream.Flush();
         
         gotDoc = true;
     }
@@ -308,16 +311,17 @@ bool RestServer::GetDatabaseAllDocs(rs::httpserver::request_ptr request, const r
         if (options.Descending()) {
             std::reverse(docs.begin(), docs.end());
         }
-        
+
         auto startkey = options.StartKey();
         
-        std::stringstream body;
-        body << R"({"offset":0,"total_rows":)" << docs.size() << R"(,"rows":[)";
+        auto& stream = response->setContentType("application/json").getResponseStream();
+        ScriptObjectResponseStream<2048u> objStream{stream};
+        objStream << R"({"offset":0,"total_rows":)" << docs.size() << R"(,"rows":[)";
         
         if (startkey.size() == 0) {
             for (decltype(docs)::size_type i = 0, size = docs.size(); i < size; ++i) {
                 if (i > 0) {
-                    body << ',';
+                    objStream << ',';
                 }
 
                 auto doc = docs[i];
@@ -325,21 +329,20 @@ bool RestServer::GetDatabaseAllDocs(rs::httpserver::request_ptr request, const r
                 auto id = doc->getId();
                 auto rev= doc->getRev();
 
-                body << '{' << R"("id":")" << id << R"(",)";
-                body << R"("key":")" << id << R"(",)";
-                body << R"("value":{"rev":")" << rev << R"(")";
+                objStream << '{' << R"("id":")" << id << R"(",)";
+                objStream << R"("key":")" << id << R"(",)";
+                objStream << R"("value":{"rev":")" << rev << R"(")";
 
                 if (options.IncludeDocs()) {
-                    body << R"(,"doc":)" << ScriptObjectStream::Serialize(doc->getObject());
+                    objStream << R"(,"doc":)" << doc->getObject();
                 }
 
-                body << "}}";
+                objStream << "}}";
             }
         }
         
-        body << "]}";
-        
-        response->setContentType("application/json").Send(body.str());
+        objStream << "]}";
+        objStream.Flush();        
     }
 }
 

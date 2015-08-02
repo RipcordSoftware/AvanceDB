@@ -15,7 +15,7 @@
       <itemPath>json_stream.h</itemPath>
       <itemPath>rest_exceptions.h</itemPath>
       <itemPath>rest_server.h</itemPath>
-      <itemPath>script_object_stream.h</itemPath>
+      <itemPath>script_object_response_stream.h</itemPath>
       <itemPath>types.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
@@ -36,7 +36,7 @@
       <itemPath>main.cpp</itemPath>
       <itemPath>rest_exceptions.cpp</itemPath>
       <itemPath>rest_server.cpp</itemPath>
-      <itemPath>script_object_stream.cpp</itemPath>
+      <itemPath>script_object_response_stream.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -178,9 +178,9 @@
       </item>
       <item path="rest_server.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="script_object_stream.cpp" ex="false" tool="1" flavor2="0">
+      <item path="script_object_response_stream.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="script_object_stream.h" ex="false" tool="3" flavor2="0">
+      <item path="script_object_response_stream.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="types.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -319,9 +319,9 @@
       </item>
       <item path="rest_server.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="script_object_stream.cpp" ex="false" tool="1" flavor2="0">
+      <item path="script_object_response_stream.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="script_object_stream.h" ex="false" tool="3" flavor2="0">
+      <item path="script_object_response_stream.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="types.h" ex="false" tool="3" flavor2="0">
       </item>
