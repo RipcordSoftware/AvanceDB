@@ -24,7 +24,7 @@ public:
     
     document_ptr GetDocument(const char* id);
     document_ptr DeleteDocument(const char* id, const char* rev);
-    document_ptr SetDocument(const char* id, script_object_ptr obj);
+    document_ptr SetDocument(const char* id, script_object_ptr obj, sequence_type seqNum);
     
     document_array GetDocuments(const GetAllDocumentsOptions& options, collection::size_type& totalDocs);
     

@@ -310,7 +310,7 @@ bool RestServer::GetDatabaseAllDocs(rs::httpserver::request_ptr request, const r
         auto docs = db->GetDocuments(options, totalDocs);
         
         auto& stream = response->setContentType("application/json").getResponseStream();
-        ScriptObjectResponseStream<2048u> objStream{stream};
+        ScriptObjectResponseStream<> objStream{stream};
         objStream << R"({"offset":0,"total_rows":)" << totalDocs << R"(,"rows":[)";
         
         for (decltype(docs)::size_type i = 0, size = docs.size(); i < size; ++i) {

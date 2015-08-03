@@ -5,10 +5,10 @@
 
 #include "script_object_vector_source.h"
 
-Document::Document(script_object_ptr obj) : obj_(obj), id_(obj->getString("_id")), rev_(obj->getString("_rev")) {
+Document::Document(script_object_ptr obj, sequence_type seqNum) : obj_(obj), id_(obj->getString("_id")), rev_(obj->getString("_rev")), seqNum_(seqNum) {
 }
 
-document_ptr Document::Create(const char* id, script_object_ptr obj) {
+document_ptr Document::Create(const char* id, script_object_ptr obj, sequence_type seqNum) {
     const char* oldRev = obj->getType("_rev") == rs::scriptobject::ScriptObjectType::String ? 
         obj->getString("_rev") : nullptr;
     
@@ -27,7 +27,7 @@ document_ptr Document::Create(const char* id, script_object_ptr obj) {
         oldRev != nullptr &&
         obj->setString("_id", id) &&
         obj->setString("_rev", rev.data())) {
-        doc = document_ptr(new Document(obj));
+        doc = document_ptr(new Document(obj, seqNum));
     } else {
         rs::scriptobject::utils::ObjectVector tempDefn = {
             std::make_pair("_id", rs::scriptobject::utils::VectorValue(id)),
@@ -40,7 +40,7 @@ document_ptr Document::Create(const char* id, script_object_ptr obj) {
         
         auto newObj = rs::scriptobject::ScriptObject::Merge(obj, tempObj, rs::scriptobject::ScriptObject::MergeStrategy::Front);
         
-        doc = document_ptr(new Document(newObj));
+        doc = document_ptr(new Document(newObj, seqNum));
     }
     
     return doc;
@@ -52,6 +52,10 @@ const char* Document::getId() const {
 
 const char* Document::getRev() const {
     return rev_;
+}
+
+sequence_type Document::getUpdateSequence() const {
+    return seqNum_;
 }
 
 const script_object_ptr Document::getObject() const {

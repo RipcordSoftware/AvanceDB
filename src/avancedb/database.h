@@ -14,7 +14,7 @@ public:
         
     static database_ptr Create(const char* name);
     
-    unsigned long CommitedUpdateSequence() { return committedUpdateSeq_; }
+    unsigned long CommitedUpdateSequence() { return updateSeq_; }
     unsigned long UpdateSequence() { return updateSeq_; }
     unsigned long PurgeSequence() { return purgeSeq_; }
     unsigned long DataSize() { return dataSize_; }
@@ -35,8 +35,7 @@ private:
     static unsigned long Now();
     
     const std::string name_;
-    boost::atomic<unsigned long> committedUpdateSeq_;
-    boost::atomic<unsigned long> updateSeq_ ;
+    boost::atomic<sequence_type long> updateSeq_ ;
     boost::atomic<unsigned long> purgeSeq_;
     boost::atomic<unsigned long> dataSize_;
     boost::atomic<unsigned long> diskSize_;

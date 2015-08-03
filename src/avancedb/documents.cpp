@@ -50,7 +50,7 @@ document_ptr Documents::DeleteDocument(const char* id, const char* rev) {
     return doc;
 }
 
-document_ptr Documents::SetDocument(const char* id, script_object_ptr obj) {
+document_ptr Documents::SetDocument(const char* id, script_object_ptr obj, sequence_type seqNum) {
     boost::lock_guard<boost::mutex> guard(docsMtx_);
     
     Document::Compare compare{id};
@@ -70,7 +70,7 @@ document_ptr Documents::SetDocument(const char* id, script_object_ptr obj) {
         }
     }
 
-    doc = Document::Create(id, obj);
+    doc = Document::Create(id, obj, seqNum);
 
     docs_.insert(doc);
 

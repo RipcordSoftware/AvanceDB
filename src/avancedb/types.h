@@ -21,5 +21,7 @@ using document_array = std::vector<document_ptr>;
 using script_object_ptr = rs::scriptobject::ScriptObjectPtr;
 using script_array_ptr = rs::scriptobject::ScriptArrayPtr;
 
+using sequence_type = unsigned long;
+
 #endif	/* TYPES_H */
 
