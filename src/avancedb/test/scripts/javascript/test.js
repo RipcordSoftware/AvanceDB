@@ -424,7 +424,7 @@ describe('avancedb -- docs --', function() {
         });
     });
     
-    it('delete a non-existant document with an id', function(done) {
+    it('delete a non-existent document with an id', function(done) {
         var db = conn.database(testDbName);
 
         db.remove('test0', function(err, res) {
@@ -641,5 +641,5 @@ describe('avancedb -- docs --', function() {
             assert.notEqual(res.ok, 'true');
             done();
         });
-    });    
+    });
 });
