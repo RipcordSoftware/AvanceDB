@@ -10,55 +10,87 @@ GetAllDocumentsOptions::GetAllDocumentsOptions(const rs::httpserver::QueryString
 }
 
 const std::string& GetAllDocumentsOptions::Key() const {
-    return qs_.getValue("key");
+    if (key_.size() == 0) {
+        key_ = GetString("key");
+    }
+    return key_;
 }
 
 const std::string& GetAllDocumentsOptions::StartKey() const {
-    auto name = qs_.IsKey("start_key") ? "start_key" : "startkey";
-    return qs_.getValue(name);
+    if (startKey_.size() == 0) {
+        startKey_ = GetString("startkey", "start_key");
+    }
+    return startKey_;
 }
 
 const std::string& GetAllDocumentsOptions::StartKeyDocId() const {
-    auto name = qs_.IsKey("start_key_doc_id") ? "start_key_doc_id" : "startkey_docid";
-    return qs_.getValue(name);
+    if (startKeyDocId_.size() == 0) {
+        startKeyDocId_ = GetString("startkey_docid", "start_key_doc_id");
+    }
+    return startKeyDocId_;
 }
 
 const std::string& GetAllDocumentsOptions::EndKey() const {
-    auto name = qs_.IsKey("end_key") ? "end_key" : "endkey";
-    return qs_.getValue(name);
+    if (endKey_.size() == 0) {
+        endKey_ = GetString("endkey", "end_key" );
+    }
+    return endKey_;
 }
 
 const std::string& GetAllDocumentsOptions::EndKeyDocId() const {
-    auto name = qs_.IsKey("end_key_doc_id") ? "end_key_doc_id" : "endkey_docid";
-    return qs_.getValue(name);
+    if (endKeyDocId_.size() == 0) {
+        endKeyDocId_ = GetString("endkey_docid", "end_key_doc_id");
+    }
+    return endKeyDocId_;
 }
 
 bool GetAllDocumentsOptions::Conflicts() const {
-    return GetBoolean("conflicts", false);
+    if (!conflicts_.is_initialized()) {
+        conflicts_ = GetBoolean("conflicts", false);
+    }
+    return conflicts_.get();
 }
 
 bool GetAllDocumentsOptions::Descending() const {
-    return GetBoolean("descending", false);
+    if (!descending_.is_initialized()) {
+        descending_ = GetBoolean("descending", false);
+    }
+    return descending_.get();
 }
 
 bool GetAllDocumentsOptions::IncludeDocs() const {
-    return GetBoolean("include_docs", false);
+    if (!includeDocs_.is_initialized()) {
+        includeDocs_ = GetBoolean("include_docs", false);
+    }
+    return includeDocs_.get();
 }
 
 bool GetAllDocumentsOptions::InclusiveEnd() const {
-    return GetBoolean("inclusive_end", true);
+    if (!inclusiveEnd_.is_initialized()) {
+        inclusiveEnd_ = GetBoolean("inclusive_end", true);
+    }
+    return inclusiveEnd_.get();
 }
 
 bool GetAllDocumentsOptions::UpdateSequence() const {
-    return GetBoolean("update_seq", false);
+    if (!updateSequence_.is_initialized()) {
+        updateSequence_ = GetBoolean("update_seq", false);
+    }
+    return updateSequence_.get();
 }
 
 int GetAllDocumentsOptions::Skip() const {
-    return GetInteger("skip", 0);
+    if (!skip_.is_initialized()) {
+        skip_ = GetInteger("skip", 0);
+    }
+    return skip_.get();
 }
 
 int GetAllDocumentsOptions::Limit() const {
-    return GetInteger("limit", std::numeric_limits<int>::max());
+    if (!limit_.is_initialized()) {
+        limit_ = GetInteger("limit", std::numeric_limits<int>::max());
+    }
+    return limit_.get();
 }
 
 bool GetAllDocumentsOptions::GetBoolean(const char* name, bool defaultValue) const {
@@ -95,4 +127,19 @@ int GetAllDocumentsOptions::GetInteger(const char* name, int defaultValue) const
     }
     
     return option;
+}
+
+std::string GetAllDocumentsOptions::GetString(const char* name, const char* altName) const {
+    if (!!altName) {
+        name = qs_.IsKey(altName) ? altName : name;
+    }
+    
+    auto value = qs_.getValue(name);
+    if (value.size() > 6 && value.find("%22") == 0 && value.rfind("%22") == (value.size() - 3)) {
+        value = std::string{value.cbegin() + 3, value.cend() - 3};
+    } else if (value.size() > 1 && value.front() == '"' && value.back() == '"') {
+        value = std::string{value.cbegin() + 1, value.cend() - 1};
+    }
+    
+    return value;
 }
