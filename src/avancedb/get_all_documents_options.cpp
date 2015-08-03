@@ -9,6 +9,10 @@ GetAllDocumentsOptions::GetAllDocumentsOptions(const rs::httpserver::QueryString
     
 }
 
+bool GetAllDocumentsOptions::HasKeys() const {
+    return StartKey().size() > 0 || EndKey().size() > 0;
+}
+
 const std::string& GetAllDocumentsOptions::Key() const {
     if (key_.size() == 0) {
         key_ = GetString("key");

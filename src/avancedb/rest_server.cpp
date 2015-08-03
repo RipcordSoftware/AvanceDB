@@ -306,12 +306,12 @@ bool RestServer::GetDatabaseAllDocs(rs::httpserver::request_ptr request, const r
     if (!!db) {
         GetAllDocumentsOptions options(request->getQueryString());
         
-        Documents::collection::size_type totalDocs = 0;
-        auto docs = db->GetDocuments(options, totalDocs);
+        Documents::collection::size_type offset = 0, totalDocs = 0;
+        auto docs = db->GetDocuments(options, offset, totalDocs);
         
         auto& stream = response->setContentType("application/json").getResponseStream();
         ScriptObjectResponseStream<> objStream{stream};
-        objStream << R"({"offset":0,"total_rows":)" << totalDocs << R"(,"rows":[)";
+        objStream << R"({"offset":)" << offset << R"(,"total_rows":)" << totalDocs << R"(,"rows":[)";
         
         for (decltype(docs)::size_type i = 0, size = docs.size(); i < size; ++i) {
             if (i > 0) {

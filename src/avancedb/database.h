@@ -27,7 +27,7 @@ public:
     document_ptr DeleteDocument(const char* id, const char* rev);
     document_ptr SetDocument(const char* id, script_object_ptr);
     
-    document_array GetDocuments(const GetAllDocumentsOptions& options, Documents::collection::size_type& totalDocs);
+    document_array GetDocuments(const GetAllDocumentsOptions& options, Documents::collection::size_type& offset, Documents::collection::size_type& totalDocs);
     
 private:
     Database(const char*);

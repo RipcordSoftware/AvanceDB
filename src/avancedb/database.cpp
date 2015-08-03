@@ -39,6 +39,6 @@ document_ptr Database::SetDocument(const char* id, script_object_ptr obj) {
     return docs_->SetDocument(id, obj, ++updateSeq_);
 }
 
-document_array Database::GetDocuments(const GetAllDocumentsOptions& options, Documents::collection::size_type& totalDocs) {
-    return docs_->GetDocuments(options, totalDocs);
+document_array Database::GetDocuments(const GetAllDocumentsOptions& options, Documents::collection::size_type& offset, Documents::collection::size_type& totalDocs) {
+    return docs_->GetDocuments(options, offset, totalDocs);
 }

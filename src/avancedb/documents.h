@@ -1,6 +1,8 @@
 #ifndef DOCUMENTS_H
 #define	DOCUMENTS_H
 
+#include <limits>
+
 #include <boost/noncopyable.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/shared_ptr.hpp>
@@ -26,15 +28,19 @@ public:
     document_ptr DeleteDocument(const char* id, const char* rev);
     document_ptr SetDocument(const char* id, script_object_ptr obj, sequence_type seqNum);
     
-    document_array GetDocuments(const GetAllDocumentsOptions& options, collection::size_type& totalDocs);
+    document_array GetDocuments(const GetAllDocumentsOptions& options, collection::size_type& offset, collection::size_type& totalDocs);
     
     collection::size_type getCount();
     
 private:
     
+    const collection::size_type findMissedFlag = ~(std::numeric_limits<collection::size_type>::max() / 2);
+    
     Documents(database_ptr db);
     
     document_array GetAllDocuments();
+    
+    collection::size_type FindDocument(const document_array& docs, const std::string& id, bool descending);
     
     database_wptr db_;
     

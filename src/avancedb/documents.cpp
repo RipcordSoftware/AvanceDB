@@ -83,25 +83,81 @@ document_array Documents::GetAllDocuments() {
     return document_array{docs_.cbegin(), docs_.cend()};
 }
 
-document_array Documents::GetDocuments(const GetAllDocumentsOptions& options, collection::size_type& totalDocs) {       
-    auto startkey = options.StartKey();
-    if (startkey.size() == 0) {
-        auto docs = GetAllDocuments();
-        
-        totalDocs = docs.size();
+document_array Documents::GetDocuments(const GetAllDocumentsOptions& options, collection::size_type& offset, collection::size_type& totalDocs) {       
+    auto docs = GetAllDocuments();                
 
-        if (options.Descending()) {
-            std::reverse(docs.begin(), docs.end());
-        }
-        
-        auto limit = options.Limit();
-        if (limit < docs.size()) {
-            docs = document_array{docs.cbegin(), docs.cbegin() + limit};
+    if (options.Descending()) {
+        std::reverse(docs.begin(), docs.end());
+    }
+
+    collection::size_type startIndex = 0;
+    collection::size_type endIndex = docs.size();
+    collection::size_type indexSkip = options.Skip();
+    collection::size_type indexLimit = options.Limit();
+
+    if (options.HasKeys()) {
+        if (options.StartKey().size() > 0) {
+            startIndex = FindDocument(docs, options.StartKey(), options.Descending());
+            if ((startIndex & findMissedFlag) == findMissedFlag) {
+                startIndex = ~startIndex;
+            }
         }
 
-        return docs;
+        if (options.EndKey().size() > 0) {
+            endIndex = FindDocument(docs, options.EndKey(), options.Descending());
+            if ((endIndex & findMissedFlag) == findMissedFlag) {
+                endIndex = ~endIndex;
+            } else if (options.InclusiveEnd()) {
+                endIndex++;
+            }
+        }
+    }
+
+    startIndex += indexSkip;
+
+    offset = startIndex;
+    totalDocs = docs.size();
+
+    if (startIndex >= 0 && startIndex < docs.size() && startIndex < endIndex) {
+        endIndex = std::min(startIndex + indexLimit, endIndex);
+        endIndex = std::min(endIndex, docs.size());
+
+        docs = document_array{docs.cbegin() + startIndex, docs.cbegin() + endIndex};
     } else {
-        totalDocs = getCount();
-        return document_array{};
+        docs.clear();
+    }
+
+    return docs;
+}
+
+Documents::collection::size_type Documents::FindDocument(const document_array& docs, const std::string& id, bool descending) {
+    const auto size = docs.size();
+    
+    if (size == 0) {
+        return ~0;
+    } else {
+        collection::size_type min = 0;
+        collection::size_type mid = 0;
+        collection::size_type max = size - 1;
+
+        while (min <= max) {
+            mid = ((max - min) / 2) + min;
+
+            auto diff = std::strcmp(id.c_str(), docs[mid]->getId());
+            diff = descending ? -diff : diff;
+            if (diff == 0) {
+                return mid;
+            } else if (diff < 0) {
+                if (mid == 0) {
+                    break;
+                }
+                
+                max = mid - 1;
+            } else {
+                min = mid + 1;
+            }
+        }
+
+        return ~min;
     }
 }

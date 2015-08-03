@@ -13,6 +13,7 @@ class GetAllDocumentsOptions final {
 public:
     GetAllDocumentsOptions(const rs::httpserver::QueryString& qs);
     
+    bool HasKeys() const;
     const std::string& Key() const;
     const std::string& StartKey() const;
     const std::string& StartKeyDocId() const;
