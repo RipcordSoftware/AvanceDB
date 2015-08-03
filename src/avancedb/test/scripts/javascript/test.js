@@ -643,3 +643,513 @@ describe('avancedb -- docs --', function() {
         });
     });
 });
+
+describe('avancedb -- _all_docs --', function() {
+    var testDbName = 'avancedb-all_docs-test';
+    var db = conn.database(testDbName);
+
+    // create sequential ids
+    var ids = [];
+    for (var i = 0; i < 15; i++) {
+        ids[i] = i.toString();
+    }
+
+    // sort the ids to match couchdb
+    ids.sort();
+
+    // reverse the sorted ids
+    var revIds = ids.slice(0);
+    revIds.reverse();
+
+    it('shouldn\'t find a database', function(done) {
+        db.exists(function(err, res) {
+            assert.equal(null, err);
+            assert.equal(false, res);
+            done();
+        });
+    });
+
+    it('should create a database', function(done) {
+        db.create(function(err, res) {
+            assert.equal(null, err);
+            assert.notEqual(null, res);
+            assert.notEqual(res.ok, 'true');
+            done();
+        });
+    });
+
+    it('create a sequence of documents', function(done) {
+        var callbackCount = ids.length;
+        for (var i = 0; i < ids.length; i++) {
+            (function() {
+                var _id = i.toString();
+                db.save({ _id: _id }, function(err, doc) {
+                    assert.equal(null, err);
+                    assert.notEqual(null, doc);
+                    assert.notEqual(null, doc._id);
+                    assert.equal(_id, doc._id);
+
+                    // countdown the callbacks
+                    --callbackCount;
+                    !callbackCount && done();
+                });
+            })();
+        }
+    });
+
+    it('check document count and order', function(done) {
+        db.all(function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            assert.equal(ids.length, docs.length);
+
+            for (var i = 0; i < ids.length; i++) {
+                assert.equal(ids[i], docs[i].id);
+            }
+
+            done();
+        });
+    });
+
+    it('check limit', function(done) {
+        db.all({limit: 1}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            assert.equal(1, docs.length);
+            assert.equal(ids[0], docs[0].id);
+            done();
+        });
+    });
+
+    it('check limit=1 and skip=1', function(done) {
+        db.all({limit: 1, skip: 1}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            assert.equal(1, docs.length);
+            assert.equal(ids[1], docs[0].id);
+            done();
+        });
+    });
+
+    it('check limit=2 and skip=1', function(done) {
+        db.all({limit: 2, skip: 1}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            assert.equal(2, docs.length);
+            assert.equal(ids[1], docs[0].id);
+            assert.equal(ids[2], docs[1].id);
+            done();
+        });
+    });
+    
+    it('check limit=5 and skip=2', function(done) {
+        db.all({limit: 5, skip: 2}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            assert.equal(5, docs.length);
+            assert.equal(ids[2], docs[0].id);
+            assert.equal(ids[3], docs[1].id);
+            assert.equal(ids[4], docs[2].id);
+            assert.equal(ids[5], docs[3].id);
+            assert.equal(ids[6], docs[4].id);
+            done();
+        });
+    });
+
+    it('check descending', function(done) {
+        db.all({descending: true}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            assert.equal(ids.length, docs.length);
+
+            for (var i = 0; i < ids.length; i++) {
+                assert.equal(revIds[i], docs[i].id);
+            }
+
+            done();
+        });
+    });
+
+    it('check descending, limit=1', function(done) {
+        db.all({descending: true, limit: 1}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            assert.equal(1, docs.length);
+            assert.equal(revIds[0], docs[0].id);
+            done();
+        });
+    });
+    
+    it('check descending, limit=2', function(done) {
+        db.all({descending: true, limit: 2}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            assert.equal(2, docs.length);
+            assert.equal(revIds[0], docs[0].id);
+            assert.equal(revIds[1], docs[1].id);
+            done();
+        });
+    });
+
+    it('check descending, limit=1, skip=1', function(done) {
+        db.all({descending: true, limit: 1, skip: 1}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            assert.equal(1, docs.length);
+            assert.equal(revIds[1], docs[0].id);
+            done();
+        });
+    });
+    
+    it('check descending, limit=2, skip=4', function(done) {
+        db.all({descending: true, limit: 2, skip: 4}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            assert.equal(2, docs.length);
+            assert.equal(revIds[4], docs[0].id);
+            assert.equal(revIds[5], docs[1].id);
+            done();
+        });
+    });
+
+    it('check startkey', function(done) {
+        db.all({startkey: '3'}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+
+            var idsIndex = ids.indexOf('3');
+            assert.equal(ids.length - idsIndex, docs.length);
+
+            for (var i = 0; i < docs.length; i++) {
+                assert.equal(ids[idsIndex], docs[i].id);
+                idsIndex++;
+            }
+
+            done();
+        });
+    });
+
+    it('check startkey, descending', function(done) {
+        db.all({startkey: '3', descending: true}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+
+            var idsIndex = revIds.indexOf('3');
+            assert.equal(revIds.length - idsIndex, docs.length);
+
+            for (var i = 0; i < docs.length; i++) {
+                assert.equal(revIds[idsIndex], docs[i].id);
+                idsIndex++;
+            }
+
+            done();
+        });
+    });
+
+    it('check startkey, descending, limit=1', function(done) {
+        db.all({startkey: '3', descending: true, limit: 1}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+
+            assert.equal(1, docs.length);
+            assert.equal('3', docs[0].id);
+            done();
+        });
+    });
+
+    it('check startkey, descending, limit=1, skip=1', function(done) {
+        db.all({startkey: '3', descending: true, limit: 1, skip: 1}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+
+            assert.equal(1, docs.length);
+
+            var idsIndex = revIds.indexOf('3');
+            assert.equal(revIds[idsIndex + 1], docs[0].id);
+            done();
+        });
+    });
+
+    it('check endkey', function(done) {
+        db.all({endkey: '3'}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+
+            var idsIndex = ids.indexOf('3');
+            assert.equal(idsIndex + 1, docs.length);
+
+            for (var i = 0; i < docs.length; i++) {
+                assert.equal(ids[i], docs[i].id);
+            }
+
+            done();
+        });
+    });
+
+    it('check endkey, no inclusive end', function(done) {
+        db.all({endkey: '3', inclusive_end: false}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+
+            var idsIndex = ids.indexOf('3');
+            assert.equal(idsIndex, docs.length);
+
+            for (var i = 0; i < docs.length; i++) {
+                assert.equal(ids[i], docs[i].id);
+            }
+
+            done();
+        });
+    });
+
+    it('check endkey, limit=1', function(done) {
+        db.all({endkey: '3', limit: 1}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+
+            assert.equal(1, docs.length);
+            assert.equal(ids[0], docs[0].id);
+
+            done();
+        });
+    });
+
+    it('check endkey, limit=3', function(done) {
+        db.all({endkey: '3', limit: 3}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+
+            assert.equal(3, docs.length);
+
+            for (var i = 0; i < docs.length; i++) {
+                assert.equal(ids[i], docs[i].id);
+            }
+
+            done();
+        });
+    });
+
+    it('check endkey, limit=3, skip=1', function(done) {
+        db.all({endkey: '3', limit: 3, skip: 1}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+
+            assert.equal(3, docs.length);
+
+            for (var i = 0; i < docs.length; i++) {
+                assert.equal(ids[i + 1], docs[i].id);
+            }
+
+            done();
+        });
+    });
+
+    it('check endkey, descending', function(done) {
+        db.all({endkey: '3', descending: true}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+
+            var idsIndex = revIds.indexOf('3');
+            assert.equal(idsIndex + 1, docs.length);
+
+            for (var i = 0; i < docs.length; i++) {
+                assert.equal(revIds[i], docs[i].id);
+            }
+
+            done();
+        });
+    });
+
+    it('check endkey, descending, no inclusive end', function(done) {
+        db.all({endkey: '3', descending: true, inclusive_end: false}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+
+            var idsIndex = revIds.indexOf('3');
+            assert.equal(idsIndex, docs.length);
+
+            for (var i = 0; i < docs.length; i++) {
+                assert.equal(revIds[i], docs[i].id);
+            }
+
+            done();
+        });
+    });
+
+    it('check endkey, descending, limit=1', function(done) {
+        db.all({endkey: '3', descending: true, limit: 1}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+
+            assert.equal(1, docs.length);
+            assert.equal(revIds[0], docs[0].id);
+
+            done();
+        });
+    });
+
+    it('check endkey, descending, limit=1, skip=1', function(done) {
+        db.all({endkey: '3', descending: true, limit: 1, skip: 1}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+
+            assert.equal(1, docs.length);
+            assert.equal(revIds[1], docs[0].id);
+
+            done();
+        });
+    });
+
+    it('check endkey, descending, limit=20, skip=2', function(done) {
+        db.all({endkey: '3', descending: true, limit: 20, skip: 2}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+
+            var idsIndex = revIds.indexOf('3');
+            assert.equal(idsIndex - 1, docs.length);
+            for (var i = 0; i < docs.length; i++) {
+                assert.equal(revIds[i + 2], docs[i].id);
+            }
+
+            done();
+        });
+    });
+
+    it('check startkey, endkey', function(done) {
+        db.all({startkey: '0', endkey:'3'}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+
+            var idsIndex = ids.indexOf('3');
+            assert.equal(idsIndex + 1, docs.length);
+            for (var i = 0; i < docs.length; i++) {
+                assert.equal(ids[i], docs[i].id);
+            }
+
+            done();
+        });
+    });
+
+    it('check startkey, endkey, not inclusive_end', function(done) {
+        db.all({startkey: '0', endkey:'3', inclusive_end: false}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+
+            var idsIndex = ids.indexOf('3');
+            assert.equal(idsIndex, docs.length);
+            for (var i = 0; i < docs.length; i++) {
+                assert.equal(ids[i], docs[i].id);
+            }
+
+            done();
+        });
+    });
+
+    it('check startkey, endkey, limit=1', function(done) {
+        db.all({startkey: '0', endkey:'3', limit: 1}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            assert.equal(1, docs.length);
+            assert.equal(ids[0], docs[0].id);
+            done();
+        });
+    });
+
+    it('check startkey, endkey, limit=1, skip=1', function(done) {
+        db.all({startkey: '0', endkey:'3', limit: 1, skip: 1}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            assert.equal(1, docs.length);
+            assert.equal(ids[1], docs[0].id);
+            done();
+        });
+    });
+
+    it('check startkey, endkey', function(done) {
+        db.all({startkey: '1', endkey:'3'}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+
+            var idsStartIndex = ids.indexOf('1');
+            var idsEndIndex = ids.indexOf('3');
+            assert.equal(idsEndIndex - idsStartIndex + 1, docs.length);
+            for (var i = 0; i < docs.length; i++) {
+                assert.equal(ids[idsStartIndex + i], docs[i].id);
+            }
+            done();
+        });
+    });
+
+    it('check startkey, endkey, descending', function(done) {
+        db.all({startkey: '0', endkey:'3', descending: true}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            assert.equal(0, docs.length);
+            done();
+        });
+    });
+
+    it('check reversed startkey, endkey, descending', function(done) {
+        db.all({startkey: '3', endkey:'0', descending: true}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+
+            var idsStartIndex = revIds.indexOf('3');
+            var idsEndIndex = revIds.indexOf('0');
+            assert.equal(idsEndIndex - idsStartIndex + 1, docs.length);
+            for (var i = 0; i < docs.length; i++) {
+                assert.equal(revIds[idsStartIndex + i], docs[i].id);
+            }
+
+            done();
+        });
+    });
+
+    it('check reversed startkey, endkey, descending', function(done) {
+        db.all({startkey: '3', endkey:'1', descending: true}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+
+            var idsStartIndex = revIds.indexOf('3');
+            var idsEndIndex = revIds.indexOf('1');
+            assert.equal(idsEndIndex - idsStartIndex + 1, docs.length);
+            for (var i = 0; i < docs.length; i++) {
+                assert.equal(revIds[idsStartIndex + i], docs[i].id);
+            }
+
+            done();
+        });
+    });
+
+    it('check reversed startkey, endkey, descending, limit=1', function(done) {
+        db.all({startkey: '3', endkey:'1', descending: true, limit: 1}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+
+            var idsStartIndex = revIds.indexOf('3');
+            assert.equal(revIds[idsStartIndex], docs[0].id);
+
+            done();
+        });
+    });
+
+    it('check reversed startkey, endkey, descending, limit=1, skip=1', function(done) {
+        db.all({startkey: '3', endkey:'1', descending: true, limit: 1, skip: 1}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+
+            var idsStartIndex = revIds.indexOf('3');
+            assert.equal(revIds[idsStartIndex + 1], docs[0].id);
+
+            done();
+        });
+    });
+
+    it('delete the database', function(done) {
+        db.destroy(function(err, res) {
+            assert.equal(null, err);
+            assert.notEqual(null, res);
+            done();
+        });
+    });
+});
