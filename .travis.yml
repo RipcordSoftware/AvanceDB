@@ -1,6 +1,6 @@
 language: cpp
 compiler: gcc
-script: make all && make test && ./coverage.sh
+script: make -j 2 all && make test && ./coverage.sh
 
 before_install:
 - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
