@@ -9,24 +9,24 @@ class GetAllDocumentsOptions final {
 public:
     GetAllDocumentsOptions(const rs::httpserver::QueryString& qs);
     
-    const std::string& Key();
-    const std::string& StartKey();
-    const std::string& StartKeyDocId();
-    const std::string& EndKey();
-    const std::string& EndKeyDocId();
+    const std::string& Key() const;
+    const std::string& StartKey() const;
+    const std::string& StartKeyDocId() const;
+    const std::string& EndKey() const;
+    const std::string& EndKeyDocId() const;
     
-    bool Conflicts();
-    bool Descending();
-    bool IncludeDocs();
-    bool InclusiveEnd();
-    bool UpdateSequence();
+    bool Conflicts() const;
+    bool Descending() const;
+    bool IncludeDocs() const;
+    bool InclusiveEnd() const;
+    bool UpdateSequence() const;
     
-    int Skip();
-    int Limit();
+    int Skip() const;
+    int Limit() const;
     
 private:
-    bool GetBoolean(const char* name, bool defaultValue);
-    int GetInteger(const char* name, int defaultValue);
+    bool GetBoolean(const char* name, bool defaultValue) const;
+    int GetInteger(const char* name, int defaultValue) const;
     
     const rs::httpserver::QueryString& qs_;
 };

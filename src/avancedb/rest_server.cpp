@@ -306,39 +306,32 @@ bool RestServer::GetDatabaseAllDocs(rs::httpserver::request_ptr request, const r
     if (!!db) {
         GetAllDocumentsOptions options(request->getQueryString());
         
-        auto docs = db->GetDocuments();
-        
-        if (options.Descending()) {
-            std::reverse(docs.begin(), docs.end());
-        }
-
-        auto startkey = options.StartKey();
+        Documents::collection::size_type totalDocs = 0;
+        auto docs = db->GetDocuments(options, totalDocs);
         
         auto& stream = response->setContentType("application/json").getResponseStream();
         ScriptObjectResponseStream<2048u> objStream{stream};
-        objStream << R"({"offset":0,"total_rows":)" << docs.size() << R"(,"rows":[)";
+        objStream << R"({"offset":0,"total_rows":)" << totalDocs << R"(,"rows":[)";
         
-        if (startkey.size() == 0) {
-            for (decltype(docs)::size_type i = 0, size = docs.size(); i < size; ++i) {
-                if (i > 0) {
-                    objStream << ',';
-                }
-
-                auto doc = docs[i];
-
-                auto id = doc->getId();
-                auto rev= doc->getRev();
-
-                objStream << '{' << R"("id":")" << id << R"(",)";
-                objStream << R"("key":")" << id << R"(",)";
-                objStream << R"("value":{"rev":")" << rev << R"(")";
-
-                if (options.IncludeDocs()) {
-                    objStream << R"(,"doc":)" << doc->getObject();
-                }
-
-                objStream << "}}";
+        for (decltype(docs)::size_type i = 0, size = docs.size(); i < size; ++i) {
+            if (i > 0) {
+                objStream << ',';
             }
+
+            auto doc = docs[i];
+
+            auto id = doc->getId();
+            auto rev= doc->getRev();
+
+            objStream << '{' << R"("id":")" << id << R"(",)";
+            objStream << R"("key":")" << id << R"(",)";
+            objStream << R"("value":{"rev":")" << rev << R"(")";
+
+            if (options.IncludeDocs()) {
+                objStream << R"(,"doc":)" << doc->getObject();
+            }
+
+            objStream << "}}";
         }
         
         objStream << "]}";

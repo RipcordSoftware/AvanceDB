@@ -6,7 +6,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/atomic.hpp>
 
-#include "types.h"
+#include "documents.h"
+#include "get_all_documents_options.h"
 
 class Database final : public boost::enable_shared_from_this<Database>, private boost::noncopyable {
 public:
@@ -26,7 +27,7 @@ public:
     document_ptr DeleteDocument(const char* id, const char* rev);
     document_ptr SetDocument(const char* id, script_object_ptr);
     
-    document_array GetDocuments();
+    document_array GetDocuments(const GetAllDocumentsOptions& options, Documents::collection::size_type& totalDocs);
     
 private:
     Database(const char*);

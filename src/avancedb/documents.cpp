@@ -5,7 +5,7 @@
 #include "document.h"
 #include "rest_exceptions.h"
 
-Documents::Documents(database_ptr db) : db_(db) {
+Documents::Documents(database_ptr db) : db_(db), docs_(64, 32 * 1024) {
     
 }
 
@@ -77,8 +77,31 @@ document_ptr Documents::SetDocument(const char* id, script_object_ptr obj) {
     return doc;
 }
 
-document_array Documents::GetDocuments() {
+document_array Documents::GetAllDocuments() {
     boost::lock_guard<boost::mutex> guard(docsMtx_);
     
     return document_array{docs_.cbegin(), docs_.cend()};
+}
+
+document_array Documents::GetDocuments(const GetAllDocumentsOptions& options, collection::size_type& totalDocs) {       
+    auto startkey = options.StartKey();
+    if (startkey.size() == 0) {
+        auto docs = GetAllDocuments();
+        
+        totalDocs = docs.size();
+
+        if (options.Descending()) {
+            std::reverse(docs.begin(), docs.end());
+        }
+        
+        auto limit = options.Limit();
+        if (limit < docs.size()) {
+            docs = document_array{docs.cbegin(), docs.cbegin() + limit};
+        }
+
+        return docs;
+    } else {
+        totalDocs = getCount();
+        return document_array{};
+    }
 }

@@ -11,6 +11,7 @@
 
 #include "types.h"
 #include "document.h"
+#include "get_all_documents_options.h"
 
 class Database;
 
@@ -25,13 +26,15 @@ public:
     document_ptr DeleteDocument(const char* id, const char* rev);
     document_ptr SetDocument(const char* id, script_object_ptr obj);
     
-    document_array GetDocuments();
+    document_array GetDocuments(const GetAllDocumentsOptions& options, collection::size_type& totalDocs);
     
     collection::size_type getCount();
     
 private:
     
     Documents(database_ptr db);
+    
+    document_array GetAllDocuments();
     
     database_wptr db_;
     
