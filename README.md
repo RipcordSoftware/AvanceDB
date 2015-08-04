@@ -19,11 +19,13 @@ To build you'll need:
 * Boost 1.53
 * pthreads
 * zlib
+* doxygen
+* libcppunit
 
-Steps:
-* git clone ...
-* run `submodules.sh`
-* run `make`
-* The binaries will appear under here: `src/avancedb/dist/`
+```bash
+git clone --recursive https://github.com/RipcordSoftware/AvanceDB.git
+cd AvanceDB
+make -j all
+```
 
-We are currently building on CentOS 7. You may be successful on other systems - if you are let us know. For development we use NetBeans 8.0.2.
+The debug and release binaries will appear under here: `src/avancedb/dist/`
