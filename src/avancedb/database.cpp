@@ -6,8 +6,7 @@
 #include "documents.h"
 
 Database::Database(const char* name) : name_(name), instanceStartTime_(Now()),
-    updateSeq_(0), purgeSeq_(0), dataSize_(0), diskSize_(0),
-    docDelCount_(0) {
+    dataSize_(0), diskSize_(0), docDelCount_(0) {
 }
 
 database_ptr Database::Create(const char* name) {
@@ -36,9 +35,9 @@ document_ptr Database::DeleteDocument(const char* id, const char* rev) {
 }
 
 document_ptr Database::SetDocument(const char* id, script_object_ptr obj) {
-    return docs_->SetDocument(id, obj, ++updateSeq_);
+    return docs_->SetDocument(id, obj);
 }
 
-document_array Database::GetDocuments(const GetAllDocumentsOptions& options, Documents::collection::size_type& offset, Documents::collection::size_type& totalDocs) {
-    return docs_->GetDocuments(options, offset, totalDocs);
+document_array Database::GetDocuments(const GetAllDocumentsOptions& options, Documents::collection::size_type& offset, Documents::collection::size_type& totalDocs, sequence_type& updateSequence) {
+    return docs_->GetDocuments(options, offset, totalDocs, updateSequence);
 }

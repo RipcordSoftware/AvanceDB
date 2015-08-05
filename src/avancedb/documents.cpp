@@ -4,8 +4,10 @@
 
 #include "document.h"
 #include "rest_exceptions.h"
+#include "database.h"
 
-Documents::Documents(database_ptr db) : db_(db), docs_(64, 32 * 1024) {
+Documents::Documents(database_ptr db) : db_(db), docs_(64, 32 * 1024),
+    updateSeq_(0) {
     
 }
 
@@ -15,6 +17,10 @@ documents_ptr Documents::Create(database_ptr db) {
 
 Documents::collection::size_type Documents::getCount() {
     return docs_.size();
+}
+
+sequence_type Documents::getUpdateSequence() {
+    return updateSeq_;
 }
 
 document_ptr Documents::GetDocument(const char* id) {
@@ -50,7 +56,7 @@ document_ptr Documents::DeleteDocument(const char* id, const char* rev) {
     return doc;
 }
 
-document_ptr Documents::SetDocument(const char* id, script_object_ptr obj, sequence_type seqNum) {
+document_ptr Documents::SetDocument(const char* id, script_object_ptr obj) {
     boost::lock_guard<boost::mutex> guard(docsMtx_);
     
     Document::Compare compare{id};
@@ -70,21 +76,23 @@ document_ptr Documents::SetDocument(const char* id, script_object_ptr obj, seque
         }
     }
 
-    doc = Document::Create(id, obj, seqNum);
+    doc = Document::Create(id, obj, ++updateSeq_);
 
     docs_.insert(doc);
 
     return doc;
 }
 
-document_array Documents::GetAllDocuments() {
+document_array Documents::GetAllDocuments(sequence_type& updateSequence) {
     boost::lock_guard<boost::mutex> guard(docsMtx_);
+    
+    updateSequence = updateSeq_;
     
     return document_array{docs_.cbegin(), docs_.cend()};
 }
 
-document_array Documents::GetDocuments(const GetAllDocumentsOptions& options, collection::size_type& offset, collection::size_type& totalDocs) {       
-    auto docs = GetAllDocuments();                
+document_array Documents::GetDocuments(const GetAllDocumentsOptions& options, collection::size_type& offset, collection::size_type& totalDocs, sequence_type& updateSequence) {       
+    auto docs = GetAllDocuments(updateSequence);                
 
     if (options.Descending()) {
         std::reverse(docs.begin(), docs.end());

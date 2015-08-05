@@ -26,11 +26,12 @@ public:
     
     document_ptr GetDocument(const char* id);
     document_ptr DeleteDocument(const char* id, const char* rev);
-    document_ptr SetDocument(const char* id, script_object_ptr obj, sequence_type seqNum);
+    document_ptr SetDocument(const char* id, script_object_ptr obj);
     
-    document_array GetDocuments(const GetAllDocumentsOptions& options, collection::size_type& offset, collection::size_type& totalDocs);
+    document_array GetDocuments(const GetAllDocumentsOptions& options, collection::size_type& offset, collection::size_type& totalDocs, sequence_type& updateSequence);
     
     collection::size_type getCount();
+    sequence_type getUpdateSequence();
     
 private:
     
@@ -38,7 +39,7 @@ private:
     
     Documents(database_ptr db);
     
-    document_array GetAllDocuments();
+    document_array GetAllDocuments(sequence_type& sequenceNumber);
     
     collection::size_type FindDocument(const document_array& docs, const std::string& id, bool descending);
     
@@ -47,6 +48,7 @@ private:
     boost::mutex docsMtx_;
     collection docs_;
 
+    boost::atomic<sequence_type long> updateSeq_;        
 };
 
 #endif	/* DOCUMENTS_H */

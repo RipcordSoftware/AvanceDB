@@ -14,9 +14,9 @@ public:
         
     static database_ptr Create(const char* name);
     
-    unsigned long CommitedUpdateSequence() { return updateSeq_; }
-    unsigned long UpdateSequence() { return updateSeq_; }
-    unsigned long PurgeSequence() { return purgeSeq_; }
+    unsigned long CommitedUpdateSequence() { return docs_->getUpdateSequence(); }
+    unsigned long UpdateSequence() { return docs_->getUpdateSequence(); }
+    unsigned long PurgeSequence() { return 0; }
     unsigned long DataSize() { return dataSize_; }
     unsigned long DiskSize() { return diskSize_; }
     unsigned long DocCount();
@@ -27,7 +27,7 @@ public:
     document_ptr DeleteDocument(const char* id, const char* rev);
     document_ptr SetDocument(const char* id, script_object_ptr);
     
-    document_array GetDocuments(const GetAllDocumentsOptions& options, Documents::collection::size_type& offset, Documents::collection::size_type& totalDocs);
+    document_array GetDocuments(const GetAllDocumentsOptions& options, Documents::collection::size_type& offset, Documents::collection::size_type& totalDocs, sequence_type& updateSequence);
     
 private:
     Database(const char*);
@@ -35,12 +35,11 @@ private:
     static unsigned long Now();
     
     const std::string name_;
-    boost::atomic<sequence_type long> updateSeq_ ;
-    boost::atomic<unsigned long> purgeSeq_;
+    
+    const unsigned long instanceStartTime_;
+    boost::atomic<unsigned long> docDelCount_;
     boost::atomic<unsigned long> dataSize_;
     boost::atomic<unsigned long> diskSize_;
-    boost::atomic<unsigned long> docDelCount_;
-    const unsigned long instanceStartTime_ ;
     
     documents_ptr docs_;
 };

@@ -696,15 +696,27 @@ describe('avancedb -- _all_docs --', function() {
             })();
         }
     });
+    
+    it('check document update sequence', function(done) {
+        db.all({update_seq:true}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            assert.equal(ids.length, docs.length);
+            assert.equal(ids.length, docs.update_seq);        
 
-    it('check document count and order', function(done) {
-        db.all(function(err, docs) {
+            done();
+        });
+    });
+
+    it('check document count and order; with include docs', function(done) {
+        db.all({include_docs:true}, function(err, docs) {
             assert.equal(null, err);
             assert.notEqual(null, docs);
             assert.equal(ids.length, docs.length);
 
             for (var i = 0; i < ids.length; i++) {
                 assert.equal(ids[i], docs[i].id);
+                assert.equal(ids[i], docs[i].value.doc._id);
             }
 
             done();

@@ -309,11 +309,18 @@ bool RestServer::GetDatabaseAllDocs(rs::httpserver::request_ptr request, const r
         GetAllDocumentsOptions options(request->getQueryString());
         
         Documents::collection::size_type offset = 0, totalDocs = 0;
-        auto docs = db->GetDocuments(options, offset, totalDocs);
+        sequence_type updateSequence = 0;
+        auto docs = db->GetDocuments(options, offset, totalDocs, updateSequence);
         
         auto& stream = response->setContentType("application/json").getResponseStream();
         ScriptObjectResponseStream<> objStream{stream};
-        objStream << R"({"offset":)" << offset << R"(,"total_rows":)" << totalDocs << R"(,"rows":[)";
+        objStream << R"({"offset":)" << offset << R"(,"total_rows":)" << totalDocs;
+        
+        if (options.UpdateSequence()) {
+            objStream << R"(,"update_seq":)" << updateSequence;
+        }
+        
+        objStream << R"(,"rows":[)";
         
         for (decltype(docs)::size_type i = 0, size = docs.size(); i < size; ++i) {
             if (i > 0) {
