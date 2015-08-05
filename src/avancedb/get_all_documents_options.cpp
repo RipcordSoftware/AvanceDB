@@ -139,9 +139,7 @@ std::string GetAllDocumentsOptions::GetString(const char* name, const char* altN
     }
     
     auto value = qs_.getValue(name);
-    if (value.size() > 6 && value.find("%22") == 0 && value.rfind("%22") == (value.size() - 3)) {
-        value = std::string{value.cbegin() + 3, value.cend() - 3};
-    } else if (value.size() > 1 && value.front() == '"' && value.back() == '"') {
+    if (value.size() > 1 && value.front() == '"' && value.back() == '"') {
         value = std::string{value.cbegin() + 1, value.cend() - 1};
     }
     
