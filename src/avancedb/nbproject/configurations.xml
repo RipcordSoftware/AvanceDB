@@ -13,6 +13,7 @@
       <itemPath>http_server_exception.h</itemPath>
       <itemPath>http_server_log.h</itemPath>
       <itemPath>json_stream.h</itemPath>
+      <itemPath>rest_config.h</itemPath>
       <itemPath>rest_exceptions.h</itemPath>
       <itemPath>rest_server.h</itemPath>
       <itemPath>script_object_response_stream.h</itemPath>
@@ -34,6 +35,7 @@
       <itemPath>http_server_log.cpp</itemPath>
       <itemPath>json_stream.cpp</itemPath>
       <itemPath>main.cpp</itemPath>
+      <itemPath>rest_config.cpp</itemPath>
       <itemPath>rest_exceptions.cpp</itemPath>
       <itemPath>rest_server.cpp</itemPath>
       <itemPath>script_object_response_stream.cpp</itemPath>
@@ -169,6 +171,10 @@
       <item path="json_stream.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="rest_config.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="rest_config.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="rest_exceptions.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -310,6 +316,10 @@
       <item path="json_stream.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="rest_config.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="rest_config.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="rest_exceptions.cpp" ex="false" tool="1" flavor2="0">
       </item>

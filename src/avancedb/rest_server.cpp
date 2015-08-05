@@ -16,6 +16,7 @@
 #include "document.h"
 #include "get_all_documents_options.h"
 #include "script_object_response_stream.h"
+#include "rest_config.h"
 
 #include "libscriptobject_gason.h"
 
@@ -39,11 +40,12 @@ RestServer::RestServer() {
     AddRoute("GET", "/_uuids", &RestServer::GetUuids);
     AddRoute("GET", "/_session", &RestServer::GetSession);
     AddRoute("GET", "/_all_dbs", &RestServer::GetAllDbs);    
-    AddRoute("GET", REGEX_DBNAME_GROUP REGEX_DOCID_GROUP, &RestServer::GetDocument);
-    AddRoute("GET", REGEX_DBNAME_GROUP "/+_all_docs", &RestServer::GetDatabaseAllDocs);
-    AddRoute("GET", REGEX_DBNAME_GROUP "/?", &RestServer::GetDatabase);
     AddRoute("GET", "/_config/query_servers/?", &RestServer::GetConfigQueryServers);
     AddRoute("GET", "/_config/native_query_servers/?", &RestServer::GetConfigNativeQueryServers);
+    AddRoute("GET", "/_config/?", &RestServer::GetConfig);
+    AddRoute("GET", REGEX_DBNAME_GROUP REGEX_DOCID_GROUP, &RestServer::GetDocument);
+    AddRoute("GET", REGEX_DBNAME_GROUP "/+_all_docs", &RestServer::GetDatabaseAllDocs);
+    AddRoute("GET", REGEX_DBNAME_GROUP "/?", &RestServer::GetDatabase);    
     AddRoute("GET", "/", &RestServer::GetSignature);
     
     databases_.AddDatabase("_replicator");
@@ -339,12 +341,19 @@ bool RestServer::GetDatabaseAllDocs(rs::httpserver::request_ptr request, const r
     }
 }
 
+bool RestServer::GetConfig(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response) {
+    response->setContentType("application/json").Send(RestConfig::getConfig());
+    return true;
+}
+
 bool RestServer::GetConfigQueryServers(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response) {
-    response->setContentType("application/json").Send(R"({"javascript":"libjsapi"})");
+    response->setContentType("application/json").Send(RestConfig::getQueryServers());
+    return true;
 }
 
 bool RestServer::GetConfigNativeQueryServers(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response) {
-    response->setContentType("application/json").Send("{}");
+    response->setContentType("application/json").Send(RestConfig::getNativeQueryServers());
+    return true;
 }
 
 database_ptr RestServer::GetDatabase(const rs::httpserver::RequestRouter::CallbackArgs& args) {

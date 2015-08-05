@@ -44,6 +44,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/http_server_log.o \
 	${OBJECTDIR}/json_stream.o \
 	${OBJECTDIR}/main.o \
+	${OBJECTDIR}/rest_config.o \
 	${OBJECTDIR}/rest_exceptions.o \
 	${OBJECTDIR}/rest_server.o \
 	${OBJECTDIR}/script_object_response_stream.o
@@ -125,6 +126,11 @@ ${OBJECTDIR}/main.o: main.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/externals/gason/src `pkg-config --cflags zlib` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
+
+${OBJECTDIR}/rest_config.o: rest_config.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/externals/gason/src `pkg-config --cflags zlib` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/rest_config.o rest_config.cpp
 
 ${OBJECTDIR}/rest_exceptions.o: rest_exceptions.cpp 
 	${MKDIR} -p ${OBJECTDIR}
