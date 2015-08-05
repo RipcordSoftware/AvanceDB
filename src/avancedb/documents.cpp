@@ -92,8 +92,8 @@ document_array Documents::GetAllDocuments(sequence_type& updateSequence) {
 }
 
 document_array Documents::GetDocuments(const GetAllDocumentsOptions& options, collection::size_type& offset, collection::size_type& totalDocs, sequence_type& updateSequence) {       
-    auto docs = GetAllDocuments(updateSequence);                
-
+    auto docs = GetAllDocuments(updateSequence);
+    
     if (options.Descending()) {
         std::reverse(docs.begin(), docs.end());
     }
@@ -103,7 +103,16 @@ document_array Documents::GetDocuments(const GetAllDocumentsOptions& options, co
     collection::size_type indexSkip = options.Skip();
     collection::size_type indexLimit = options.Limit();
 
-    if (options.HasKeys()) {
+    if (options.HasKey()) {
+        startIndex = FindDocument(docs, options.Key(), options.Descending());
+        if ((startIndex & findMissedFlag) == findMissedFlag) {
+            startIndex = ~startIndex;
+            endIndex = startIndex;
+        } else {
+            endIndex = startIndex + 1;
+        }
+    }
+    else if (options.HasKeys()) {
         if (options.StartKey().size() > 0) {
             startIndex = FindDocument(docs, options.StartKey(), options.Descending());
             if ((startIndex & findMissedFlag) == findMissedFlag) {

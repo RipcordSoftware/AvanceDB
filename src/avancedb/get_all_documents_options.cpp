@@ -9,6 +9,10 @@ GetAllDocumentsOptions::GetAllDocumentsOptions(const rs::httpserver::QueryString
     
 }
 
+bool GetAllDocumentsOptions::HasKey() const {
+    return Key().size() > 0;
+}
+
 bool GetAllDocumentsOptions::HasKeys() const {
     return StartKey().size() > 0 || EndKey().size() > 0;
 }

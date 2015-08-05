@@ -823,6 +823,54 @@ describe('avancedb -- _all_docs --', function() {
             done();
         });
     });
+    
+    it('check key', function(done) {
+        db.all({key: '3'}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+
+            var idsIndex = ids.indexOf('3');
+            assert.equal(1, docs.length);
+            assert.equal(ids[idsIndex], docs[0].id);
+            
+            done();
+        });
+    });
+    
+    it('check key, limit=1, skip=0', function(done) {
+        db.all({key: '3', limit: 1, skip: 0}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+
+            var idsIndex = ids.indexOf('3');
+            assert.equal(1, docs.length);
+            assert.equal(ids[idsIndex], docs[0].id);
+            
+            done();
+        });
+    });
+    
+    it('check key, limit=0, skip=1', function(done) {
+        db.all({key: '3', limit: 0, skip: 1}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+
+            assert.equal(0, docs.length);
+            
+            done();
+        });
+    });
+    
+    it('check missed key', function(done) {
+        db.all({key: 'x'}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+
+            assert.equal(0, docs.length);
+            
+            done();
+        });
+    });
 
     it('check startkey', function(done) {
         db.all({startkey: '3'}, function(err, docs) {
