@@ -85,7 +85,7 @@ void HttpServerLog::Append(rs::httpserver::socket_ptr socket, rs::httpserver::re
     // TODO: optimize the string formatting to reduce ad-hoc allocations and re-use already known string values (dates, etc.)
     logRows[index].status = response->getStatusCode();
     std::snprintf(logRows[index].data, sizeof(logRows[0].data), 
-        "%04d-%02d-%02d %02d:%02d:%02dZ %d.%d.%d.%d %s %s %s %u %d.%d.%d.%d %s %d %u",
+        "%04d-%02d-%02d %02d:%02d:%02dZ %u.%u.%u.%u %s %s %s %u %u.%u.%u.%u %s %d %u",
         year, month, day, hour, min, sec,
         localEndpoint[2], localEndpoint[3], localEndpoint[4], localEndpoint[5],
         request->getMethod().c_str(),
