@@ -311,16 +311,19 @@ bool RestServer::GetDatabaseAllDocs(rs::httpserver::request_ptr request, const r
     if (!!db) {
         GetAllDocumentsOptions options(request->getQueryString());
         
+        const auto includeDocs = options.IncludeDocs();
+        const auto updateSequence = options.UpdateSequence();
+        
         Documents::collection::size_type offset = 0, totalDocs = 0;
-        sequence_type updateSequence = 0;
-        auto docs = db->GetDocuments(options, offset, totalDocs, updateSequence);
+        sequence_type updateSequenceNumber = 0;
+        auto docs = db->GetDocuments(options, offset, totalDocs, updateSequenceNumber);
         
         auto& stream = response->setContentType("application/json").getResponseStream();
         ScriptObjectResponseStream<> objStream{stream};
         objStream << R"({"offset":)" << offset << R"(,"total_rows":)" << totalDocs;
         
-        if (options.UpdateSequence()) {
-            objStream << R"(,"update_seq":)" << updateSequence;
+        if (updateSequence) {
+            objStream << R"(,"update_seq":)" << updateSequenceNumber;
         }
         
         objStream << R"(,"rows":[)";
@@ -339,7 +342,7 @@ bool RestServer::GetDatabaseAllDocs(rs::httpserver::request_ptr request, const r
             objStream << R"("key":")" << id << R"(",)";
             objStream << R"("value":{"rev":")" << rev << '"';
 
-            if (options.IncludeDocs()) {
+            if (includeDocs) {
                 objStream << R"(,"doc":)" << doc->getObject();
             }
 
@@ -363,16 +366,19 @@ bool RestServer::PostDatabaseAllDocs(rs::httpserver::request_ptr request, const 
         
         PostAllDocumentsOptions options(request->getQueryString(), keys);
         
+        const auto includeDocs = options.IncludeDocs();
+        const auto updateSequence = options.UpdateSequence();
+        
         Documents::collection::size_type totalDocs = 0;
-        sequence_type updateSequence = 0;
-        auto docs = db->PostDocuments(options, totalDocs, updateSequence);
+        sequence_type updateSequenceNumber = 0;
+        auto docs = db->PostDocuments(options, totalDocs, updateSequenceNumber);
         
         auto& stream = response->setContentType("application/json").getResponseStream();
         ScriptObjectResponseStream<> objStream{stream};
         objStream << R"({"offset":0,"total_rows":)" << totalDocs;
         
-        if (options.UpdateSequence()) {
-            objStream << R"(,"update_seq":)" << updateSequence;
+        if (updateSequence) {
+            objStream << R"(,"update_seq":)" << updateSequenceNumber;
         }
         
         objStream << R"(,"rows":[)";
@@ -392,12 +398,13 @@ bool RestServer::PostDatabaseAllDocs(rs::httpserver::request_ptr request, const 
                 objStream << R"("key":")" << id << R"(",)";
                 objStream << R"("value":{"rev":")" << rev << '"';
 
-                if (options.IncludeDocs()) {
+                if (includeDocs) {
                     objStream << R"(,"doc":)" << doc->getObject();
                 }
 
                 objStream << "}}";
             } else {
+                // TODO: if the key type is not a string this will throw
                 auto id = keys->getString(i);
                 objStream << R"({"key":")" << id << R"(","error":"not_found"})";
             }

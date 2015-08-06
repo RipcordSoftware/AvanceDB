@@ -119,10 +119,18 @@ uint64_t GetAllDocumentsOptions::GetUnsigned(const char* name, uint64_t defaultV
     if (qs_.IsKey(name)) {
         auto value = qs_.getValue(name);    
         if (value.size() > 0) {
-            try {            
-                option = boost::lexical_cast<uint64_t>(value);
+            auto valid = false;
+
+            try {
+                if (value[0] != '-') {
+                    option = boost::lexical_cast<uint64_t>(value);
+                    valid = true;
+                }
             } catch (const boost::bad_lexical_cast&) {
-                throw QueryParseError{"uint64_t", value};
+            }
+
+            if (!valid) {
+                throw QueryParseError{"positive integer", value};
             }
         }
     }

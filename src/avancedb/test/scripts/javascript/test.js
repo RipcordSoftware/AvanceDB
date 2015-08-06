@@ -708,12 +708,30 @@ describe('avancedb -- _all_docs --', function() {
         });
     });
     
+    it('check document update sequence with malformed parameter', function(done) {
+        db.all({update_seq:'tru'}, function(err, docs) {
+            assert.notEqual(null, err);
+            assert.equal('query_parse_error', err.error);
+
+            done();
+        });
+    });
+    
     it('check document update sequence with keys', function(done) {
         db.all({keys: ids, update_seq:true}, function(err, docs) {
             assert.equal(null, err);
             assert.notEqual(null, docs);
             assert.equal(ids.length, docs.length);
             assert.equal(ids.length, docs.update_seq);        
+
+            done();
+        });
+    });
+    
+    it('check document update sequence with keys and malformed parameter', function(done) {
+        db.all({keys: ids, update_seq:'tru'}, function(err, docs) {
+            assert.notEqual(null, err);
+            assert.equal('query_parse_error', err.error);
 
             done();
         });
@@ -740,6 +758,22 @@ describe('avancedb -- _all_docs --', function() {
             assert.notEqual(null, docs);
             assert.equal(1, docs.length);
             assert.equal(ids[0], docs[0].id);
+            done();
+        });
+    });
+    
+    it('check negative limit', function(done) {
+        db.all({limit: -1}, function(err, docs) {
+            assert.notEqual(null, err);
+            assert.equal('query_parse_error', err.error);
+            done();
+        });
+    });
+    
+    it('check negative skip', function(done) {
+        db.all({skip: -1}, function(err, docs) {
+            assert.notEqual(null, err);
+            assert.equal('query_parse_error', err.error);
             done();
         });
     });
@@ -1247,6 +1281,16 @@ describe('avancedb -- _all_docs --', function() {
         });
     });
     
+    it('check with keys with malformed include_docs', function(done) {
+        var keys = ids.slice(0, 4);
+        db.all({keys: keys, include_docs: 'tru'}, function(err, docs) {
+            assert.notEqual(null, err);
+            assert.equal('query_parse_error', err.error);
+
+            done();
+        });
+    });
+    
     it('check with keys, descending', function(done) {
         var keys = ids.slice(0, 4);
         db.all({keys: keys, descending: true}, function(err, docs) {
@@ -1326,6 +1370,24 @@ describe('avancedb -- _all_docs --', function() {
         });
     });
     
+    it('check with all keys, negative skip', function(done) {
+        db.all({keys: ids, skip: -1}, function(err, docs) {
+            assert.notEqual(null, err);
+            assert.equal('query_parse_error', err.error);
+
+            done();
+        });
+    });
+    
+    it('check with all keys, negative limit', function(done) {
+        db.all({keys: ids, limit: -1}, function(err, docs) {
+            assert.notEqual(null, err);
+            assert.equal('query_parse_error', err.error);
+
+            done();
+        });
+    });
+    
     it('check with all keys, descending', function(done) {
         db.all({keys: ids, descending: true}, function(err, docs) {
             assert.equal(null, err);
@@ -1335,6 +1397,15 @@ describe('avancedb -- _all_docs --', function() {
             for (var i = 0; i < ids.length; i++) {
                 assert.equal(ids[i], docs[ids.length - 1 - i].id);
             }
+
+            done();
+        });
+    });
+    
+    it('check with all keys, malformed descending', function(done) {
+        db.all({keys: ids, descending: 'tru'}, function(err, docs) {
+            assert.notEqual(null, err);
+            assert.equal('query_parse_error', err.error);
 
             done();
         });
