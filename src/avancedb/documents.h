@@ -14,6 +14,7 @@
 #include "types.h"
 #include "document.h"
 #include "get_all_documents_options.h"
+#include "post_all_documents_options.h"
 
 class Database;
 
@@ -29,6 +30,7 @@ public:
     document_ptr SetDocument(const char* id, script_object_ptr obj);
     
     document_array GetDocuments(const GetAllDocumentsOptions& options, collection::size_type& offset, collection::size_type& totalDocs, sequence_type& updateSequence);
+    document_array PostDocuments(const PostAllDocumentsOptions& options, Documents::collection::size_type& totalDocs, sequence_type& updateSequence);
     
     collection::size_type getCount();
     sequence_type getUpdateSequence();

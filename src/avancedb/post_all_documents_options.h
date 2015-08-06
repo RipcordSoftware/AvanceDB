@@ -1,7 +1,8 @@
-#ifndef GET_ALL_DOCUMENTS_OPTIONS_H
-#define	GET_ALL_DOCUMENTS_OPTIONS_H
+#ifndef POST_ALL_DOCUMENTS_OPTIONS_H
+#define POST_ALL_DOCUMENTS_OPTIONS_H
 
 #include <string>
+#include <vector>
 
 #include <boost/optional.hpp>
 
@@ -9,18 +10,13 @@
 
 #include "types.h"
 
-class GetAllDocumentsOptions final {
+class PostAllDocumentsOptions final {
 public:
-    GetAllDocumentsOptions(const rs::httpserver::QueryString& qs);
+    using keys_array = std::vector<std::string>;
     
-    bool HasKey() const;
-    bool HasKeys() const;
+    PostAllDocumentsOptions(const rs::httpserver::QueryString& qs, script_array_ptr keysArray);
     
-    const std::string& Key() const;
-    const std::string& StartKey() const;
-    const std::string& StartKeyDocId() const;
-    const std::string& EndKey() const;
-    const std::string& EndKeyDocId() const;
+    const keys_array& Keys() const;
     
     bool Descending() const;
     bool IncludeDocs() const;
@@ -31,27 +27,24 @@ public:
     uint64_t Limit() const;
     
 private:
-    std::string GetString(const char* name, const char* altName = nullptr) const;
     bool GetBoolean(const char* name, bool defaultValue) const;
     uint64_t GetUnsigned(const char* name, uint64_t defaultValue) const;
+            
+    mutable keys_array keys_;
     
-    mutable std::string key_;
-    mutable std::string startKey_;
-    mutable std::string startKeyDocId_;
-    mutable std::string endKey_;
-    mutable std::string endKeyDocId_;
-        
     mutable boost::optional<bool> conflicts_;
     mutable boost::optional<bool> descending_;
     mutable boost::optional<bool> includeDocs_;
-    mutable boost::optional<bool> inclusiveEnd_;
     mutable boost::optional<bool> updateSequence_;
     
     mutable boost::optional<uint64_t> skip_;
     mutable boost::optional<uint64_t> limit_;
     
     const rs::httpserver::QueryString& qs_;
+    const script_array_ptr keysArray_;
+    
+    const std::string _emptyString;
 };
 
-#endif	/* GET_ALL_DOCUMENTS_OPTIONS_H */
+#endif	/* POST_ALL_DOCUMENTS_OPTIONS_H */
 

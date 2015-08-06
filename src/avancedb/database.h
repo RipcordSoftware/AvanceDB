@@ -8,6 +8,7 @@
 
 #include "documents.h"
 #include "get_all_documents_options.h"
+#include "post_all_documents_options.h"
 
 class Database final : public boost::enable_shared_from_this<Database>, private boost::noncopyable {
 public:
@@ -28,6 +29,7 @@ public:
     document_ptr SetDocument(const char* id, script_object_ptr);
     
     document_array GetDocuments(const GetAllDocumentsOptions& options, Documents::collection::size_type& offset, Documents::collection::size_type& totalDocs, sequence_type& updateSequence);
+    document_array PostDocuments(const PostAllDocumentsOptions& options, Documents::collection::size_type& totalDocs, sequence_type& updateSequence);
     
 private:
     Database(const char*);

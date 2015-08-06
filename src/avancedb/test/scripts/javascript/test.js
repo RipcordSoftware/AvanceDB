@@ -707,7 +707,18 @@ describe('avancedb -- _all_docs --', function() {
             done();
         });
     });
+    
+    it('check document update sequence with keys', function(done) {
+        db.all({keys: ids, update_seq:true}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            assert.equal(ids.length, docs.length);
+            assert.equal(ids.length, docs.update_seq);        
 
+            done();
+        });
+    });
+    
     it('check document count and order; with include docs', function(done) {
         db.all({include_docs:true}, function(err, docs) {
             assert.equal(null, err);
@@ -1200,6 +1211,166 @@ describe('avancedb -- _all_docs --', function() {
 
             var idsStartIndex = revIds.indexOf('3');
             assert.equal(revIds[idsStartIndex + 1], docs[0].id);
+
+            done();
+        });
+    });
+    
+    it('check with keys', function(done) {
+        var keys = ids.slice(0, 4);
+        db.all({keys: keys}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            assert.equal(keys.length, docs.length);
+
+            for (var i = 0; i < keys.length; i++) {
+                assert.equal(keys[i], docs[i].id);
+            }
+
+            done();
+        });
+    });
+    
+    it('check with keys with include_docs', function(done) {
+        var keys = ids.slice(0, 4);
+        db.all({keys: keys, include_docs: true}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            assert.equal(keys.length, docs.length);
+
+            for (var i = 0; i < keys.length; i++) {
+                assert.equal(keys[i], docs[i].id);
+                assert.equal(keys[i], docs[i].value.doc._id);
+            }
+
+            done();
+        });
+    });
+    
+    it('check with keys, descending', function(done) {
+        var keys = ids.slice(0, 4);
+        db.all({keys: keys, descending: true}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            assert.equal(keys.length, docs.length);
+
+            for (var i = 0; i < keys.length; i++) {
+                assert.equal(keys[i], docs[keys.length - 1 - i].id);
+            }
+
+            done();
+        });
+    });
+    
+    it('check with keys and limit 10', function(done) {
+        var keys = ids.slice(0, 4);
+        db.all({keys: keys, limit:10}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            assert.equal(keys.length, docs.length);
+
+            for (var i = 0; i < keys.length; i++) {
+                assert.equal(keys[i], docs[i].id);
+            }
+
+            done();
+        });
+    });
+    
+    it('check all with keys and limit 1', function(done) {
+        var keys = ids.slice(1, 4);
+        db.all({keys: keys, limit:1}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            assert.equal(1, docs.length);
+            assert.equal(keys[0], docs[0].id);
+
+            done();
+        });
+    });
+    
+    it('check all with keys, limit 1 and skip 1', function(done) {
+        var keys = ids.slice(1, 4);
+        db.all({keys: keys, limit:1, skip:1}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            assert.equal(1, docs.length);
+            assert.equal(keys[1], docs[0].id);
+
+            done();
+        });
+    });
+    
+    it('check all with keys, limit 1 and skip 100', function(done) {
+        var keys = ids.slice(1, 4);
+        db.all({keys: keys, limit:1, skip:100}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            assert.equal(0, docs.length);
+
+            done();
+        });
+    });
+
+    it('check with all keys', function(done) {
+        db.all({keys: ids}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            assert.equal(ids.length, docs.length);
+
+            for (var i = 0; i < ids.length; i++) {
+                assert.equal(ids[i], docs[i].id);
+            }
+
+            done();
+        });
+    });
+    
+    it('check with all keys, descending', function(done) {
+        db.all({keys: ids, descending: true}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            assert.equal(ids.length, docs.length);
+
+            for (var i = 0; i < ids.length; i++) {
+                assert.equal(ids[i], docs[ids.length - 1 - i].id);
+            }
+
+            done();
+        });
+    });
+    
+    it('check with all keys, with modified first missing doc', function(done) {
+        var keys = ids.slice(0);
+        keys[0] = 'abc';
+        db.all({keys: keys}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            assert.equal(keys.length, docs.length);
+
+            for (var i = 0; i < keys.length; i++) {
+                assert.equal(keys[i], docs[i].key);
+            }       
+            
+            assert.equal("not_found", docs[0].error);
+
+            done();
+        });
+    });    
+    
+    it('check with all keys, with added last missing doc', function(done) {
+        var keys = ids.slice(0);
+        keys.push('abc');
+        db.all({keys: keys}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            assert.equal(keys.length, docs.length);
+
+            for (var i = 0; i < keys.length; i++) {
+                assert.equal(keys[i], docs[i].key);
+            }       
+            
+            assert.equal("not_found", docs[keys.length - 1].error);
 
             done();
         });

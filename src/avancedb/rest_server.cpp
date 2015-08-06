@@ -15,6 +15,7 @@
 #include "database.h"
 #include "document.h"
 #include "get_all_documents_options.h"
+#include "post_all_documents_options.h"
 #include "script_object_response_stream.h"
 #include "rest_config.h"
 
@@ -35,6 +36,8 @@ RestServer::RestServer() {
     
     AddRoute("PUT", REGEX_DBNAME_GROUP REGEX_DOCID_GROUP, &RestServer::PutDocument);
     AddRoute("PUT", REGEX_DBNAME_GROUP "/?", &RestServer::PutDatabase);
+    
+    AddRoute("POST", REGEX_DBNAME_GROUP "/+_all_docs", &RestServer::PostDatabaseAllDocs);
     
     AddRoute("GET", "/_active_tasks", &RestServer::GetActiveTasks);
     AddRoute("GET", "/_uuids", &RestServer::GetUuids);
@@ -332,9 +335,9 @@ bool RestServer::GetDatabaseAllDocs(rs::httpserver::request_ptr request, const r
             auto id = doc->getId();
             auto rev= doc->getRev();
 
-            objStream << '{' << R"("id":")" << id << R"(",)";
+            objStream << R"({"id":")" << id << R"(",)";
             objStream << R"("key":")" << id << R"(",)";
-            objStream << R"("value":{"rev":")" << rev << R"(")";
+            objStream << R"("value":{"rev":")" << rev << '"';
 
             if (options.IncludeDocs()) {
                 objStream << R"(,"doc":)" << doc->getObject();
@@ -345,6 +348,63 @@ bool RestServer::GetDatabaseAllDocs(rs::httpserver::request_ptr request, const r
         
         objStream << "]}";
         objStream.Flush();        
+    }
+}
+
+bool RestServer::PostDatabaseAllDocs(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
+    auto db = GetDatabase(args);
+    if (!!db) {
+        auto obj = GetJsonBody(request);
+        if (!obj || obj->getType("keys") != rs::scriptobject::ScriptObjectType::Array) {
+            throw InvalidJson();
+        }
+        
+        auto keys = obj->getArray("keys");
+        
+        PostAllDocumentsOptions options(request->getQueryString(), keys);
+        
+        Documents::collection::size_type totalDocs = 0;
+        sequence_type updateSequence = 0;
+        auto docs = db->PostDocuments(options, totalDocs, updateSequence);
+        
+        auto& stream = response->setContentType("application/json").getResponseStream();
+        ScriptObjectResponseStream<> objStream{stream};
+        objStream << R"({"offset":0,"total_rows":)" << totalDocs;
+        
+        if (options.UpdateSequence()) {
+            objStream << R"(,"update_seq":)" << updateSequence;
+        }
+        
+        objStream << R"(,"rows":[)";
+        
+        for (decltype(docs)::size_type i = 0, size = docs.size(); i < size; ++i) {
+            if (i > 0) {
+                objStream << ',';
+            }
+
+            auto doc = docs[i];
+
+            if (!!doc) {
+                auto id = doc->getId();
+                auto rev= doc->getRev();
+
+                objStream << R"({"id":")" << id << R"(",)";
+                objStream << R"("key":")" << id << R"(",)";
+                objStream << R"("value":{"rev":")" << rev << '"';
+
+                if (options.IncludeDocs()) {
+                    objStream << R"(,"doc":)" << doc->getObject();
+                }
+
+                objStream << "}}";
+            } else {
+                auto id = keys->getString(i);
+                objStream << R"({"key":")" << id << R"(","error":"not_found"})";
+            }
+        }
+        
+        objStream << "]}";
+        objStream.Flush();
     }
 }
 

@@ -41,3 +41,7 @@ document_ptr Database::SetDocument(const char* id, script_object_ptr obj) {
 document_array Database::GetDocuments(const GetAllDocumentsOptions& options, Documents::collection::size_type& offset, Documents::collection::size_type& totalDocs, sequence_type& updateSequence) {
     return docs_->GetDocuments(options, offset, totalDocs, updateSequence);
 }
+
+document_array Database::PostDocuments(const PostAllDocumentsOptions& options, Documents::collection::size_type& totalDocs, sequence_type& updateSequence) {
+    return docs_->PostDocuments(options, totalDocs, updateSequence);
+}

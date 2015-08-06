@@ -147,6 +147,46 @@ document_array Documents::GetDocuments(const GetAllDocumentsOptions& options, co
     return docs;
 }
 
+document_array Documents::PostDocuments(const PostAllDocumentsOptions& options, Documents::collection::size_type& totalDocs, sequence_type& updateSequence) {
+    auto docs = GetAllDocuments(updateSequence);
+    
+    const auto& keys = options.Keys();
+    
+    document_array results;
+    results.reserve(keys.size());
+    
+    for (auto key : keys) {
+        auto index = FindDocument(docs, key, false);
+        if ((index & findMissedFlag) == 0) {
+            auto doc = docs[index];
+            results.push_back(doc);
+        } else {
+            results.push_back(nullptr);
+        }
+    }
+    
+    totalDocs = docs.size();
+    
+    auto startIndex = options.Skip();
+    auto endIndex = results.size();
+    auto indexLimit = options.Limit();
+    
+    if (startIndex >= 0 && startIndex < endIndex) {
+        endIndex = std::min(startIndex + indexLimit, endIndex);
+        endIndex = std::min(endIndex, results.size());
+
+        results = document_array{results.cbegin() + startIndex, results.cbegin() + endIndex};
+    } else {
+        results.clear();
+    }
+    
+    if (options.Descending()) {
+        std::reverse(results.begin(), results.end());
+    }
+    
+    return results;
+}
+
 Documents::collection::size_type Documents::FindDocument(const document_array& docs, const std::string& id, bool descending) {
     const auto size = docs.size();
     

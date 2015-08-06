@@ -52,13 +52,6 @@ const std::string& GetAllDocumentsOptions::EndKeyDocId() const {
     return endKeyDocId_;
 }
 
-bool GetAllDocumentsOptions::Conflicts() const {
-    if (!conflicts_.is_initialized()) {
-        conflicts_ = GetBoolean("conflicts", false);
-    }
-    return conflicts_.get();
-}
-
 bool GetAllDocumentsOptions::Descending() const {
     if (!descending_.is_initialized()) {
         descending_ = GetBoolean("descending", false);
@@ -87,16 +80,16 @@ bool GetAllDocumentsOptions::UpdateSequence() const {
     return updateSequence_.get();
 }
 
-int GetAllDocumentsOptions::Skip() const {
+uint64_t GetAllDocumentsOptions::Skip() const {
     if (!skip_.is_initialized()) {
-        skip_ = GetInteger("skip", 0);
+        skip_ = GetUnsigned("skip", 0);
     }
     return skip_.get();
 }
 
-int GetAllDocumentsOptions::Limit() const {
+uint64_t GetAllDocumentsOptions::Limit() const {
     if (!limit_.is_initialized()) {
-        limit_ = GetInteger("limit", std::numeric_limits<int>::max());
+        limit_ = GetUnsigned("limit", std::numeric_limits<uint64_t>::max());
     }
     return limit_.get();
 }
@@ -120,16 +113,16 @@ bool GetAllDocumentsOptions::GetBoolean(const char* name, bool defaultValue) con
     return option;
 }
 
-int GetAllDocumentsOptions::GetInteger(const char* name, int defaultValue) const {
-    int option = defaultValue;    
+uint64_t GetAllDocumentsOptions::GetUnsigned(const char* name, uint64_t defaultValue) const {
+    auto option = std::min(defaultValue, (uint64_t)std::numeric_limits<int64_t>::max());
     
     if (qs_.IsKey(name)) {
         auto value = qs_.getValue(name);    
         if (value.size() > 0) {
             try {            
-                option = boost::lexical_cast<int>(value);
+                option = boost::lexical_cast<uint64_t>(value);
             } catch (const boost::bad_lexical_cast&) {
-                throw QueryParseError{"integer", value};
+                throw QueryParseError{"uint64_t", value};
             }
         }
     }
