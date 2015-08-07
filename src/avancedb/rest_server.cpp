@@ -404,9 +404,9 @@ bool RestServer::PostDatabaseAllDocs(rs::httpserver::request_ptr request, const 
 
                 objStream << "}}";
             } else {
-                // TODO: if the key type is not a string this will throw
-                auto id = keys->getString(i);
-                objStream << R"({"key":")" << id << R"(","error":"not_found"})";
+                objStream << R"({"key":)";
+                objStream.Serialize(keys, i);
+                objStream << R"(,"error":"not_found"})";
             }
         }
         

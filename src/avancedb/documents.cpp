@@ -156,12 +156,12 @@ document_array Documents::PostDocuments(const PostAllDocumentsOptions& options, 
     results.reserve(keys.size());
     
     for (auto key : keys) {
-        auto index = FindDocument(docs, key, false);
+        auto index = key.size() > 0 ? FindDocument(docs, key, false) : findMissedFlag;
         if ((index & findMissedFlag) == 0) {
             auto doc = docs[index];
-            results.push_back(doc);
+            results.emplace_back(doc);
         } else {
-            results.push_back(nullptr);
+            results.emplace_back(nullptr);
         }
     }
     

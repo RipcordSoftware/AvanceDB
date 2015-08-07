@@ -1446,6 +1446,22 @@ describe('avancedb -- _all_docs --', function() {
             done();
         });
     });
+    
+    it('check badly typed keys', function(done) {
+        var keys = [ 1, null, true, false, "wawawewa", {}, [] ];
+        db.all({keys: keys}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            assert.equal(keys.length, docs.length);
+
+            for (var i = 0; i < keys.length; i++) {
+                assert.deepEqual(keys[i], docs[i].key);
+                assert.equal("not_found", docs[i].error);
+            }       
+
+            done();
+        });
+    });
 
     it('delete the database', function(done) {
         db.destroy(function(err, res) {

@@ -17,6 +17,24 @@ public:
         AppendObject(obj, false);
     }
     
+    void Serialize(script_array_ptr arr, unsigned index) {
+        auto type = index < arr->getCount() ? arr->getType(index) : rs::scriptobject::ScriptObjectType::Unknown;
+        switch (type) {
+            case rs::scriptobject::ScriptObjectType::Array: Serialize(arr->getArray(index)); break;
+            case rs::scriptobject::ScriptObjectType::Boolean: SerializeBoolean(arr->getBoolean(index)); break;
+            case rs::scriptobject::ScriptObjectType::Double: Serialize(arr->getDouble(index)); break;
+            case rs::scriptobject::ScriptObjectType::Int32: Serialize(arr->getInt32(index)); break;
+            case rs::scriptobject::ScriptObjectType::Null: Serialize("null"); break;
+            case rs::scriptobject::ScriptObjectType::Object: Serialize(arr->getObject(index)); break;
+            case rs::scriptobject::ScriptObjectType::String: *this << '"' << arr->getString(index) << '"'; break;
+            default: Serialize("undefined"); break;
+        }
+    }
+    
+    void Serialize(script_array_ptr arr) {
+        AppendArray(arr, false);
+    }
+    
     void Serialize(const char* str) {
         auto len = std::strlen(str);
         
@@ -38,7 +56,15 @@ public:
     
     void Serialize(std::uint64_t value, bool comma = false) {
         AppendUInt64(value, comma);
-    }        
+    }    
+
+    void Serialize(double value, bool comma = false) {
+        AppendDouble(value, comma);
+    }
+
+    void SerializeBoolean(bool value, bool comma = false) {
+        AppendBool(value, comma);
+    }
     
     void Flush() {
         FlushBuffer();
@@ -47,6 +73,11 @@ public:
     
     friend ScriptObjectResponseStream<SIZE>& operator<<(ScriptObjectResponseStream<SIZE>& stream, script_object_ptr obj) {
         stream.Serialize(obj);
+        return stream;
+    }
+    
+    friend ScriptObjectResponseStream<SIZE>& operator<<(ScriptObjectResponseStream<SIZE>& stream, script_array_ptr arr) {
+        stream.Serialize(arr);
         return stream;
     }
     
@@ -67,6 +98,11 @@ public:
     }
     
     friend ScriptObjectResponseStream<SIZE>& operator<<(ScriptObjectResponseStream<SIZE>& stream, std::uint64_t value) {
+        stream.Serialize(value);
+        return stream;
+    }
+    
+    friend ScriptObjectResponseStream<SIZE>& operator<<(ScriptObjectResponseStream<SIZE>& stream, double value) {
         stream.Serialize(value);
         return stream;
     }
