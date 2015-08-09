@@ -45,3 +45,15 @@ document_array Database::GetDocuments(const GetAllDocumentsOptions& options, Doc
 document_array Database::PostDocuments(const PostAllDocumentsOptions& options, Documents::collection::size_type& totalDocs, sequence_type& updateSequence) {
     return docs_->PostDocuments(options, totalDocs, updateSequence);
 }
+
+document_ptr Database::GetLocalDocument(const char* id) {
+    return docs_->GetLocalDocument(id);
+}
+
+document_ptr Database::DeleteLocalDocument(const char* id, const char* rev) {
+    return docs_->DeleteLocalDocument(id, rev);
+}
+
+document_ptr Database::SetLocalDocument(const char* id, script_object_ptr obj) {
+    return docs_->SetLocalDocument(id, obj);
+}

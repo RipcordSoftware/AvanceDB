@@ -29,6 +29,10 @@ public:
     document_ptr DeleteDocument(const char* id, const char* rev);
     document_ptr SetDocument(const char* id, script_object_ptr obj);
     
+    document_ptr GetLocalDocument(const char* id);
+    document_ptr DeleteLocalDocument(const char* id, const char* rev);
+    document_ptr SetLocalDocument(const char* id, script_object_ptr obj);
+    
     document_array GetDocuments(const GetAllDocumentsOptions& options, collection::size_type& offset, collection::size_type& totalDocs, sequence_type& updateSequence);
     document_array PostDocuments(const PostAllDocumentsOptions& options, Documents::collection::size_type& totalDocs, sequence_type& updateSequence);
     
@@ -49,8 +53,12 @@ private:
     
     boost::mutex docsMtx_;
     collection docs_;
-
-    boost::atomic<sequence_type long> updateSeq_;        
+    boost::atomic<sequence_type long> updateSeq_;
+    
+    boost::mutex localDocsMtx_;
+    collection localDocs_;
+    boost::atomic<sequence_type long> localUpdateSeq_;
+    
 };
 
 #endif	/* DOCUMENTS_H */

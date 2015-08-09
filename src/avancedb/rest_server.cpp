@@ -25,15 +25,17 @@
 #define REGEX_DBNAME_GROUP "/(?<db>" REGEX_DBNAME ")"
 
 #define REGEX_DOCID R"([a-zA-Z0-9\$\+\-\(\)\:\.\~][a-zA-Z0-9_\$\+\-\(\)\:\.\~]*)"
-#define REGEX_DOCID_GROUP "/(?<id>" REGEX_DOCID ")"
+#define REGEX_DOCID_GROUP "/+(?<id>" REGEX_DOCID ")"
 
 RestServer::RestServer() {
     AddRoute("HEAD", REGEX_DBNAME_GROUP "/?", &RestServer::HeadDatabase);   
     AddRoute("HEAD", REGEX_DBNAME_GROUP REGEX_DOCID_GROUP, &RestServer::HeadDocument);
     
+    AddRoute("DELETE", REGEX_DBNAME_GROUP "/+_local" REGEX_DOCID_GROUP, &RestServer::DeleteLocalDocument);
     AddRoute("DELETE", REGEX_DBNAME_GROUP "/?/?", &RestServer::DeleteDatabase);
     AddRoute("DELETE", REGEX_DBNAME_GROUP REGEX_DOCID_GROUP, &RestServer::DeleteDocument);
     
+    AddRoute("PUT", REGEX_DBNAME_GROUP "/+_local" REGEX_DOCID_GROUP, &RestServer::PutLocalDocument);
     AddRoute("PUT", REGEX_DBNAME_GROUP REGEX_DOCID_GROUP, &RestServer::PutDocument);
     AddRoute("PUT", REGEX_DBNAME_GROUP "/?", &RestServer::PutDatabase);
     
@@ -46,6 +48,7 @@ RestServer::RestServer() {
     AddRoute("GET", "/_config/query_servers/?", &RestServer::GetConfigQueryServers);
     AddRoute("GET", "/_config/native_query_servers/?", &RestServer::GetConfigNativeQueryServers);
     AddRoute("GET", "/_config/?", &RestServer::GetConfig);
+    AddRoute("GET", REGEX_DBNAME_GROUP "/+_local" REGEX_DOCID_GROUP, &RestServer::GetLocalDocument);
     AddRoute("GET", REGEX_DBNAME_GROUP REGEX_DOCID_GROUP, &RestServer::GetDocument);
     AddRoute("GET", REGEX_DBNAME_GROUP "/+_all_docs", &RestServer::GetDatabaseAllDocs);
     AddRoute("GET", REGEX_DBNAME_GROUP "/?", &RestServer::GetDatabase);    
@@ -265,6 +268,53 @@ bool RestServer::PutDocument(rs::httpserver::request_ptr request, const rs::http
     return created;
 }
 
+bool RestServer::GetLocalDocument(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
+    bool gotDoc = false;
+    auto db = GetDatabase(args);
+    if (!!db) {
+        auto id = GetParameter("id", args);
+        
+        auto doc = db->GetLocalDocument(id);
+        auto obj = doc->getObject();
+        
+        auto rev = doc->getRev();
+
+        auto& stream = response->setStatusCode(200).setContentType("application/json").setETag(rev).getResponseStream();
+        ScriptObjectResponseStream<> objStream{stream};
+        objStream << obj;
+        objStream.Flush();
+        
+        gotDoc = true;
+    }
+    
+    return gotDoc;
+}
+
+bool RestServer::PutLocalDocument(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
+    bool created = false;
+    auto db = GetDatabase(args);
+    if (!!db) {
+        auto id = GetParameter("id", args);
+        auto obj = GetJsonBody(request);        
+
+        if (!!obj) {
+            auto doc = db->SetLocalDocument(id, obj);
+            
+            auto rev = doc->getRev();
+            
+            JsonStream stream;
+            stream.Append("ok", true);
+            stream.Append("id", doc->getId());
+            stream.Append("rev", rev);
+
+            response->setStatusCode(201).setContentType("application/json").setETag(rev).Send(stream.Flush());
+
+            created = true;
+        }
+    }
+    return created;
+}
+
 bool RestServer::DeleteDocument(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
     bool deleted = false;
     auto db = GetDatabase(args);
@@ -273,6 +323,30 @@ bool RestServer::DeleteDocument(rs::httpserver::request_ptr request, const rs::h
         auto rev = GetParameter("rev", request->getQueryString()).c_str();
         
         auto doc = db->DeleteDocument(id, rev);
+        
+        rev = doc->getRev();
+            
+        JsonStream stream;
+        stream.Append("ok", true);
+        stream.Append("id", doc->getId());
+        stream.Append("rev", rev);
+
+        response->setStatusCode(200).setContentType("application/json").setETag(rev).Send(stream.Flush());
+        
+        deleted = true;        
+    }
+    
+    return deleted;
+}
+
+bool RestServer::DeleteLocalDocument(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
+    bool deleted = false;
+    auto db = GetDatabase(args);
+    if (!!db) {
+        auto id = GetParameter("id", args);
+        auto rev = GetParameter("rev", request->getQueryString()).c_str();
+        
+        auto doc = db->DeleteLocalDocument(id, rev);
         
         rev = doc->getRev();
             

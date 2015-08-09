@@ -7,7 +7,7 @@
 #include "database.h"
 
 Documents::Documents(database_ptr db) : db_(db), docs_(64, 32 * 1024),
-    updateSeq_(0) {
+    updateSeq_(0), localUpdateSeq_(0) {
     
 }
 
@@ -186,6 +186,66 @@ document_array Documents::PostDocuments(const PostAllDocumentsOptions& options, 
     
     return results;
 }
+
+document_ptr Documents::GetLocalDocument(const char* id) {
+    boost::lock_guard<boost::mutex> guard(localDocsMtx_);
+    
+    Document::Compare compare{id};
+    auto doc = localDocs_.find_fn(compare);
+    
+    if (!doc) {
+        throw DocumentMissing{};
+    }
+    
+    return doc;
+}
+
+document_ptr Documents::SetLocalDocument(const char* id, script_object_ptr obj) {
+    boost::lock_guard<boost::mutex> guard(localDocsMtx_);
+    
+    Document::Compare compare{id};
+    auto doc = localDocs_.find_fn(compare);
+
+    if (!!doc) {
+        if (obj->getType("_rev") != rs::scriptobject::ScriptObjectType::String) {
+            throw DocumentConflict{};
+        }
+        
+        auto objRev = obj->getString("_rev");
+        
+        auto docRev = doc->getRev();
+        
+        if (std::strcmp(objRev, docRev) != 0) {
+            throw DocumentConflict();
+        }
+    }
+    
+    doc = Document::Create(id, obj, ++localUpdateSeq_);
+
+    localDocs_.insert(doc);
+
+    return doc;
+}
+
+document_ptr Documents::DeleteLocalDocument(const char* id, const char* rev) {
+    boost::lock_guard<boost::mutex> guard(localDocsMtx_);
+    
+    Document::Compare compare{id};
+    auto doc = localDocs_.find_fn(compare);
+    
+    if (!doc) {
+        throw DocumentMissing{};
+    }
+    
+    auto docRev = doc->getRev();
+    if (std::strcmp(rev, docRev) != 0) {
+        throw DocumentConflict{};
+    }
+    
+    localDocs_.erase(doc);
+    
+    return doc;
+}   
 
 Documents::collection::size_type Documents::FindDocument(const document_array& docs, const std::string& id, bool descending) {
     const auto size = docs.size();

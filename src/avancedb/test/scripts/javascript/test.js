@@ -1471,3 +1471,117 @@ describe('avancedb -- _all_docs --', function() {
         });
     });
 });
+
+describe('avancedb -- local docs --', function() {
+    var testDbName = 'avancedb-local-test';
+    var testDocument = { 'lorem' : 'ipsum', pi: 3.14159, sunny: true, free_lunch: false, the_answer: 42, 
+        taxRate: null, fibonnaci: [0, 1, 1, 2, 3, 5, 8, 13 ], child: { 'hello': 'world' }, 
+        events: [ null, 1969, 'avance', true, {}, [] ], //minNUm: Number.MIN_VALUE , maxNum: Number.MAX_VALUE,
+        data: '0123456789' };
+        
+    var db = conn.database(testDbName);    
+    var local = conn.database(testDbName);
+    local.name += '/_local';
+    
+    it('should create a database', function(done) {
+        db.create(function(err, res) {
+            assert.equal(null, err);
+            assert.notEqual(null, res);
+            assert.notEqual(res.ok, 'true');
+            done();
+        });
+    });
+    
+    it('get a non-existent document', function(done) {
+        local.get('test0', function(err, doc) {
+            assert.notEqual(null, err);
+            assert.equal('not_found', err.error);
+            done();
+        });
+    });
+
+    it('create a document with an id', function(done) {       
+        var test0 = _.extend({}, testDocument);        
+        local.save('test0', test0, function(err, doc) {
+            assert.equal(null, err);
+            assert.notEqual(null, doc);
+            assert.equal('test0', doc._id);
+            assert.notEqual(null, doc._rev);
+            done();
+        });
+    });
+    
+    it('get a document', function(done) {
+        local.get('test0', function(err, doc) {
+            assert.equal(null, err);
+            assert.notEqual(null, doc);
+            var compDoc = _.extend({}, testDocument);
+            compDoc._id = doc._id;
+            compDoc._rev = doc._rev;
+            assert.deepEqual(doc, compDoc);
+            done();
+        });
+    });
+        
+    it('delete a document with an id, then attempt to read it back', function(done) {
+        local.remove('test0', function(err, res) {
+            assert.equal(null, err);
+            assert.equal(true, res.ok);
+            assert.notEqual(null, res.rev);
+
+            local.get('test0', function(err, doc) {
+                assert.notEqual(null, err);
+                assert.equal('not_found', err.error);
+                assert.equal(404, err.headers.status);
+                assert.equal(null, doc);
+                done();
+            });
+        });
+    });
+       
+    it('delete a non-existent document with an id', function(done) {
+        local.remove('test0', function(err, res) {
+            assert.notEqual(null, err);
+            assert.equal('not_found', err.error);
+            assert.equal(404, err.headers.status);
+            assert.equal(null, res);
+            done();
+        });
+    });
+    
+    it('create a document with an id, then attempt to update it using the wrong rev', function(done) {
+        var test0 = _.extend({}, testDocument);
+        local.save('test0', test0, function(err, doc) {
+            assert.equal(null, err);
+            assert.notEqual(null, doc);
+            assert.equal('test0', doc._id);
+            assert.notEqual(null, doc._rev);
+            
+            local.save('test0', { _rev: '0' + doc._rev.slice(1) }, function(err, res) {
+                assert.notEqual(null, err);
+                assert.equal('conflict', err.error);
+                assert.equal(409, err.headers.status);
+                done();
+            });
+        });
+    });
+    
+    it('should get database info; validate the main seq numbers are still 0', function(done) {     
+        db.info(function(err, info) {
+            assert.equal(null, err);
+            assert.notEqual(null, info);
+            assert.equal(0, info.update_seq);
+            assert.equal(0, info.purge_seq);
+            assert.equal(0, info.committed_update_seq);
+            done();
+        });
+    });
+    
+    it('delete the database', function(done) {
+        db.destroy(function(err, res) {
+            assert.equal(null, err);
+            assert.notEqual(null, res);
+            done();
+        });
+    });
+});
