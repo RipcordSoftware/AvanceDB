@@ -50,6 +50,11 @@ static const char* queryParseErrorJsonBody = R"({
     "reason": "Invalid value for %s: \"%s\""
 })";
 
+static const char* invalidRevisionFormatJsonBody = R"({
+    "error": "bad_request",
+    "reason": "Invalid rev format"
+})";
+
 static const char* contentType = "application/json";
 
 DatabaseAlreadyExists::DatabaseAlreadyExists() : 
@@ -89,5 +94,10 @@ UuidCountLimit::UuidCountLimit() :
 
 QueryParseError::QueryParseError(const char* type, const std::string& value) :
     HttpServerException(400, badRequestDescription, (boost::format(queryParseErrorJsonBody) % type % value).str(), contentType) {
+    
+}
+
+InvalidRevisionFormat::InvalidRevisionFormat() :
+    HttpServerException(400, badRequestDescription, invalidRevisionFormatJsonBody, contentType) {
     
 }

@@ -406,6 +406,18 @@ describe('avancedb -- docs --', function() {
         });
     });
     
+    it('delete a document with an id but bad rev', function(done) {
+        var db = conn.database(testDbName);
+
+        db.remove('test0', 'abcdef', function(err, doc) {
+            assert.notEqual(null, err);
+            assert.equal('bad_request', err.error);
+            assert.equal(400, err.headers.status);
+            assert.equal(null, doc);
+            done();
+        });
+    });
+    
     it('delete a document with an id', function(done) {
         var db = conn.database(testDbName);
 
@@ -428,6 +440,18 @@ describe('avancedb -- docs --', function() {
         var db = conn.database(testDbName);
 
         db.remove('test0', function(err, res) {
+            assert.notEqual(null, err);
+            assert.equal('not_found', err.error);
+            assert.equal(404, err.headers.status);
+            assert.equal(null, res);
+            done();
+        });
+    });
+    
+    it('delete a non-existent document with an id and bad rev', function(done) {
+        var db = conn.database(testDbName);
+
+        db.remove('test0', 'abcdef', function(err, res) {
             assert.notEqual(null, err);
             assert.equal('not_found', err.error);
             assert.equal(404, err.headers.status);
@@ -1522,6 +1546,16 @@ describe('avancedb -- local docs --', function() {
             done();
         });
     });
+    
+    it('delete a document with an id but a bad rev', function(done) {
+        local.remove('test0', 'abcdef', function(err, res) {
+            assert.notEqual(null, err);
+            assert.equal('bad_request', err.error);
+            assert.equal(400, err.headers.status);
+            assert.equal(null, res);
+            done();
+        });
+    });
         
     it('delete a document with an id, then attempt to read it back', function(done) {
         local.remove('test0', function(err, res) {
@@ -1541,6 +1575,16 @@ describe('avancedb -- local docs --', function() {
        
     it('delete a non-existent document with an id', function(done) {
         local.remove('test0', function(err, res) {
+            assert.notEqual(null, err);
+            assert.equal('not_found', err.error);
+            assert.equal(404, err.headers.status);
+            assert.equal(null, res);
+            done();
+        });
+    });
+    
+    it('delete a non-existent document with a bad rev', function(done) {
+        local.remove('test0', 'abcdef', function(err, res) {
             assert.notEqual(null, err);
             assert.equal('not_found', err.error);
             assert.equal(404, err.headers.status);

@@ -43,5 +43,9 @@ public:
     QueryParseError(const char* type, const std::string& value);    
 };
 
-#endif	/* REST_EXCEPTIONS_H */
+class InvalidRevisionFormat final : public HttpServerException {
+public:
+    InvalidRevisionFormat();    
+};
 
+#endif	/* REST_EXCEPTIONS_H */

@@ -18,6 +18,7 @@
 #include "post_all_documents_options.h"
 #include "script_object_response_stream.h"
 #include "rest_config.h"
+#include "document_revision.h"
 
 #include "libscriptobject_gason.h"
 
@@ -320,18 +321,19 @@ bool RestServer::DeleteDocument(rs::httpserver::request_ptr request, const rs::h
     auto db = GetDatabase(args);
     if (!!db) {
         auto id = GetParameter("id", args);
-        auto rev = GetParameter("rev", request->getQueryString()).c_str();
+        auto oldRev = GetParameter("rev", request->getQueryString()).c_str();
         
-        auto doc = db->DeleteDocument(id, rev);
+        db->DeleteDocument(id, oldRev);
         
-        rev = doc->getRev();
+        DocumentRevision::RevString newRev;
+        DocumentRevision::Parse(oldRev).Increment().FormatRevision(newRev);
             
         JsonStream stream;
         stream.Append("ok", true);
-        stream.Append("id", doc->getId());
-        stream.Append("rev", rev);
+        stream.Append("id", id);
+        stream.Append("rev", newRev.data());
 
-        response->setStatusCode(200).setContentType("application/json").setETag(rev).Send(stream.Flush());
+        response->setStatusCode(200).setContentType("application/json").setETag(newRev.data()).Send(stream.Flush());
         
         deleted = true;        
     }
@@ -344,18 +346,19 @@ bool RestServer::DeleteLocalDocument(rs::httpserver::request_ptr request, const 
     auto db = GetDatabase(args);
     if (!!db) {
         auto id = GetParameter("id", args);
-        auto rev = GetParameter("rev", request->getQueryString()).c_str();
+        auto oldRev = GetParameter("rev", request->getQueryString()).c_str();
         
-        auto doc = db->DeleteLocalDocument(id, rev);
+        db->DeleteLocalDocument(id, oldRev);
         
-        rev = doc->getRev();
+        DocumentRevision::RevString newRev;
+        DocumentRevision::Parse(oldRev).Increment().FormatRevision(newRev);
             
         JsonStream stream;
         stream.Append("ok", true);
-        stream.Append("id", doc->getId());
-        stream.Append("rev", rev);
+        stream.Append("id", id);
+        stream.Append("rev", newRev.data());
 
-        response->setStatusCode(200).setContentType("application/json").setETag(rev).Send(stream.Flush());
+        response->setStatusCode(200).setContentType("application/json").setETag(newRev.data()).Send(stream.Flush());
         
         deleted = true;        
     }

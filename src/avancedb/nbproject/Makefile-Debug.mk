@@ -38,6 +38,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/database.o \
 	${OBJECTDIR}/databases.o \
 	${OBJECTDIR}/document.o \
+	${OBJECTDIR}/document_revision.o \
 	${OBJECTDIR}/documents.o \
 	${OBJECTDIR}/get_all_documents_options.o \
 	${OBJECTDIR}/http_server.o \
@@ -97,6 +98,11 @@ ${OBJECTDIR}/document.o: document.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/externals/gason/src `pkg-config --cflags zlib` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/document.o document.cpp
+
+${OBJECTDIR}/document_revision.o: document_revision.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/externals/gason/src `pkg-config --cflags zlib` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/document_revision.o document_revision.cpp
 
 ${OBJECTDIR}/documents.o: documents.cpp 
 	${MKDIR} -p ${OBJECTDIR}

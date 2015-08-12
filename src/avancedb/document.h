@@ -47,12 +47,10 @@ public:
     const script_object_ptr getObject() const;
         
 private:        
-    using RevString = std::array<char, 20 + 1 + 32 + 1>;
-    
+
     Document(script_object_ptr obj, sequence_type seqNum);
     
     static bool ValidateHashField(const char*);
-    static void FormatRevision(long version, const rs::scriptobject::ScriptObjectHash& digest, RevString& rev);
     
     script_object_ptr obj_;
     const char* id_;

@@ -7,6 +7,7 @@
       <itemPath>database.h</itemPath>
       <itemPath>databases.h</itemPath>
       <itemPath>document.h</itemPath>
+      <itemPath>document_revision.h</itemPath>
       <itemPath>documents.h</itemPath>
       <itemPath>get_all_documents_options.h</itemPath>
       <itemPath>http_server.h</itemPath>
@@ -30,6 +31,7 @@
       <itemPath>database.cpp</itemPath>
       <itemPath>databases.cpp</itemPath>
       <itemPath>document.cpp</itemPath>
+      <itemPath>document_revision.cpp</itemPath>
       <itemPath>documents.cpp</itemPath>
       <itemPath>get_all_documents_options.cpp</itemPath>
       <itemPath>http_server.cpp</itemPath>
@@ -149,6 +151,10 @@
       <item path="document.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="document.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="document_revision.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="document_revision.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="documents.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -298,6 +304,10 @@
       <item path="document.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="document.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="document_revision.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="document_revision.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="documents.cpp" ex="false" tool="1" flavor2="0">
       </item>

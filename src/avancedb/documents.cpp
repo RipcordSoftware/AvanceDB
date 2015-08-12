@@ -5,6 +5,7 @@
 #include "document.h"
 #include "rest_exceptions.h"
 #include "database.h"
+#include "document_revision.h"
 
 Documents::Documents(database_ptr db) : db_(db), docs_(64, 32 * 1024),
     updateSeq_(0), localUpdateSeq_(0) {
@@ -45,6 +46,8 @@ document_ptr Documents::DeleteDocument(const char* id, const char* rev) {
     if (!doc) {
         throw DocumentMissing();
     }
+    
+    DocumentRevision::Validate(rev, true);
     
     auto docRev = doc->getRev();
     if (std::strcmp(rev, docRev) != 0) {
@@ -236,6 +239,8 @@ document_ptr Documents::DeleteLocalDocument(const char* id, const char* rev) {
     if (!doc) {
         throw DocumentMissing{};
     }
+    
+    DocumentRevision::Validate(rev, true);
     
     auto docRev = doc->getRev();
     if (std::strcmp(rev, docRev) != 0) {
