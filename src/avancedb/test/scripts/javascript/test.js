@@ -78,6 +78,18 @@ describe('avancedb -- futon --', function() {
 });
 
 describe('avancedb -- config --', function() {
+    it('should get the server config', function(done) {
+        http.get(url + '/_config', function(res) {
+            assert.equal(200, res.statusCode);
+            assert.equal('application/json', res.headers['content-type']);
+            res.on('data', function(chunk) {
+                var config = JSON.parse(chunk);
+                assert.notEqual(null, config.query_servers.javascript);
+                done();
+            });
+        });
+    });
+    
     it('should get the query server config', function(done) {
         http.get(url + '/_config/query_servers', function(res) {
             assert.equal(200, res.statusCode);
