@@ -379,6 +379,30 @@ describe('avancedb -- docs --', function() {
         });
     });
     
+    it('create a document with an id but a bad rev', function(done) {
+        var db = conn.database(testDbName);
+        var test1 = _.extend({_rev: 'abcdef'}, testDocument);
+        db.save('test1', test1, function(err, res) {
+            assert.notEqual(null, err);
+            assert.equal(400, err.headers.status);        
+            assert.equal('bad_request', err.error);
+            assert.equal(null, res);        
+            done();
+        });
+    });
+    
+    it('update a document with an id but a bad rev', function(done) {
+        var db = conn.database(testDbName);
+        var test0 = _.extend({_rev:'abcdef'}, testDocument);
+        db.save('test0', test0, function(err, res) {
+            assert.notEqual(null, err);
+            assert.equal(409, err.headers.status);        
+            assert.equal('conflict', err.error);
+            assert.equal(null, res);       
+            done();
+        });
+    });
+    
     it('re-use a document id (cradle only)', function(done) {
         var db = conn.database(testDbName);
         var test1 = _.extend({}, testDocument);
@@ -1543,6 +1567,28 @@ describe('avancedb -- local docs --', function() {
             assert.notEqual(null, doc);
             assert.equal('test0', doc._id);
             assert.notEqual(null, doc._rev);
+            done();
+        });
+    });
+    
+    it('update a document with an id but a bad rev', function(done) {       
+        var test0 = _.extend({_rev:'abcdef'}, testDocument);        
+        local.save('test0', test0, function(err, res) {
+            assert.notEqual(null, err);            
+            assert.equal(409, err.headers.status);
+            assert.equal('conflict', err.error);
+            assert.equal(null, res);
+            done();
+        });
+    });
+    
+    it('create a document with an id but a bad rev', function(done) {       
+        var test1 = _.extend({_rev:'abcdef'}, testDocument);        
+        local.save('test1', test1, function(err, res) {
+            assert.notEqual(null, err);            
+            assert.equal(400, err.headers.status);
+            assert.equal('bad_request', err.error);
+            assert.equal(null, res);
             done();
         });
     });

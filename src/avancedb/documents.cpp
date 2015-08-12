@@ -64,19 +64,17 @@ document_ptr Documents::SetDocument(const char* id, script_object_ptr obj) {
     
     Document::Compare compare{id};
     auto doc = docs_.find_fn(compare);
+    
+    auto objRev = obj->getString("_rev", false);
 
-    if (!!doc) {
-        if (obj->getType("_rev") != rs::scriptobject::ScriptObjectType::String) {
-            throw DocumentConflict();
-        }
-        
-        auto objRev = obj->getString("_rev");
-        
+    if (!!doc) {                     
         auto docRev = doc->getRev();
         
-        if (std::strcmp(objRev, docRev) != 0) {
+        if (objRev == nullptr || std::strcmp(objRev, docRev) != 0) {
             throw DocumentConflict();
         }
+    } else if (objRev != nullptr) {
+        DocumentRevision::Validate(objRev, true);
     }
 
     doc = Document::Create(id, obj, ++updateSeq_);
@@ -208,19 +206,17 @@ document_ptr Documents::SetLocalDocument(const char* id, script_object_ptr obj) 
     
     Document::Compare compare{id};
     auto doc = localDocs_.find_fn(compare);
+    
+    const char* objRev = obj->getString("_rev", false);
 
     if (!!doc) {
-        if (obj->getType("_rev") != rs::scriptobject::ScriptObjectType::String) {
-            throw DocumentConflict{};
-        }
-        
-        auto objRev = obj->getString("_rev");
-        
         auto docRev = doc->getRev();
         
-        if (std::strcmp(objRev, docRev) != 0) {
+        if (objRev == nullptr || std::strcmp(objRev, docRev) != 0) {
             throw DocumentConflict();
         }
+    } else if (objRev != nullptr) {
+        DocumentRevision::Validate(objRev, true);
     }
     
     doc = Document::Create(id, obj, ++localUpdateSeq_);
