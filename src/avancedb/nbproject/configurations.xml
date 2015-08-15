@@ -4,6 +4,7 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>../../externals/cityhash/src/city.h</itemPath>
       <itemPath>database.h</itemPath>
       <itemPath>databases.h</itemPath>
       <itemPath>document.h</itemPath>
@@ -28,6 +29,7 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <itemPath>../../externals/cityhash/src/city.cc</itemPath>
       <itemPath>database.cpp</itemPath>
       <itemPath>databases.cpp</itemPath>
       <itemPath>document.cpp</itemPath>
@@ -74,6 +76,7 @@
             <pElem>../../externals/libscriptobject/src/libscriptobject</pElem>
             <pElem>../../externals/libscriptobject/src/libscriptobject_gason</pElem>
             <pElem>../../externals/libscriptobject/externals/gason/src</pElem>
+            <pElem>../../externals/cityhash/src</pElem>
           </incDir>
           <commandLine>--coverage</commandLine>
         </ccTool>
@@ -140,6 +143,16 @@
           <commandLine>--coverage</commandLine>
         </linkerTool>
       </compileType>
+      <item path="../../externals/cityhash/src/city.cc"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../externals/cityhash/src/city.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="database.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="database.h" ex="false" tool="3" flavor2="0">
@@ -223,6 +236,7 @@
             <pElem>../../externals/libscriptobject/src/libscriptobject</pElem>
             <pElem>../../externals/libscriptobject/src/libscriptobject_gason</pElem>
             <pElem>../../externals/libscriptobject/externals/gason/src</pElem>
+            <pElem>../../externals/cityhash/src</pElem>
           </incDir>
         </ccTool>
         <fortranCompilerTool>
@@ -293,6 +307,16 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <item path="../../externals/cityhash/src/city.cc"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../externals/cityhash/src/city.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="database.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="database.h" ex="false" tool="3" flavor2="0">

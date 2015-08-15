@@ -22,3 +22,6 @@
 [submodule "externals/gason"]
 	path = externals/gason
 	url = https://github.com/vivkin/gason.git
+[submodule "externals/cityhash"]
+	path = externals/cityhash
+	url = https://github.com/google/cityhash.git

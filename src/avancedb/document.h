@@ -41,6 +41,7 @@ public:
     static document_ptr Create(const char* id, script_object_ptr obj, sequence_type seqNum);
     
     const char* getId() const;
+    std::uint64_t getIdHash() const;
     const char* getRev() const;
     sequence_type getUpdateSequence() const;
     

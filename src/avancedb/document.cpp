@@ -6,6 +6,7 @@
 #include "script_object_vector_source.h"
 
 #include "document_revision.h"
+#include "city.h"
 
 Document::Document(script_object_ptr obj, sequence_type seqNum) : obj_(obj), id_(obj->getString("_id")), rev_(obj->getString("_rev")), seqNum_(seqNum) {
 }
@@ -50,6 +51,10 @@ document_ptr Document::Create(const char* id, script_object_ptr obj, sequence_ty
 
 const char* Document::getId() const {
     return id_;
+}
+
+std::uint64_t Document::getIdHash() const {
+    return CityHash64(id_, std::strlen(id_));
 }
 
 const char* Document::getRev() const {

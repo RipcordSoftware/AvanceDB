@@ -5,12 +5,13 @@
 An in-memory database based on the CouchDB REST API and containing the CouchDB Futon and Fauxton web sites.
 
 Written in C++ 11 with Boost and the following technologies:
-* [Mozilla SpiderMonkey JSAPI 31](https://github.com/mozilla/gecko-dev/tree/esr31/js/src)
+* [Mozilla SpiderMonkey JSAPI 31](http://github.com/mozilla/gecko-dev/tree/esr31/js/src)
 * [RipcordSoftware/libhttpserver](http://github.com/RipcordSoftware/libhttpserver)
 * [RipcordSoftware/libjsapi](http://github.com/RipcordSoftware/libjsapi)
 * [RipcordSoftware/libscriptobject](http://github.com/RipcordSoftware/libscriptobject)
-* [RipcordSoftware/lazyflatset](https://github.com/RipcordSoftware/lazyflatset)
-* [vivkin/gason](https://github.com/vivkin/gason)
+* [RipcordSoftware/lazyflatset](http://github.com/RipcordSoftware/lazyflatset)
+* [vivkin/gason](http://github.com/vivkin/gason)
+* [Google/cityhash](http://github.com/google/cityhash)
 
 ## Building
 To build you'll need:
