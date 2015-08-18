@@ -131,7 +131,7 @@ bool RestServer::GetUuids(rs::httpserver::request_ptr request, const rs::httpser
     
     stream << "]}";
     
-    response->setContentType("application/javascript").Send(stream.str());    
+    response->setContentType("application/json").Send(stream.str());    
     return true;
 }
 
