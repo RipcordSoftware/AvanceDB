@@ -2,6 +2,7 @@
 #define	DOCUMENTS_H
 
 #include <limits>
+#include <vector>
 
 #include <boost/noncopyable.hpp>
 #include <boost/enable_shared_from_this.hpp>
@@ -43,22 +44,39 @@ private:
     
     const collection::size_type findMissedFlag = ~(std::numeric_limits<collection::size_type>::max() / 2);
     
+    class DocumentsMutex {
+    public:
+        DocumentsMutex() {}
+        DocumentsMutex(const DocumentsMutex& other) = delete;
+        
+        void lock() { mtx_.lock(); }
+        bool try_lock() { mtx_.try_lock(); }
+        void unlock() { mtx_.unlock(); }
+        
+    private:
+        
+        boost::mutex mtx_;
+        char padding_[64];
+    };
+    
     Documents(database_ptr db);
     
-    document_array GetAllDocuments(sequence_type& sequenceNumber);
-    
+    document_array GetAllDocuments(sequence_type& sequenceNumber);    
     collection::size_type FindDocument(const document_array& docs, const std::string& id, bool descending);
+    unsigned GetCollectionCount() const;
+    unsigned GetDocumentCollectionIndex(const char* id) const;
     
     database_wptr db_;
     
-    boost::mutex docsMtx_;
-    collection docs_;
-    boost::atomic<sequence_type long> updateSeq_;
+    const unsigned collections_;
+    std::vector<DocumentsMutex> docsMtx_;
+    std::vector<collection> docs_;
+    boost::atomic<sequence_type> updateSeq_;
     
     boost::mutex localDocsMtx_;
     collection localDocs_;
     boost::atomic<sequence_type long> localUpdateSeq_;
-    
+
 };
 
 #endif	/* DOCUMENTS_H */

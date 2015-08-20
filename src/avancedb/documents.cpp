@@ -1,15 +1,22 @@
 #include "documents.h"
 
+#include <algorithm>
+
 #include <boost/bind.hpp>
+#include <boost/thread.hpp>
 
 #include "document.h"
 #include "rest_exceptions.h"
 #include "database.h"
 #include "document_revision.h"
+#include "config.h"
 
-Documents::Documents(database_ptr db) : db_(db), docs_(64, 32 * 1024),
-    updateSeq_(0), localUpdateSeq_(0) {
-    
+Documents::Documents(database_ptr db) : db_(db), updateSeq_(0), localUpdateSeq_(0),
+        collections_(GetCollectionCount()), docsMtx_(collections_) {
+   
+    for (unsigned i = 0; i < collections_; ++i) {
+        docs_.emplace_back(64, 32 * 1024);
+    }
 }
 
 documents_ptr Documents::Create(database_ptr db) {
@@ -17,7 +24,13 @@ documents_ptr Documents::Create(database_ptr db) {
 }
 
 Documents::collection::size_type Documents::getCount() {
-    return docs_.size();
+    collection::size_type size = 0;
+    
+    for (auto coll : docs_) {
+        size += coll.size();
+    }
+    
+    return size;
 }
 
 sequence_type Documents::getUpdateSequence() {
@@ -25,10 +38,12 @@ sequence_type Documents::getUpdateSequence() {
 }
 
 document_ptr Documents::GetDocument(const char* id) {
-    boost::lock_guard<boost::mutex> guard(docsMtx_);
+    auto coll = GetDocumentCollectionIndex(id);
+    
+    boost::lock_guard<DocumentsMutex> guard{docsMtx_[coll]};
     
     Document::Compare compare{id};
-    auto doc = docs_.find_fn(compare);
+    auto doc = docs_[coll].find_fn(compare);
     
     if (!doc) {
         throw DocumentMissing();
@@ -38,10 +53,12 @@ document_ptr Documents::GetDocument(const char* id) {
 }
 
 document_ptr Documents::DeleteDocument(const char* id, const char* rev) {
-    boost::lock_guard<boost::mutex> guard(docsMtx_);
+    auto coll = GetDocumentCollectionIndex(id);
+    
+    boost::lock_guard<DocumentsMutex> guard{docsMtx_[coll]};
     
     Document::Compare compare{id};
-    auto doc = docs_.find_fn(compare);
+    auto doc = docs_[coll].find_fn(compare);
     
     if (!doc) {
         throw DocumentMissing();
@@ -54,16 +71,18 @@ document_ptr Documents::DeleteDocument(const char* id, const char* rev) {
         throw DocumentConflict();
     }
     
-    docs_.erase(doc);
+    docs_[coll].erase(doc);
     
     return doc;
 }
 
 document_ptr Documents::SetDocument(const char* id, script_object_ptr obj) {
-    boost::lock_guard<boost::mutex> guard(docsMtx_);
+    auto coll = GetDocumentCollectionIndex(id);
+    
+    boost::lock_guard<DocumentsMutex> guard{docsMtx_[coll]};
     
     Document::Compare compare{id};
-    auto doc = docs_.find_fn(compare);
+    auto doc = docs_[coll].find_fn(compare);
     
     auto objRev = obj->getString("_rev", false);
 
@@ -79,17 +98,29 @@ document_ptr Documents::SetDocument(const char* id, script_object_ptr obj) {
 
     doc = Document::Create(id, obj, ++updateSeq_);
 
-    docs_.insert(doc);
+    docs_[coll].insert(doc);
 
     return doc;
 }
 
 document_array Documents::GetAllDocuments(sequence_type& updateSequence) {
-    boost::lock_guard<boost::mutex> guard(docsMtx_);
+    auto count = getCount();
+    
+    document_array allDocs;
+    allDocs.reserve(count);
+    
+    for (unsigned i = 0; i < collections_; ++i) {
+        boost::unique_lock<DocumentsMutex> guard{docsMtx_[i]};
+        auto old_size = allDocs.size();
+        allDocs.insert(allDocs.end(), docs_[i].cbegin(), docs_[i].cend());
+        
+        guard.unlock();
+        std::inplace_merge(allDocs.begin(), allDocs.begin() + old_size, allDocs.end(), Document::Less{});
+    }
     
     updateSequence = updateSeq_;
     
-    return document_array{docs_.cbegin(), docs_.cend()};
+    return std::move(allDocs);
 }
 
 document_array Documents::GetDocuments(const GetAllDocumentsOptions& options, collection::size_type& offset, collection::size_type& totalDocs, sequence_type& updateSequence) {       
@@ -145,7 +176,7 @@ document_array Documents::GetDocuments(const GetAllDocumentsOptions& options, co
         docs.clear();
     }
 
-    return docs;
+    return std::move(docs);
 }
 
 document_array Documents::PostDocuments(const PostAllDocumentsOptions& options, Documents::collection::size_type& totalDocs, sequence_type& updateSequence) {
@@ -278,4 +309,15 @@ Documents::collection::size_type Documents::FindDocument(const document_array& d
 
         return ~min;
     }
+}
+
+unsigned Documents::GetCollectionCount() const {
+    auto collections = Config::GetCPUCount() * 2;           
+    return collections;
+}
+
+unsigned Documents::GetDocumentCollectionIndex(const char* id) const {
+    auto hash = Document::getIdHash(id);
+    auto index = hash % collections_;   
+    return index;
 }

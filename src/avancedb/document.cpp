@@ -54,7 +54,11 @@ const char* Document::getId() const {
 }
 
 std::uint64_t Document::getIdHash() const {
-    return CityHash64(id_, std::strlen(id_));
+    return getIdHash(id_);
+}
+
+std::uint64_t Document::getIdHash(const char* id) {    
+    return id != nullptr ? CityHash64(id, std::strlen(id)) : 0;
 }
 
 const char* Document::getRev() const {

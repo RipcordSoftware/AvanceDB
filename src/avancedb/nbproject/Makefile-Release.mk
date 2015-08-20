@@ -36,6 +36,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/_ext/1383664149/city.o \
+	${OBJECTDIR}/config.o \
 	${OBJECTDIR}/database.o \
 	${OBJECTDIR}/databases.o \
 	${OBJECTDIR}/document.o \
@@ -89,6 +90,11 @@ ${OBJECTDIR}/_ext/1383664149/city.o: ../../externals/cityhash/src/city.cc
 	${MKDIR} -p ${OBJECTDIR}/_ext/1383664149
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src `pkg-config --cflags zlib` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/1383664149/city.o ../../externals/cityhash/src/city.cc
+
+${OBJECTDIR}/config.o: config.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src `pkg-config --cflags zlib` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/config.o config.cpp
 
 ${OBJECTDIR}/database.o: database.cpp 
 	${MKDIR} -p ${OBJECTDIR}

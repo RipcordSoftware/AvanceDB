@@ -42,6 +42,7 @@ public:
     
     const char* getId() const;
     std::uint64_t getIdHash() const;
+    static std::uint64_t getIdHash(const char*);
     const char* getRev() const;
     sequence_type getUpdateSequence() const;
     

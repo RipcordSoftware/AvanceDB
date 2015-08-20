@@ -5,6 +5,7 @@
                    displayName="Header Files"
                    projectFiles="true">
       <itemPath>../../externals/cityhash/src/city.h</itemPath>
+      <itemPath>config.h</itemPath>
       <itemPath>database.h</itemPath>
       <itemPath>databases.h</itemPath>
       <itemPath>document.h</itemPath>
@@ -30,6 +31,7 @@
                    displayName="Source Files"
                    projectFiles="true">
       <itemPath>../../externals/cityhash/src/city.cc</itemPath>
+      <itemPath>config.cpp</itemPath>
       <itemPath>database.cpp</itemPath>
       <itemPath>databases.cpp</itemPath>
       <itemPath>document.cpp</itemPath>
@@ -152,6 +154,10 @@
             ex="false"
             tool="3"
             flavor2="0">
+      </item>
+      <item path="config.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="config.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="database.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -316,6 +322,10 @@
             ex="false"
             tool="3"
             flavor2="0">
+      </item>
+      <item path="config.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="config.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="database.cpp" ex="false" tool="1" flavor2="0">
       </item>
