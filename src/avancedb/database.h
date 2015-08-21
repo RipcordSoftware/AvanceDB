@@ -32,8 +32,8 @@ public:
     document_ptr DeleteLocalDocument(const char* id, const char* rev);
     document_ptr SetLocalDocument(const char* id, script_object_ptr);
     
-    document_array GetDocuments(const GetAllDocumentsOptions& options, Documents::collection::size_type& offset, Documents::collection::size_type& totalDocs, sequence_type& updateSequence);
-    document_array PostDocuments(const PostAllDocumentsOptions& options, Documents::collection::size_type& totalDocs, sequence_type& updateSequence);
+    document_array_ptr GetDocuments(const GetAllDocumentsOptions& options, Documents::collection::size_type& offset, Documents::collection::size_type& totalDocs, sequence_type& updateSequence);
+    document_array_ptr PostDocuments(const PostAllDocumentsOptions& options, Documents::collection::size_type& totalDocs, sequence_type& updateSequence);
     
 private:
     Database(const char*);

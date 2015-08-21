@@ -4,6 +4,7 @@
 
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
+#include <boost/make_shared.hpp>
 
 #include "document.h"
 #include "rest_exceptions.h"
@@ -103,40 +104,40 @@ document_ptr Documents::SetDocument(const char* id, script_object_ptr obj) {
     return doc;
 }
 
-document_array Documents::GetAllDocuments(sequence_type& updateSequence) {
+document_array_ptr Documents::GetAllDocuments(sequence_type& updateSequence) {
     auto count = getCount();
     
-    document_array allDocs;
-    allDocs.reserve(count);
+    auto allDocs = boost::make_shared<document_array>();
+    allDocs->reserve(count);
     
     for (unsigned i = 0; i < collections_; ++i) {
         boost::unique_lock<DocumentsMutex> guard{docsMtx_[i]};
-        auto old_size = allDocs.size();
-        allDocs.insert(allDocs.end(), docs_[i].cbegin(), docs_[i].cend());
+        auto old_size = allDocs->size();
+        allDocs->insert(allDocs->end(), docs_[i].cbegin(), docs_[i].cend());
         
         guard.unlock();
-        std::inplace_merge(allDocs.begin(), allDocs.begin() + old_size, allDocs.end(), Document::Less{});
+        std::inplace_merge(allDocs->begin(), allDocs->begin() + old_size, allDocs->end(), Document::Less{});
     }
     
     updateSequence = updateSeq_;
     
-    return std::move(allDocs);
+    return allDocs;
 }
 
-document_array Documents::GetDocuments(const GetAllDocumentsOptions& options, collection::size_type& offset, collection::size_type& totalDocs, sequence_type& updateSequence) {       
+document_array_ptr Documents::GetDocuments(const GetAllDocumentsOptions& options, collection::size_type& offset, collection::size_type& totalDocs, sequence_type& updateSequence) {       
     auto docs = GetAllDocuments(updateSequence);
     
     if (options.Descending()) {
-        std::reverse(docs.begin(), docs.end());
+        std::reverse(docs->begin(), docs->end());
     }
 
     collection::size_type startIndex = 0;
-    collection::size_type endIndex = docs.size();
+    collection::size_type endIndex = docs->size();
     collection::size_type indexSkip = options.Skip();
     collection::size_type indexLimit = options.Limit();
 
     if (options.HasKey()) {
-        startIndex = FindDocument(docs, options.Key(), options.Descending());
+        startIndex = FindDocument(*docs, options.Key(), options.Descending());
         if ((startIndex & findMissedFlag) == findMissedFlag) {
             startIndex = ~startIndex;
             endIndex = startIndex;
@@ -146,14 +147,14 @@ document_array Documents::GetDocuments(const GetAllDocumentsOptions& options, co
     }
     else if (options.HasKeys()) {
         if (options.StartKey().size() > 0) {
-            startIndex = FindDocument(docs, options.StartKey(), options.Descending());
+            startIndex = FindDocument(*docs, options.StartKey(), options.Descending());
             if ((startIndex & findMissedFlag) == findMissedFlag) {
                 startIndex = ~startIndex;
             }
         }
 
         if (options.EndKey().size() > 0) {
-            endIndex = FindDocument(docs, options.EndKey(), options.Descending());
+            endIndex = FindDocument(*docs, options.EndKey(), options.Descending());
             if ((endIndex & findMissedFlag) == findMissedFlag) {
                 endIndex = ~endIndex;
             } else if (options.InclusiveEnd()) {
@@ -165,55 +166,55 @@ document_array Documents::GetDocuments(const GetAllDocumentsOptions& options, co
     startIndex += indexSkip;
 
     offset = startIndex;
-    totalDocs = docs.size();
+    totalDocs = docs->size();
 
-    if (startIndex >= 0 && startIndex < docs.size() && startIndex < endIndex) {
+    if (startIndex >= 0 && startIndex < docs->size() && startIndex < endIndex) {
         endIndex = std::min(startIndex + indexLimit, endIndex);
-        endIndex = std::min(endIndex, docs.size());
+        endIndex = std::min(endIndex, docs->size());
 
-        docs = document_array{docs.cbegin() + startIndex, docs.cbegin() + endIndex};
+        docs = boost::make_shared<document_array>(docs->cbegin() + startIndex, docs->cbegin() + endIndex);
     } else {
-        docs.clear();
+        docs->clear();
     }
 
-    return std::move(docs);
+    return docs;
 }
 
-document_array Documents::PostDocuments(const PostAllDocumentsOptions& options, Documents::collection::size_type& totalDocs, sequence_type& updateSequence) {
+document_array_ptr Documents::PostDocuments(const PostAllDocumentsOptions& options, Documents::collection::size_type& totalDocs, sequence_type& updateSequence) {
     auto docs = GetAllDocuments(updateSequence);
     
     const auto& keys = options.Keys();
     
-    document_array results;
-    results.reserve(keys.size());
+    auto results = boost::make_shared<document_array>();
+    results->reserve(keys.size());
     
     for (auto key : keys) {
-        auto index = key.size() > 0 ? FindDocument(docs, key, false) : findMissedFlag;
+        auto index = key.size() > 0 ? FindDocument(*docs, key, false) : findMissedFlag;
         if ((index & findMissedFlag) == 0) {
-            auto doc = docs[index];
-            results.emplace_back(doc);
+            auto doc = (*docs)[index];
+            results->emplace_back(doc);
         } else {
-            results.emplace_back(nullptr);
+            results->emplace_back(nullptr);
         }
     }
     
-    totalDocs = docs.size();
+    totalDocs = docs->size();
     
     auto startIndex = options.Skip();
-    auto endIndex = results.size();
+    auto endIndex = results->size();
     auto indexLimit = options.Limit();
     
     if (startIndex >= 0 && startIndex < endIndex) {
         endIndex = std::min(startIndex + indexLimit, endIndex);
-        endIndex = std::min(endIndex, results.size());
+        endIndex = std::min(endIndex, results->size());
 
-        results = document_array{results.cbegin() + startIndex, results.cbegin() + endIndex};
+        results = boost::make_shared<document_array>(results->cbegin() + startIndex, results->cbegin() + endIndex);
     } else {
-        results.clear();
+        results->clear();
     }
     
     if (options.Descending()) {
-        std::reverse(results.begin(), results.end());
+        std::reverse(results->begin(), results->end());
     }
     
     return results;

@@ -17,6 +17,7 @@ using documents_ptr = boost::shared_ptr<Documents>;
 class Document;
 using document_ptr = boost::shared_ptr<Document>;
 using document_array = std::vector<document_ptr>;
+using document_array_ptr = boost::shared_ptr<std::vector<document_ptr>>;
 
 using script_object_ptr = rs::scriptobject::ScriptObjectPtr;
 using script_array_ptr = rs::scriptobject::ScriptArrayPtr;

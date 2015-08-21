@@ -34,8 +34,8 @@ public:
     document_ptr DeleteLocalDocument(const char* id, const char* rev);
     document_ptr SetLocalDocument(const char* id, script_object_ptr obj);
     
-    document_array GetDocuments(const GetAllDocumentsOptions& options, collection::size_type& offset, collection::size_type& totalDocs, sequence_type& updateSequence);
-    document_array PostDocuments(const PostAllDocumentsOptions& options, Documents::collection::size_type& totalDocs, sequence_type& updateSequence);
+    document_array_ptr GetDocuments(const GetAllDocumentsOptions& options, collection::size_type& offset, collection::size_type& totalDocs, sequence_type& updateSequence);
+    document_array_ptr PostDocuments(const PostAllDocumentsOptions& options, Documents::collection::size_type& totalDocs, sequence_type& updateSequence);
     
     collection::size_type getCount();
     sequence_type getUpdateSequence();
@@ -61,7 +61,7 @@ private:
     
     Documents(database_ptr db);
     
-    document_array GetAllDocuments(sequence_type& sequenceNumber);    
+    document_array_ptr GetAllDocuments(sequence_type& sequenceNumber);    
     collection::size_type FindDocument(const document_array& docs, const std::string& id, bool descending);
     unsigned GetCollectionCount() const;
     unsigned GetDocumentCollectionIndex(const char* id) const;

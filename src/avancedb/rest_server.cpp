@@ -405,12 +405,12 @@ bool RestServer::GetDatabaseAllDocs(rs::httpserver::request_ptr request, const r
         
         objStream << R"(,"rows":[)";
         
-        for (decltype(docs)::size_type i = 0, size = docs.size(); i < size; ++i) {
+        for (decltype(docs->size()) i = 0, size = docs->size(); i < size; ++i) {
             if (i > 0) {
                 objStream << ',';
             }
 
-            auto doc = docs[i];
+            auto doc = (*docs)[i];
 
             auto id = doc->getId();
             auto rev= doc->getRev();
@@ -460,12 +460,12 @@ bool RestServer::PostDatabaseAllDocs(rs::httpserver::request_ptr request, const 
         
         objStream << R"(,"rows":[)";
         
-        for (decltype(docs)::size_type i = 0, size = docs.size(); i < size; ++i) {
+        for (decltype(docs->size()) i = 0, size = docs->size(); i < size; ++i) {
             if (i > 0) {
                 objStream << ',';
             }
 
-            auto doc = docs[i];
+            auto doc = (*docs)[i];
 
             if (!!doc) {
                 auto id = doc->getId();
