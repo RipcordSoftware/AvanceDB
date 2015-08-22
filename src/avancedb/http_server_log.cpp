@@ -75,9 +75,8 @@ void HttpServerLog::Append(rs::httpserver::socket_ptr socket, rs::httpserver::re
     
     const auto queryString = request->getHeaders()->getQueryString();
     
-    // TODO: must check the family first
-    const auto localEndpoint = socket->getLocalEndpoint().data()->sa_data;
-    const auto remoteEndpoint = socket->getRemoteEndpoint().data()->sa_data;
+    const auto localAddr = socket->getLocalEndpoint().address().to_string();
+    const auto remoteAddr = socket->getRemoteEndpoint().address().to_string();
     
     auto index = writeRowIndex++;    
     index %= maxLogRows;
@@ -85,14 +84,14 @@ void HttpServerLog::Append(rs::httpserver::socket_ptr socket, rs::httpserver::re
     // TODO: optimize the string formatting to reduce ad-hoc allocations and re-use already known string values (dates, etc.)
     logRows[index].status = response->getStatusCode();
     std::snprintf(logRows[index].data, sizeof(logRows[0].data), 
-        "%04d-%02d-%02d %02d:%02d:%02dZ %u.%u.%u.%u %s %s %s %u %u.%u.%u.%u %s %d %u",
+        "%04d-%02d-%02d %02d:%02d:%02dZ %s %s %s %s %u %s %s %d %u",
         year, month, day, hour, min, sec,
-        localEndpoint[2], localEndpoint[3], localEndpoint[4], localEndpoint[5],
+        localAddr.c_str(),
         request->getMethod().c_str(),
         request->getUri().c_str(),
         queryString.size() > 0 ? queryString.c_str() : "-",
         socket->getLocalEndpoint().port(),
-        remoteEndpoint[2], remoteEndpoint[3], remoteEndpoint[4], remoteEndpoint[5],
+        remoteAddr.c_str(),
         boost::replace_all_copy(request->getHeaders()->getUserAgent(), " ", "+").c_str(),
         response->getStatusCode(),
         duration);        
