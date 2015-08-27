@@ -2,6 +2,8 @@
 [![Coverage Status](https://coveralls.io/repos/RipcordSoftware/AvanceDB/badge.svg?branch=master&service=github)](https://coveralls.io/github/RipcordSoftware/AvanceDB?branch=master)
 [![License](http://img.shields.io/:license-agpl-blue.svg)](http://doge.agpl-license.org)
 # AvanceDB
+
+[![Join the chat at https://gitter.im/RipcordSoftware/AvanceDB](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/RipcordSoftware/AvanceDB?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 An in-memory database based on the CouchDB REST API and containing the CouchDB Futon and Fauxton web sites.
 
 Written in C++ 11 with Boost and the following technologies:
