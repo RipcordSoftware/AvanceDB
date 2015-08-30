@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <cstring>
+#include <cstdlib>
+#include <cinttypes>
 
 #include "rest_exceptions.h"
 
@@ -90,7 +92,7 @@ DocumentRevision&  DocumentRevision::FormatRevision(RevString& rev) {
 }
 
 void DocumentRevision::FormatRevision(version_type version, const Digest& digest, RevString& rev) {
-    std::snprintf(rev.data(), rev.size(), "%lu-%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x", 
+    std::snprintf(rev.data(), rev.size(), "%llu-%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x", 
             version, digest[0], digest[1], digest[2], digest[3], digest[4], digest[5], digest[6], digest[7],
             digest[8], digest[9], digest[10], digest[11], digest[12], digest[13], digest[14], digest[15]);
 }

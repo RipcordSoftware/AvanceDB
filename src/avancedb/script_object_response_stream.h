@@ -54,6 +54,10 @@ public:
         AppendInt32(value, comma);
     }
     
+    void Serialize(unsigned long value, bool comma = false) {
+        AppendUInt64(value, comma);
+    }
+    
     void Serialize(std::uint64_t value, bool comma = false) {
         AppendUInt64(value, comma);
     }    
@@ -93,6 +97,11 @@ public:
     }
     
     friend ScriptObjectResponseStream<SIZE>& operator<<(ScriptObjectResponseStream<SIZE>& stream, int value) {
+        stream.Serialize(value);
+        return stream;
+    }
+    
+    friend ScriptObjectResponseStream<SIZE>& operator<<(ScriptObjectResponseStream<SIZE>& stream, unsigned long value) {
         stream.Serialize(value);
         return stream;
     }
@@ -184,7 +193,7 @@ private:
         buffer_[pos_++] = ']';
     }
 
-    bool AppendName(const char* name, bool comma) {
+    void AppendName(const char* name, bool comma) {
         AppendString(name, comma);
                         
         if (getRemainingBytes() == 0) {
@@ -194,7 +203,7 @@ private:
         buffer_[pos_++] = ':';
     }
     
-    bool AppendString(const char* value, bool comma = false) {        
+    void AppendString(const char* value, bool comma = false) {        
         auto strlen = std::strlen(value);
         auto len = strlen + 2 + (comma ? 1: 0);
         
@@ -222,7 +231,7 @@ private:
         buffer_[pos_++] = '"';
     }
     
-    bool AppendBool(bool value, bool comma = false) {
+    void AppendBool(bool value, bool comma = false) {
         auto len = 5 + (comma ? 1 : 0);
         
         if (len > getRemainingBytes()) {
@@ -247,7 +256,7 @@ private:
         }
     }
     
-    bool AppendNull(bool comma = false) {
+    void AppendNull(bool comma = false) {
         auto len = 4 + (comma ? 1 : 0);
         
         if (len > getRemainingBytes()) {
@@ -264,7 +273,7 @@ private:
         buffer_[pos_++] = 'l';
     }
     
-    bool AppendInt32(int value, bool comma = false) {
+    void AppendInt32(int value, bool comma = false) {
         auto len = 10 + (comma ? 1 : 0);
         
         if (len > getRemainingBytes()) {
@@ -278,7 +287,7 @@ private:
         pos_ += std::sprintf(reinterpret_cast<char*>(buffer_ + pos_), "%d", value);
     }
     
-    bool AppendUInt64(std::uint64_t value, bool comma = false) {
+    void AppendUInt64(std::uint64_t value, bool comma = false) {
         auto len = 20 + (comma ? 1 : 0);
         
         if (len > getRemainingBytes()) {
@@ -289,11 +298,11 @@ private:
             buffer_[pos_++] = ',';
         }
         
-        pos_ += std::sprintf(reinterpret_cast<char*>(buffer_ + pos_), "%lu", value);
+        pos_ += std::sprintf(reinterpret_cast<char*>(buffer_ + pos_), "%llu", value);
     }
     
     // TODO: review
-    bool AppendDouble(double value, bool comma = false) {
+    void AppendDouble(double value, bool comma = false) {
         char buffer[64];
         auto numLen = std::snprintf(reinterpret_cast<char*>(buffer), sizeof(buffer), "%g", value);
         
@@ -308,7 +317,7 @@ private:
         }
         
         std::strncpy(reinterpret_cast<char*>(buffer_ + pos_), buffer, numLen);
-        pos_ += numLen;
+            pos_ += numLen;
     }
     
     void FlushBuffer() { if (pos_ > 0) { stream_.Write(buffer_, 0, pos_); pos_ = 0; } }

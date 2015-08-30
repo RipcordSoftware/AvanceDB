@@ -168,7 +168,7 @@ document_array_ptr Documents::GetDocuments(const GetAllDocumentsOptions& options
     offset = startIndex;
     totalDocs = docs->size();
 
-    if (startIndex >= 0 && startIndex < docs->size() && startIndex < endIndex) {
+    if (startIndex < docs->size() && startIndex < endIndex) {
         endIndex = std::min(startIndex + indexLimit, endIndex);
         endIndex = std::min(endIndex, docs->size());
 
@@ -200,11 +200,11 @@ document_array_ptr Documents::PostDocuments(const PostAllDocumentsOptions& optio
     
     totalDocs = docs->size();
     
-    auto startIndex = options.Skip();
-    auto endIndex = results->size();
-    auto indexLimit = options.Limit();
+    collection::size_type startIndex = options.Skip();
+    collection::size_type endIndex = results->size();
+    collection::size_type indexLimit = options.Limit();
     
-    if (startIndex >= 0 && startIndex < endIndex) {
+    if (startIndex < endIndex) {
         endIndex = std::min(startIndex + indexLimit, endIndex);
         endIndex = std::min(endIndex, results->size());
 

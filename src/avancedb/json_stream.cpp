@@ -19,7 +19,7 @@ void JsonStream::Append(const char* name, int value) {
     count_++;
 }
 
-void JsonStream::Append(const char* name, unsigned value) {
+void JsonStream::Append(const char* name, unsigned long value) {
     stream_ << (count_ > 0 ? "," : "")  << "\"" << name << "\":" << value;
     count_++;
 }
