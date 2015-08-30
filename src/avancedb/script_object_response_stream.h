@@ -317,7 +317,7 @@ private:
         }
         
         std::strncpy(reinterpret_cast<char*>(buffer_ + pos_), buffer, numLen);
-            pos_ += numLen;
+        pos_ += numLen;
     }
     
     void FlushBuffer() { if (pos_ > 0) { stream_.Write(buffer_, 0, pos_); pos_ = 0; } }
