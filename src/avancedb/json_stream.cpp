@@ -14,36 +14,6 @@ void JsonStream::Append(const char* name, const char* value) {
     count_++;
 }
 
-void JsonStream::Append(const char* name, int value) {
-    stream_ << (count_ > 0 ? "," : "")  << "\"" << name << "\":" << value;
-    count_++;
-}
-
-void JsonStream::Append(const char* name, unsigned long value) {
-    stream_ << (count_ > 0 ? "," : "")  << "\"" << name << "\":" << value;
-    count_++;
-}
-
-void JsonStream::Append(const char* name, int64_t value) {
-    stream_ << (count_ > 0 ? "," : "")  << "\"" << name << "\":" << value;
-    count_++;
-}
-
-void JsonStream::Append(const char* name, uint64_t value) {
-    stream_ << (count_ > 0 ? "," : "")  << "\"" << name << "\":" << value;
-    count_++;
-}
-
-void JsonStream::Append(const char* name, double value) {
-    stream_ << (count_ > 0 ? "," : "")  << "\"" << name << "\":" << value;
-    count_++;
-}
-
-void JsonStream::Append(const char* name, bool value) {
-    stream_ << (count_ > 0 ? "," : "")  << "\"" << name << "\":" << (value ? "true" : "false");
-    count_++;
-}
-
 void JsonStream::Append(const char* name) {
     stream_ << (count_ > 0 ? "," : "")  << "\"" << name << "\":" << "null";
     count_++;

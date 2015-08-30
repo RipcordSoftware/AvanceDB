@@ -50,11 +50,15 @@ public:
         }        
     }
     
-    void Serialize(int value, bool comma = false) {
-        AppendInt32(value, comma);
+    void Serialize(std::int32_t value, bool comma = false) {
+        AppendInt64(value, comma);
     }
     
-    void Serialize(unsigned long value, bool comma = false) {
+    void Serialize(std::int64_t value, bool comma = false) {
+        AppendInt64(value, comma);
+    }
+
+    void Serialize(std::uint32_t value, bool comma = false) {
         AppendUInt64(value, comma);
     }
     
@@ -96,12 +100,17 @@ public:
         return stream;
     }
     
-    friend ScriptObjectResponseStream<SIZE>& operator<<(ScriptObjectResponseStream<SIZE>& stream, int value) {
+    friend ScriptObjectResponseStream<SIZE>& operator<<(ScriptObjectResponseStream<SIZE>& stream, std::int32_t value) {
         stream.Serialize(value);
         return stream;
     }
     
-    friend ScriptObjectResponseStream<SIZE>& operator<<(ScriptObjectResponseStream<SIZE>& stream, unsigned long value) {
+    friend ScriptObjectResponseStream<SIZE>& operator<<(ScriptObjectResponseStream<SIZE>& stream, std::int64_t value) {
+        stream.Serialize(value);
+        return stream;
+    }
+    
+    friend ScriptObjectResponseStream<SIZE>& operator<<(ScriptObjectResponseStream<SIZE>& stream, std::uint32_t value) {
         stream.Serialize(value);
         return stream;
     }
@@ -143,7 +152,7 @@ private:
                 case rs::scriptobject::ScriptObjectType::Array: AppendArray(obj->getArray(i)); break;
                 case rs::scriptobject::ScriptObjectType::Boolean: AppendBool(obj->getBoolean(i)); break;
                 case rs::scriptobject::ScriptObjectType::Double: AppendDouble(obj->getDouble(i)); break;
-                case rs::scriptobject::ScriptObjectType::Int32: AppendInt32(obj->getInt32(i)); break;
+                case rs::scriptobject::ScriptObjectType::Int32: AppendInt64(obj->getInt32(i)); break;
                 case rs::scriptobject::ScriptObjectType::Null: AppendNull(); break;
                 case rs::scriptobject::ScriptObjectType::Object: AppendObject(obj->getObject(i)); break;
                 case rs::scriptobject::ScriptObjectType::String: AppendString(obj->getString(i)); break;
@@ -179,7 +188,7 @@ private:
                 case rs::scriptobject::ScriptObjectType::Array: AppendArray(arr->getArray(i), i > 0); break;
                 case rs::scriptobject::ScriptObjectType::Boolean: AppendBool(arr->getBoolean(i), i > 0); break;
                 case rs::scriptobject::ScriptObjectType::Double: AppendDouble(arr->getDouble(i), i > 0); break;
-                case rs::scriptobject::ScriptObjectType::Int32: AppendInt32(arr->getInt32(i), i > 0); break;
+                case rs::scriptobject::ScriptObjectType::Int32: AppendInt64(arr->getInt32(i), i > 0); break;
                 case rs::scriptobject::ScriptObjectType::Null: AppendNull(i > 0); break;
                 case rs::scriptobject::ScriptObjectType::Object: AppendObject(arr->getObject(i), i > 0); break;
                 case rs::scriptobject::ScriptObjectType::String: { auto str = arr->getString(i); AppendString(str, i > 0); break; }
@@ -273,20 +282,6 @@ private:
         buffer_[pos_++] = 'l';
     }
     
-    void AppendInt32(int value, bool comma = false) {
-        auto len = 10 + (comma ? 1 : 0);
-        
-        if (len > getRemainingBytes()) {
-            FlushBuffer();
-        }
-        
-        if (comma) {
-            buffer_[pos_++] = ',';
-        }
-        
-        pos_ += std::sprintf(reinterpret_cast<char*>(buffer_ + pos_), "%d", value);
-    }
-    
     void AppendUInt64(std::uint64_t value, bool comma = false) {
         auto len = 20 + (comma ? 1 : 0);
         
@@ -299,6 +294,20 @@ private:
         }
         
         pos_ += std::sprintf(reinterpret_cast<char*>(buffer_ + pos_), "%llu", value);
+    }
+    
+    void AppendInt64(std::int64_t value, bool comma = false) {
+        auto len = 20 + (comma ? 1 : 0);
+        
+        if (len > getRemainingBytes()) {
+            FlushBuffer();
+        }
+        
+        if (comma) {
+            buffer_[pos_++] = ',';
+        }
+        
+        pos_ += std::sprintf(reinterpret_cast<char*>(buffer_ + pos_), "%lld", value);
     }
     
     // TODO: review

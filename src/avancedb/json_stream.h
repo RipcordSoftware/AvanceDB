@@ -10,13 +10,12 @@ public:
     
     void Append(const char* name, const std::string& value);
     void Append(const char* name, const char* value);
-    void Append(const char* name, int value);
-    void Append(const char* name, unsigned long value);
-    void Append(const char* name, uint64_t value);
-    void Append(const char* name, int64_t value);
-    void Append(const char* name, double value);
-    void Append(const char* name, bool value);
     void Append(const char* name);
+    
+    template <typename T> void Append(const char* name, T value) {
+        stream_ << (count_ > 0 ? "," : "")  << "\"" << name << "\":" << value;
+        count_++;
+    }
     
     std::string Flush();
     
