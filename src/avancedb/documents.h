@@ -50,7 +50,7 @@ private:
         DocumentsMutex(const DocumentsMutex& other) = delete;
         
         void lock() { mtx_.lock(); }
-        bool try_lock() { mtx_.try_lock(); }
+        bool try_lock() { return mtx_.try_lock(); }
         void unlock() { mtx_.unlock(); }
         
     private:
@@ -75,7 +75,7 @@ private:
     
     boost::mutex localDocsMtx_;
     collection localDocs_;
-    boost::atomic<sequence_type long> localUpdateSeq_;
+    boost::atomic<sequence_type> localUpdateSeq_;
 
 };
 
