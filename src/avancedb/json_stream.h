@@ -3,17 +3,27 @@
 
 #include <sstream>
 #include <string>
+#include <type_traits>
 
 class JsonStream final {
 public:
     JsonStream();
-    
-    void Append(const char* name, const std::string& value);
-    void Append(const char* name, const char* value);
-    void Append(const char* name);
-    
-    template <typename T> void Append(const char* name, T value) {
+
+    template <typename T>
+    void Append(const char* name, T value, typename std::enable_if<!std::is_same<T, bool>::value && std::is_arithmetic<T>::value>::type* = nullptr) {
         stream_ << (count_ > 0 ? "," : "")  << "\"" << name << "\":" << value;
+        count_++;
+    }   
+    
+    template <typename T>
+    void Append(const char* name, T value, typename std::enable_if<std::is_same<T, const char*>::value || std::is_same<T, char*>::value ||std::is_same<T, const std::string&>::value>::type* = nullptr) {
+        stream_ << (count_ > 0 ? "," : "") << "\"" << name << "\":\"" << value << "\"";
+        count_++;
+    }
+    
+    template <typename T>
+    void Append(const char* name, T value, typename std::enable_if<std::is_same<T, bool>::value>::type* = nullptr) {
+        stream_ << (count_ > 0 ? "," : "")  << "\"" << name << "\":" << (value ? "true" : "false");
         count_++;
     }
     
