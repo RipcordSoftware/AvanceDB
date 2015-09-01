@@ -1,0 +1,19 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    couchdb (0.2.2)
+      transport (>= 1.0.1)
+    faker (1.5.0)
+      i18n (~> 0.5)
+    i18n (0.7.0)
+    transport (1.0.6)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  couchdb
+  faker
+
+BUNDLED WITH
+   1.10.6
