@@ -2,6 +2,7 @@
 #define	SCRIPT_OBJECT_RESPONSE_STREAM_H
 
 #include <cstring>
+#include <type_traits>
 
 #include "libhttpserver.h"
 
@@ -12,16 +13,18 @@ class ScriptObjectResponseStream final {
 public:
     ScriptObjectResponseStream(rs::httpserver::Stream& stream) : 
         pos_(0), stream_(stream) {}
-        
-    void Serialize(script_object_ptr obj) {
+    
+    template <typename T>    
+    void Serialize(T obj, typename std::enable_if<std::is_same<T, script_object_ptr>::value>::type* = nullptr) {
         AppendObject(obj, false);
     }
-    
-    void Serialize(script_array_ptr arr, unsigned index) {
+
+    template <typename T>    
+    void Serialize(T arr, unsigned index, typename std::enable_if<std::is_same<T, script_array_ptr>::value>::type* = nullptr) {
         auto type = index < arr->getCount() ? arr->getType(index) : rs::scriptobject::ScriptObjectType::Unknown;
         switch (type) {
             case rs::scriptobject::ScriptObjectType::Array: Serialize(arr->getArray(index)); break;
-            case rs::scriptobject::ScriptObjectType::Boolean: SerializeBoolean(arr->getBoolean(index)); break;
+            case rs::scriptobject::ScriptObjectType::Boolean: Serialize(arr->getBoolean(index)); break;
             case rs::scriptobject::ScriptObjectType::Double: Serialize(arr->getDouble(index)); break;
             case rs::scriptobject::ScriptObjectType::Int32: Serialize(arr->getInt32(index)); break;
             case rs::scriptobject::ScriptObjectType::Null: Serialize("null"); break;
@@ -31,47 +34,40 @@ public:
         }
     }
     
-    void Serialize(script_array_ptr arr) {
+    template <typename T>
+    void Serialize(T arr, typename std::enable_if<std::is_same<T, script_array_ptr>::value>::type* = nullptr) {
         AppendArray(arr, false);
     }
     
-    void Serialize(const char* str) {
-        auto len = std::strlen(str);
-        
-        if (len > getRemainingBytes()) {
-            FlushBuffer();
-        }
-                
-        if (len <= getRemainingBytes()) {            
-            std::memcpy(buffer_ + pos_, str, len);
-            pos_ += len;            
-        } else {
-            stream_.Write(reinterpret_cast<const rs::httpserver::Stream::byte*>(str), 0, len);
-        }        
+    template <typename T>
+    void Serialize(T str, typename std::enable_if<std::is_same<T, const char*>::value>::type* = nullptr) {
+        AppendLiteralString(str);        
     }
     
-    void Serialize(std::int32_t value, bool comma = false) {
+    template <typename T>
+    void Serialize(T value, bool comma = false, typename std::enable_if<!std::is_same<T, bool>::value && !std::is_same<T, char>::value && std::is_integral<T>::value && std::is_signed<T>::value>::type* = nullptr) {
         AppendInt64(value, comma);
     }
     
-    void Serialize(std::int64_t value, bool comma = false) {
-        AppendInt64(value, comma);
-    }
-
-    void Serialize(std::uint32_t value, bool comma = false) {
-        AppendUInt64(value, comma);
-    }
-    
-    void Serialize(std::uint64_t value, bool comma = false) {
+    template <typename T>
+    void Serialize(T value, bool comma = false, typename std::enable_if<!std::is_same<T, bool>::value && !std::is_same<T, char>::value && std::is_integral<T>::value && std::is_unsigned<T>::value>::type* = nullptr) {
         AppendUInt64(value, comma);
     }    
 
-    void Serialize(double value, bool comma = false) {
+    template <typename T>
+    void Serialize(T value, bool comma = false, typename std::enable_if<std::is_floating_point<T>::value>::type* = nullptr) {
         AppendDouble(value, comma);
     }
 
-    void SerializeBoolean(bool value, bool comma = false) {
+    template <typename T>
+    void Serialize(T value, bool comma = false, typename std::enable_if<std::is_same<T, bool>::value>::type* = nullptr) {
         AppendBool(value, comma);
+    }
+    
+    template <typename T>
+    void Serialize(T ch, typename std::enable_if<std::is_same<T, char>::value>::type* = nullptr) {
+        char chars[2] = { ch, 0 };
+        AppendLiteralString(&chars[0]);
     }
     
     void Flush() {
@@ -79,48 +75,8 @@ public:
         stream_.Flush();
     }
     
-    friend ScriptObjectResponseStream<SIZE>& operator<<(ScriptObjectResponseStream<SIZE>& stream, script_object_ptr obj) {
-        stream.Serialize(obj);
-        return stream;
-    }
-    
-    friend ScriptObjectResponseStream<SIZE>& operator<<(ScriptObjectResponseStream<SIZE>& stream, script_array_ptr arr) {
-        stream.Serialize(arr);
-        return stream;
-    }
-    
-    friend ScriptObjectResponseStream<SIZE>& operator<<(ScriptObjectResponseStream<SIZE>& stream, const char* str) {
-        stream.Serialize(str);
-        return stream;
-    }
-    
-    friend ScriptObjectResponseStream<SIZE>& operator<<(ScriptObjectResponseStream<SIZE>& stream, char ch) {
-        char chars[2] = { ch, 0 };
-        stream.Serialize(&chars[0]);
-        return stream;
-    }
-    
-    friend ScriptObjectResponseStream<SIZE>& operator<<(ScriptObjectResponseStream<SIZE>& stream, std::int32_t value) {
-        stream.Serialize(value);
-        return stream;
-    }
-    
-    friend ScriptObjectResponseStream<SIZE>& operator<<(ScriptObjectResponseStream<SIZE>& stream, std::int64_t value) {
-        stream.Serialize(value);
-        return stream;
-    }
-    
-    friend ScriptObjectResponseStream<SIZE>& operator<<(ScriptObjectResponseStream<SIZE>& stream, std::uint32_t value) {
-        stream.Serialize(value);
-        return stream;
-    }
-    
-    friend ScriptObjectResponseStream<SIZE>& operator<<(ScriptObjectResponseStream<SIZE>& stream, std::uint64_t value) {
-        stream.Serialize(value);
-        return stream;
-    }
-    
-    friend ScriptObjectResponseStream<SIZE>& operator<<(ScriptObjectResponseStream<SIZE>& stream, double value) {
+    template <typename T>
+    friend ScriptObjectResponseStream<SIZE>& operator<<(ScriptObjectResponseStream<SIZE>& stream, T value) {
         stream.Serialize(value);
         return stream;
     }
@@ -238,6 +194,21 @@ private:
         }
         
         buffer_[pos_++] = '"';
+    }
+    
+    void AppendLiteralString(const char* str) {
+        auto len = std::strlen(str);
+        
+        if (len > getRemainingBytes()) {
+            FlushBuffer();
+        }
+                
+        if (len <= getRemainingBytes()) {            
+            std::memcpy(buffer_ + pos_, str, len);
+            pos_ += len;            
+        } else {
+            stream_.Write(reinterpret_cast<const rs::httpserver::Stream::byte*>(str), 0, len);
+        }
     }
     
     void AppendBool(bool value, bool comma = false) {
