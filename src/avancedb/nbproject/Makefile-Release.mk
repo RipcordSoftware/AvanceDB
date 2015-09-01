@@ -68,15 +68,13 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=../../externals/libhttpserver/src/libhttpserver/dist/Release/GNU-Linux-x86/libhttpserver.a ../../externals/libjsapi/src/libjsapi/dist/Release/GNU-Linux-x86/libjsapi.a ../../externals/libscriptobject/src/libscriptobject_gason/dist/Release/GNU-Linux-x86/liblibscriptobject_gason.a ../../externals/libscriptobject/src/libscriptobject/dist/Release/GNU-Linux-x86/libscriptobject.a -lboost_regex -lboost_filesystem -lboost_program_options -lboost_thread -lboost_date_time -lboost_chrono -lboost_system `pkg-config --libs zlib` -lpthread   
+LDLIBSOPTIONS=../../externals/libhttpserver/src/libhttpserver/dist/Release/GNU-Linux-x86/libhttpserver.a ../../externals/libscriptobject/src/libscriptobject_gason/dist/Release/GNU-Linux-x86/liblibscriptobject_gason.a ../../externals/libscriptobject/src/libscriptobject/dist/Release/GNU-Linux-x86/libscriptobject.a -lboost_regex -lboost_filesystem -lboost_program_options -lboost_thread -lboost_date_time -lboost_chrono -lboost_system `pkg-config --libs zlib` -lpthread   
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
 	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb: ../../externals/libhttpserver/src/libhttpserver/dist/Release/GNU-Linux-x86/libhttpserver.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb: ../../externals/libjsapi/src/libjsapi/dist/Release/GNU-Linux-x86/libjsapi.a
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb: ../../externals/libscriptobject/src/libscriptobject_gason/dist/Release/GNU-Linux-x86/liblibscriptobject_gason.a
 
@@ -174,7 +172,6 @@ ${OBJECTDIR}/script_object_response_stream.o: script_object_response_stream.cpp
 # Subprojects
 .build-subprojects:
 	cd ../../externals/libhttpserver/src/libhttpserver && ${MAKE}  -f Makefile CONF=Release
-	cd ../../externals/libjsapi/src/libjsapi && ${MAKE}  -f Makefile CONF=Release
 	cd ../../externals/libscriptobject/src/libscriptobject_gason && ${MAKE}  -f Makefile CONF=Release
 	cd ../../externals/libscriptobject/src/libscriptobject && ${MAKE}  -f Makefile CONF=Release
 
@@ -186,7 +183,6 @@ ${OBJECTDIR}/script_object_response_stream.o: script_object_response_stream.cpp
 # Subprojects
 .clean-subprojects:
 	cd ../../externals/libhttpserver/src/libhttpserver && ${MAKE}  -f Makefile CONF=Release clean
-	cd ../../externals/libjsapi/src/libjsapi && ${MAKE}  -f Makefile CONF=Release clean
 	cd ../../externals/libscriptobject/src/libscriptobject_gason && ${MAKE}  -f Makefile CONF=Release clean
 	cd ../../externals/libscriptobject/src/libscriptobject && ${MAKE}  -f Makefile CONF=Release clean
 
