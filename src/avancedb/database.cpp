@@ -57,3 +57,7 @@ document_ptr Database::DeleteLocalDocument(const char* id, const char* rev) {
 document_ptr Database::SetLocalDocument(const char* id, script_object_ptr obj) {
     return docs_->SetLocalDocument(id, obj);
 }
+
+void Database::PostBulkDocuments(script_array_ptr docs) {
+    return docs_->PostBulkDocuments(docs);
+}

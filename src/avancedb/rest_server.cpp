@@ -6,10 +6,6 @@
 #include <vector>
 #include <algorithm>
 
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/random_generator.hpp>
-#include <boost/uuid/uuid_io.hpp>
-
 #include "json_stream.h"
 #include "rest_exceptions.h"
 #include "database.h"
@@ -41,19 +37,20 @@ RestServer::RestServer() {
     AddRoute("PUT", REGEX_DBNAME_GROUP "/?", &RestServer::PutDatabase);
     
     AddRoute("POST", REGEX_DBNAME_GROUP "/+_all_docs", &RestServer::PostDatabaseAllDocs);
+    AddRoute("POST", REGEX_DBNAME_GROUP "/+_bulk_docs", &RestServer::PostDatabaseBulkDocs);
     
-    AddRoute("GET", "/_active_tasks", &RestServer::GetActiveTasks);
-    AddRoute("GET", "/_uuids", &RestServer::GetUuids);
-    AddRoute("GET", "/_session", &RestServer::GetSession);
-    AddRoute("GET", "/_all_dbs", &RestServer::GetAllDbs);    
-    AddRoute("GET", "/_config/query_servers/?", &RestServer::GetConfigQueryServers);
-    AddRoute("GET", "/_config/native_query_servers/?", &RestServer::GetConfigNativeQueryServers);
-    AddRoute("GET", "/_config/?", &RestServer::GetConfig);
+    AddRoute("GET", "/+_active_tasks", &RestServer::GetActiveTasks);
+    AddRoute("GET", "/+_uuids", &RestServer::GetUuids);
+    AddRoute("GET", "/+_session", &RestServer::GetSession);
+    AddRoute("GET", "/+_all_dbs", &RestServer::GetAllDbs);    
+    AddRoute("GET", "/+_config/query_servers/?", &RestServer::GetConfigQueryServers);
+    AddRoute("GET", "/+_config/native_query_servers/?", &RestServer::GetConfigNativeQueryServers);
+    AddRoute("GET", "/+_config/?", &RestServer::GetConfig);
     AddRoute("GET", REGEX_DBNAME_GROUP "/+_local" REGEX_DOCID_GROUP, &RestServer::GetLocalDocument);
     AddRoute("GET", REGEX_DBNAME_GROUP REGEX_DOCID_GROUP, &RestServer::GetDocument);
     AddRoute("GET", REGEX_DBNAME_GROUP "/+_all_docs", &RestServer::GetDatabaseAllDocs);
     AddRoute("GET", REGEX_DBNAME_GROUP "/?", &RestServer::GetDatabase);    
-    AddRoute("GET", "/", &RestServer::GetSignature);
+    AddRoute("GET", "/+", &RestServer::GetSignature);
     
     databases_.AddDatabase("_replicator");
     databases_.AddDatabase("_users");
@@ -117,16 +114,14 @@ bool RestServer::GetUuids(rs::httpserver::request_ptr request, const rs::httpser
     std::stringstream stream;
     stream << std::hex << std::setfill('0') << "{\"uuids\":[";
     
-    boost::uuids::random_generator gen;
+    UuidHelper::UuidGenerator gen;
     for (int i = 0; i < count; ++i) {                
         stream << (i > 0 ? "," : "") << "\"";
 
-        auto uuid = gen();
-        for (auto iter = uuid.begin(); iter != uuid.end(); ++iter) {
-            stream << std::setw(2) << static_cast<unsigned>(*iter);
-        }
+        UuidHelper::UuidString uuidString;
+        UuidHelper::FormatUuid(gen(), uuidString);
         
-        stream << "\"";
+        stream << uuidString << "\"";
     }
     
     stream << "]}";
@@ -266,6 +261,24 @@ bool RestServer::PutDocument(rs::httpserver::request_ptr request, const rs::http
             created = true;
         }
     }
+    return created;
+}
+
+bool RestServer::PostDatabaseBulkDocs(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
+    bool created = false;
+    auto db = GetDatabase(args);
+    if (!!db) {
+        auto obj = GetJsonBody(request);
+        
+        if (obj->getType("docs") != rs::scriptobject::ScriptObjectType::Array) {
+            throw InvalidJson{};
+        }
+        
+        auto docs = obj->getArray("docs");
+        
+        db->PostBulkDocuments(docs);
+    }
+    
     return created;
 }
 

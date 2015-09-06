@@ -220,6 +220,10 @@ document_array_ptr Documents::PostDocuments(const PostAllDocumentsOptions& optio
     return results;
 }
 
+void Documents::PostBulkDocuments(script_array_ptr docs) {
+    
+}
+
 document_ptr Documents::GetLocalDocument(const char* id) {
     boost::lock_guard<boost::mutex> guard(localDocsMtx_);
     

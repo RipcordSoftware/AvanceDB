@@ -51,7 +51,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/rest_config.o \
 	${OBJECTDIR}/rest_exceptions.o \
 	${OBJECTDIR}/rest_server.o \
-	${OBJECTDIR}/script_object_response_stream.o
+	${OBJECTDIR}/script_object_response_stream.o \
+	${OBJECTDIR}/uuid_helper.o
 
 
 # C Compiler Flags
@@ -170,6 +171,11 @@ ${OBJECTDIR}/script_object_response_stream.o: script_object_response_stream.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src `pkg-config --cflags zlib` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/script_object_response_stream.o script_object_response_stream.cpp
+
+${OBJECTDIR}/uuid_helper.o: uuid_helper.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src `pkg-config --cflags zlib` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/uuid_helper.o uuid_helper.cpp
 
 # Subprojects
 .build-subprojects:
