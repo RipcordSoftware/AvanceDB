@@ -274,9 +274,14 @@ bool RestServer::PostDatabaseBulkDocs(rs::httpserver::request_ptr request, const
             throw InvalidJson{};
         }
         
+        auto newEdits = true;
+        if (obj->getType("new_edits") == rs::scriptobject::ScriptObjectType::Boolean) {
+            newEdits = obj->getBoolean("new_edits");
+        }
+        
         auto docs = obj->getArray("docs");
         
-        auto results = db->PostBulkDocuments(docs);
+        auto results = db->PostBulkDocuments(docs, newEdits);
         
         JsonStream stream{"["};
         for (auto result : results) {

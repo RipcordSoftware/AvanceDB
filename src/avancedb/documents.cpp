@@ -221,7 +221,7 @@ document_array_ptr Documents::PostDocuments(const PostAllDocumentsOptions& optio
     return results;
 }
 
-Documents::BulkDocumentsResults Documents::PostBulkDocuments(script_array_ptr docs) {
+Documents::BulkDocumentsResults Documents::PostBulkDocuments(script_array_ptr docs, bool newEdits) {
     BulkDocumentsResults results;
     UuidHelper::UuidGenerator gen;
     UuidHelper::UuidString newId;
@@ -257,7 +257,7 @@ Documents::BulkDocumentsResults Documents::PostBulkDocuments(script_array_ptr do
         
         const char* error = nullptr;
         const char* reason = nullptr;
-        if (!!oldDoc) {                     
+        if (!!oldDoc && newEdits) {                     
             auto docRev = oldDoc->getRev();
 
             if (objRev == nullptr || std::strcmp(objRev, docRev) != 0) {
@@ -267,7 +267,7 @@ Documents::BulkDocumentsResults Documents::PostBulkDocuments(script_array_ptr do
         }
         
         if (!error) {
-            auto doc = Document::Create(id, obj, ++updateSeq_);
+            auto doc = Document::Create(id, obj, ++updateSeq_, newEdits);
 
             docs_[coll].insert(doc);
 

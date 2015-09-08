@@ -38,7 +38,7 @@ public:
         const char* id_;
     };
     
-    static document_ptr Create(const char* id, script_object_ptr obj, sequence_type seqNum);
+    static document_ptr Create(const char* id, script_object_ptr obj, sequence_type seqNum, bool incrementRev = true);
     
     const char* getId() const;
     std::uint64_t getIdHash() const;

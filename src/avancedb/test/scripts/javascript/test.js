@@ -1772,7 +1772,138 @@ describe('avancedb -- _bulk_docs --', function() {
                 });
             });
         });
-    });    
+    });
+    
+    it('bulk save documents with revs', function(done) {
+        db.save([{_id:'Vader',_rev:'1-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'},{_id:'Lando',_rev:'2-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'},{_id:'Dooku',_rev:'3-cccccccccccccccccccccccccccccccc'}], function(err, results) {
+            assert.equal(null, err);
+            assert.equal(3, results.length);
+            assert.equal(true, results[0].ok);
+            assert.equal('Vader', results[0].id);
+            assert.equal(true, regexRev.test(results[0].rev));
+            assert.equal(2, results[0].rev[0]);
+            assert.equal(true, results[1].ok);
+            assert.equal('Lando', results[1].id);
+            assert.equal(true, regexRev.test(results[1].rev));
+            assert.equal(3, results[1].rev[0]);
+            assert.equal(true, results[2].ok);
+            assert.equal('Dooku', results[2].id);
+            assert.equal(true, regexRev.test(results[2].rev));
+            assert.equal(4, results[2].rev[0]);
+            done();
+        });
+    });
+    
+    it('bulk save documents with revs and new_edits=false', function(done) {
+        var oldRequest = conn.request;
+        conn.request = function(options, callback) {
+            conn.request = oldRequest;
+            
+            if (options.body && Array.isArray(options.body.docs)) {
+                options.body.new_edits = false;
+            }
+            
+            return oldRequest.call(conn, options, callback);
+        };
+        
+        db.save([{_id:'R2-D2',_rev:'1-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'},{_id:'Greedo',_rev:'2-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'},{_id:'Luke',_rev:'3-cccccccccccccccccccccccccccccccc'}], function(err, results) {
+            assert.equal(null, err);
+            assert.equal(3, results.length);
+            assert.equal(true, results[0].ok);
+            assert.equal('R2-D2', results[0].id);
+            assert.equal(true, regexRev.test(results[0].rev));
+            assert.equal(1, results[0].rev[0]);
+            assert.equal('-', results[0].rev[1]);
+            assert.equal('a', results[0].rev[2]);
+            assert.equal(true, results[1].ok);
+            assert.equal('Greedo', results[1].id);
+            assert.equal(true, regexRev.test(results[1].rev));
+            assert.equal(2, results[1].rev[0]);
+            assert.equal('-', results[1].rev[1]);
+            assert.equal('b', results[1].rev[2]);
+            assert.equal(true, results[2].ok);
+            assert.equal('Luke', results[2].id);
+            assert.equal(true, regexRev.test(results[2].rev));
+            assert.equal(3, results[2].rev[0]);
+            assert.equal('-', results[2].rev[1]);
+            assert.equal('c', results[2].rev[2]);
+            done();
+        });
+    });
+    
+    it('bulk save existing documents with matching version revs and new_edits=false', function(done) {
+        var oldRequest = conn.request;
+        conn.request = function(options, callback) {
+            conn.request = oldRequest;
+            
+            if (options.body && Array.isArray(options.body.docs)) {
+                options.body.new_edits = false;
+            }
+            
+            return oldRequest.call(conn, options, callback);
+        };
+        
+        db.save([{_id:'R2-D2',_rev:'1-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'},{_id:'Greedo',_rev:'2-cccccccccccccccccccccccccccccccc'},{_id:'Luke',_rev:'3-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'}], function(err, results) {
+            assert.equal(null, err);
+            assert.equal(3, results.length);
+            assert.equal(true, results[0].ok);
+            assert.equal('R2-D2', results[0].id);
+            assert.equal(true, regexRev.test(results[0].rev));
+            assert.equal(1, results[0].rev[0]);
+            assert.equal('-', results[0].rev[1]);
+            assert.equal('b', results[0].rev[2]);
+            assert.equal(true, results[1].ok);
+            assert.equal('Greedo', results[1].id);
+            assert.equal(true, regexRev.test(results[1].rev));
+            assert.equal(2, results[1].rev[0]);
+            assert.equal('-', results[1].rev[1]);
+            assert.equal('c', results[1].rev[2]);
+            assert.equal(true, results[2].ok);
+            assert.equal('Luke', results[2].id);
+            assert.equal(true, regexRev.test(results[2].rev));
+            assert.equal(3, results[2].rev[0]);
+            assert.equal('-', results[2].rev[1]);
+            assert.equal('a', results[2].rev[2]);
+            done();
+        });
+    }); 
+    
+    it('bulk save existing documents with higher version revs and new_edits=false', function(done) {
+        var oldRequest = conn.request;
+        conn.request = function(options, callback) {
+            conn.request = oldRequest;
+            
+            if (options.body && Array.isArray(options.body.docs)) {
+                options.body.new_edits = false;
+            }
+            
+            return oldRequest.call(conn, options, callback);
+        };
+        
+        db.save([{_id:'R2-D2',_rev:'6-cccccccccccccccccccccccccccccccc'},{_id:'Greedo',_rev:'5-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'},{_id:'Luke',_rev:'4-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'}], function(err, results) {
+            assert.equal(null, err);
+            assert.equal(3, results.length);
+            assert.equal(true, results[0].ok);
+            assert.equal('R2-D2', results[0].id);
+            assert.equal(true, regexRev.test(results[0].rev));
+            assert.equal(6, results[0].rev[0]);
+            assert.equal('-', results[0].rev[1]);
+            assert.equal('c', results[0].rev[2]);
+            assert.equal(true, results[1].ok);
+            assert.equal('Greedo', results[1].id);
+            assert.equal(true, regexRev.test(results[1].rev));
+            assert.equal(5, results[1].rev[0]);
+            assert.equal('-', results[1].rev[1]);
+            assert.equal('a', results[1].rev[2]);
+            assert.equal(true, results[2].ok);
+            assert.equal('Luke', results[2].id);
+            assert.equal(true, regexRev.test(results[2].rev));
+            assert.equal(4, results[2].rev[0]);
+            assert.equal('-', results[2].rev[1]);
+            assert.equal('b', results[2].rev[2]);
+            done();
+        });
+    }); 
 
     it('delete the database', function(done) {
         db.destroy(function(err, res) {
