@@ -5,7 +5,7 @@ require 'faker'
 
 DB="ruby_tests"
 HOST="127.0.0.1"
-PORT="5984"
+PORT="5994"
 URL='http://' + HOST + ':' + PORT
 docs=[]
 
