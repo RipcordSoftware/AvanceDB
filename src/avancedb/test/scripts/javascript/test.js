@@ -1687,3 +1687,98 @@ describe('avancedb -- local docs --', function() {
         });
     });
 });
+
+describe('avancedb -- _bulk_docs --', function() {
+    var testDbName = 'avancedb-bulk_docs-test';
+    var db = conn.database(testDbName);
+    var regexRev = /\d+\-[a-zA-Z0-9]{32}/;
+
+    it('should create a database', function(done) {
+        db.create(function(err, res) {
+            assert.equal(null, err);
+            assert.notEqual(null, res);
+            assert.notEqual(res.ok, 'true');
+            done();
+        });
+    });
+    
+    it('bulk save documents without ids', function(done) {     
+        db.save([{name:'Yoda'},{name:'Han Solo'},{name:'Leia'}], function(err, results) {
+            assert.equal(null, err);
+            assert.equal(3, results.length);
+            assert.equal(true, results[0].ok);
+            assert.notEqual(null, results[0].id);
+            assert.equal(true, regexRev.test(results[0].rev));
+            assert.equal(true, results[1].ok);
+            assert.notEqual(null, results[1].id);
+            assert.equal(true, regexRev.test(results[1].rev));
+            assert.equal(true, results[2].ok);
+            assert.notEqual(null, results[2].id);
+            assert.equal(true, regexRev.test(results[2].rev));
+            done();
+        });
+    });
+    
+    it('bulk save documents with ids', function(done) {     
+        db.save([{_id:'Yoda'},{_id:'HanSolo'},{_id:'Leia'}], function(err, results) {
+            assert.equal(null, err);
+            assert.equal(3, results.length);
+            assert.equal(true, results[0].ok);
+            assert.equal('Yoda', results[0].id);
+            assert.equal(true, regexRev.test(results[0].rev));
+            assert.equal(true, results[1].ok);
+            assert.equal('HanSolo', results[1].id);
+            assert.equal(true, regexRev.test(results[1].rev));
+            assert.equal(true, results[2].ok);
+            assert.equal('Leia', results[2].id);
+            assert.equal(true, regexRev.test(results[2].rev));
+            done();
+        });
+    });
+    
+    it('bulk save documents with some conflict ids', function(done) {          
+        db.save([{_id:'Yoda'},{_id:'HanSolo'},{_id:'Chewy'},{_id:'Leia'}], function(err, results) {
+            assert.equal(null, err);
+            assert.equal(4, results.length);
+            assert.equal('conflict', results[0].error);
+            assert.equal('Yoda', results[0].id);
+            assert.equal('conflict', results[1].error);
+            assert.equal('HanSolo', results[1].id);            
+            assert.equal(true, results[2].ok);
+            assert.equal('Chewy', results[2].id);
+            assert.equal(true, regexRev.test(results[2].rev));
+            assert.equal('conflict', results[3].error);
+            assert.equal('Leia', results[3].id);            
+            done();
+        });
+    });
+    
+    it('bulk save documents with an invalid rev', function(done) {     
+        db.info(function(err, info) {
+            assert.equal(null, err);
+            var docCount = info.doc_count;
+        
+            db.save([{_id:'Yoda'},{_id:'HanSolo'},{_id:'Leia',_rev:'1234'}], function(err, results) {
+                assert.notEqual(null, err);
+                assert.equal('bad_request', err.error);
+                assert.equal('Invalid rev format', err.reason);
+                assert.equal(400, err.headers.status);
+                assert.equal(null, results);
+                
+                db.info(function(err, info) {
+                    assert.equal(null, err);
+                    assert.equal(docCount, info.doc_count);
+                    done();
+                });
+            });
+        });
+    });    
+
+    it('delete the database', function(done) {
+        db.destroy(function(err, res) {
+            assert.equal(null, err);            
+            assert.notEqual(null, res);
+            done();
+        });
+    });
+});
