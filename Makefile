@@ -10,6 +10,7 @@ all: force_true
 	cd externals/libhttpserver && $(MAKE) $(MFLAGS) $(MAKEOVERRIDES) all
 	cd src/avancedb && $(MAKE) $(MFLAGS) $(MAKEOVERRIDES) all
 
+.NOTPARALLEL: test
 test: build
 	cd src/avancedb/test/scripts/javascript && ./test.sh
 	cd src/avancedb/test/scripts/python && ./test.sh
