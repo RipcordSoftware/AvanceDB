@@ -1,0 +1,74 @@
+# Simple ruby api tests for rspec
+# 
+require 'airborne'
+require 'faker'
+
+DB="ruby_tests"
+HOST="127.0.0.1"
+PORT="5994"
+URL='http://' + HOST + ':' + PORT
+docs=[]
+
+1000.times { | i |
+
+docs[i] = [i, {
+  :first_name => Faker::Name.first_name,
+  :last_name => Faker::Name.last_name,
+  :company_name => Faker::Company.name,
+  :catch_phrase => Faker::Company.catch_phrase,
+  :BS => Faker::Company.bs,
+  :phone_number => Faker::PhoneNumber.phone_number,
+  :email => Faker::Internet.email,
+  :ip_v4_address => Faker::Internet.ip_v4_address,
+  :ip_v6_address => Faker::Internet.ip_v6_address } ]
+
+}
+
+
+
+describe 'couch DB API spec' do
+
+#  before :all do
+#
+#  end
+
+
+
+  it 'should have a database' do
+	delete URL + '/' + DB
+	put URL + '/' + DB
+	expect_status 201
+  end
+
+
+  it 'should return futon' do
+    get URL+'/_utils/index.html'
+    expect_status 200
+  end
+
+  # Other futon tests...
+
+  # Generic doc wrangling tests
+  it 'should be possible to create a document' do
+    put URL + '/'+ DB + '/' + "001" , { :name => "Desdemona", :occupation => "street urchin", :age => 8}
+    expect_status 201
+  end
+
+  it 'should be possible to find the document' do
+    get URL + '/'+ DB + '/' + "001" 
+    expect_json_types(_id: :string, name:  :string , occupation: :string, age: :integer)
+    expect_json(_id: "001",  name:  "Desdemona", occupation: "street urchin", age: 8)
+    expect_status 200
+  end
+
+  # Add bulk api version once implemented
+  it 'should be possible to load a bunch of docs' do
+    docs.each {  |doc|
+      put URL + '/'+ DB + '/' + doc[0].to_s , doc[1]
+      expect_status 201
+    }
+  end
+end
+
+
+

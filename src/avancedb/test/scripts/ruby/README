@@ -1,0 +1,10 @@
+#
+# Uses airborne REST test gem for rspec: https://github.com/brooklynDev/airborne
+#
+# To install
+# Needs ruby 1.9-ish, and:
+#
+# sudo gem install airborne
+#
+# To run tests:
+# rspec test_api.rspec
