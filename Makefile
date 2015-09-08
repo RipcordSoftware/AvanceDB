@@ -12,6 +12,7 @@ all: force_true
 
 test: build
 	cd src/avancedb/test/scripts/javascript && ./test.sh
+	cd src/avancedb/test/scripts/python && ./test.sh
 
 clean: force_true
 	cd externals/libscriptobject && $(MAKE) $(MFLAGS) $(MAKEOVERRIDES) clean
