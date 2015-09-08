@@ -276,7 +276,26 @@ bool RestServer::PostDatabaseBulkDocs(rs::httpserver::request_ptr request, const
         
         auto docs = obj->getArray("docs");
         
-        db->PostBulkDocuments(docs);
+        auto results = db->PostBulkDocuments(docs);
+        
+        JsonStream stream{"["};
+        for (auto result : results) {
+            stream.Append("id", result.id_);
+            
+            if (result.ok_) {
+                stream.Append("ok", true);
+                stream.Append("rev", result.rev_);
+            } else {
+                stream.Append("error", result.error_);
+                stream.Append("reason", result.reason_);
+            }
+            
+            stream.NextObject();
+        }
+        
+        response->setStatusCode(201).setContentType("application/json").Send(stream.Flush("]"));
+        
+        created = true;
     }
     
     return created;

@@ -35,7 +35,7 @@ public:
     document_array_ptr GetDocuments(const GetAllDocumentsOptions& options, Documents::collection::size_type& offset, Documents::collection::size_type& totalDocs, sequence_type& updateSequence);
     document_array_ptr PostDocuments(const PostAllDocumentsOptions& options, Documents::collection::size_type& totalDocs, sequence_type& updateSequence);
     
-    void PostBulkDocuments(script_array_ptr docs);
+    Documents::BulkDocumentsResults PostBulkDocuments(script_array_ptr docs);
     
 private:
     Database(const char*);

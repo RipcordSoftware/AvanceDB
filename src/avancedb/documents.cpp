@@ -11,6 +11,7 @@
 #include "database.h"
 #include "document_revision.h"
 #include "config.h"
+#include "uuid_helper.h"
 
 Documents::Documents(database_ptr db) : db_(db), updateSeq_(0), localUpdateSeq_(0),
         collections_(GetCollectionCount()), docsMtx_(collections_) {
@@ -220,8 +221,64 @@ document_array_ptr Documents::PostDocuments(const PostAllDocumentsOptions& optio
     return results;
 }
 
-void Documents::PostBulkDocuments(script_array_ptr docs) {
+Documents::BulkDocumentsResults Documents::PostBulkDocuments(script_array_ptr docs) {
+    BulkDocumentsResults results;
+    UuidHelper::UuidGenerator gen;
+    UuidHelper::UuidString newId;
     
+    auto size = docs->getCount();    
+    for (decltype(size) i = 0; i < size; ++i) {
+        auto obj = docs->getObject(i);
+        auto objRev = obj->getString("_rev", false);
+        
+        if (objRev) {
+            DocumentRevision::Validate(objRev, true);
+        }
+    }
+    
+    for (decltype(size) i = 0; i < size; ++i) {
+        auto obj = docs->getObject(i);
+        
+        auto id = obj->getString("_id", false);
+        if (id == nullptr) {
+            auto uuid = gen();
+            UuidHelper::FormatUuid(uuid, newId);
+            id = newId;
+        }
+        
+        auto coll = GetDocumentCollectionIndex(id);
+    
+        boost::lock_guard<DocumentsMutex> guard{docsMtx_[coll]};
+        
+        Document::Compare compare{id};
+        auto oldDoc = docs_[coll].find_fn(compare);
+        
+        auto objRev = obj->getString("_rev", false);
+        
+        const char* error = nullptr;
+        const char* reason = nullptr;
+        if (!!oldDoc) {                     
+            auto docRev = oldDoc->getRev();
+
+            if (objRev == nullptr || std::strcmp(objRev, docRev) != 0) {
+                error = "conflict";
+                reason = "Document update conflict.";
+            }
+        }
+        
+        if (!error) {
+            auto doc = Document::Create(id, obj, ++updateSeq_);
+
+            docs_[coll].insert(doc);
+
+            auto newRev = doc->getRev();
+            results.emplace_back(id, newRev); 
+        } else {
+            results.emplace_back(id, error, reason);
+        }     
+    }
+    
+    return std::move(results);
 }
 
 document_ptr Documents::GetLocalDocument(const char* id) {
