@@ -24,7 +24,7 @@ export PATH=${PATH}:`ruby -rubygems -e 'puts Gem.user_dir'`/bin
 USER_INSTALL=--user-install
 if [ -f ~/.rvm/scripts/rvm ]; then
     unset USER_INSTALL
-fo
+fi
 
 gem list | grep bundler > /dev/null
 if [ $? -ne 0 ]; then
