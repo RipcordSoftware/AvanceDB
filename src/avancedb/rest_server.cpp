@@ -25,32 +25,33 @@
 #define REGEX_DOCID_GROUP "/+(?<id>" REGEX_DOCID ")"
 
 RestServer::RestServer() {
-    AddRoute("HEAD", REGEX_DBNAME_GROUP "/?", &RestServer::HeadDatabase);   
+    AddRoute("HEAD", REGEX_DBNAME_GROUP "/{0,}$", &RestServer::HeadDatabase);   
     AddRoute("HEAD", REGEX_DBNAME_GROUP REGEX_DOCID_GROUP, &RestServer::HeadDocument);
     
     AddRoute("DELETE", REGEX_DBNAME_GROUP "/+_local" REGEX_DOCID_GROUP, &RestServer::DeleteLocalDocument);
-    AddRoute("DELETE", REGEX_DBNAME_GROUP "/?/?", &RestServer::DeleteDatabase);
+    AddRoute("DELETE", REGEX_DBNAME_GROUP "/{0,}$", &RestServer::DeleteDatabase);
     AddRoute("DELETE", REGEX_DBNAME_GROUP REGEX_DOCID_GROUP, &RestServer::DeleteDocument);
     
     AddRoute("PUT", REGEX_DBNAME_GROUP "/+_local" REGEX_DOCID_GROUP, &RestServer::PutLocalDocument);
     AddRoute("PUT", REGEX_DBNAME_GROUP REGEX_DOCID_GROUP, &RestServer::PutDocument);
-    AddRoute("PUT", REGEX_DBNAME_GROUP "/?", &RestServer::PutDatabase);
+    AddRoute("PUT", REGEX_DBNAME_GROUP "/{0,}$", &RestServer::PutDatabase);
     
     AddRoute("POST", REGEX_DBNAME_GROUP "/+_all_docs", &RestServer::PostDatabaseAllDocs);
     AddRoute("POST", REGEX_DBNAME_GROUP "/+_bulk_docs", &RestServer::PostDatabaseBulkDocs);
+    AddRoute("POST", REGEX_DBNAME_GROUP "/{0,}$", &RestServer::PostDatabase);
     
-    AddRoute("GET", "/+_active_tasks", &RestServer::GetActiveTasks);
-    AddRoute("GET", "/+_uuids", &RestServer::GetUuids);
-    AddRoute("GET", "/+_session", &RestServer::GetSession);
-    AddRoute("GET", "/+_all_dbs", &RestServer::GetAllDbs);    
-    AddRoute("GET", "/+_config/query_servers/?", &RestServer::GetConfigQueryServers);
-    AddRoute("GET", "/+_config/native_query_servers/?", &RestServer::GetConfigNativeQueryServers);
-    AddRoute("GET", "/+_config/?", &RestServer::GetConfig);
+    AddRoute("GET", "/+_active_tasks/{0,}$", &RestServer::GetActiveTasks);
+    AddRoute("GET", "/+_uuids/{0,}$", &RestServer::GetUuids);
+    AddRoute("GET", "/+_session/{0,}$", &RestServer::GetSession);
+    AddRoute("GET", "/+_all_dbs/{0,}$", &RestServer::GetAllDbs);    
+    AddRoute("GET", "/+_config/query_servers/{0,}$", &RestServer::GetConfigQueryServers);
+    AddRoute("GET", "/+_config/native_query_servers/{0,}$", &RestServer::GetConfigNativeQueryServers);
+    AddRoute("GET", "/+_config/{0,}$", &RestServer::GetConfig);
     AddRoute("GET", REGEX_DBNAME_GROUP "/+_local" REGEX_DOCID_GROUP, &RestServer::GetLocalDocument);
     AddRoute("GET", REGEX_DBNAME_GROUP REGEX_DOCID_GROUP, &RestServer::GetDocument);
-    AddRoute("GET", REGEX_DBNAME_GROUP "/+_all_docs", &RestServer::GetDatabaseAllDocs);
-    AddRoute("GET", REGEX_DBNAME_GROUP "/?", &RestServer::GetDatabase);    
-    AddRoute("GET", "/+", &RestServer::GetSignature);
+    AddRoute("GET", REGEX_DBNAME_GROUP "/+_all_docs/{0,}$", &RestServer::GetDatabaseAllDocs);
+    AddRoute("GET", REGEX_DBNAME_GROUP "/{0,}$", &RestServer::GetDatabase);    
+    AddRoute("GET", "/{0,}$", &RestServer::GetSignature);
     
     databases_.AddDatabase("_replicator");
     databases_.AddDatabase("_users");
@@ -196,6 +197,39 @@ bool RestServer::PutDatabase(rs::httpserver::request_ptr request, const rs::http
     return created;
 }
 
+bool RestServer::PostDatabase(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
+    bool created = false;
+    auto db = GetDatabase(args);
+    if (!!db) {
+        UuidHelper::UuidString uuidString;
+        auto obj = GetJsonBody(request);
+
+        if (!!obj) {                      
+            auto id = obj->getString("_id", false);
+            if (!id) {
+                UuidHelper::UuidGenerator gen;
+                UuidHelper::FormatUuid(gen(), uuidString);
+                id = uuidString;
+            }
+            
+            auto doc = db->SetDocument(id, obj);
+            
+            auto rev = doc->getRev();
+            
+            JsonStream stream;
+            stream.Append("ok", true);
+            stream.Append("id", doc->getId());
+            stream.Append("rev", rev);
+
+            response->setStatusCode(201).setContentType("application/json").setETag(rev).Send(stream.Flush());
+
+            created = true;
+        }
+    }
+    
+    return created;
+}
+
 bool RestServer::DeleteDatabase(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
     bool deleted = false;
     
@@ -261,6 +295,7 @@ bool RestServer::PutDocument(rs::httpserver::request_ptr request, const rs::http
             created = true;
         }
     }
+    
     return created;
 }
 

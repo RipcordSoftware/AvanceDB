@@ -337,8 +337,8 @@ describe('avancedb -- db --', function() {
     });
 });
 
-describe('avancedb -- docs --', function() {
-    var testDbName = 'avancedb-test';
+describe('avancedb -- docs -- PUT', function() {
+    var testDbName = 'avancedb-docs-test-put';
     var testDocument = { 'lorem' : 'ipsum', pi: 3.14159, sunny: true, free_lunch: false, the_answer: 42, 
         taxRate: null, fibonnaci: [0, 1, 1, 2, 3, 5, 8, 13 ], child: { 'hello': 'world' }, 
         events: [ null, 1969, 'avance', true, {}, [] ], //minNUm: Number.MIN_VALUE , maxNum: Number.MAX_VALUE,
@@ -496,7 +496,7 @@ describe('avancedb -- docs --', function() {
         });
     });
     
-    it('create a document with an id, then attempt to update it using the wrong rev', function(done) {
+    it('create a document with an id then update it', function(done) {
         var db = conn.database(testDbName);
         var test0 = _.extend({}, testDocument);
         db.save('test0', test0, function(err, doc) {
@@ -505,7 +505,28 @@ describe('avancedb -- docs --', function() {
             assert.equal('test0', doc._id);
             assert.notEqual(null, doc._rev);
             
-            db.save('test0', { _rev: '0' + doc._rev.slice(1) }, function(err, res) {
+            db.save('test0', { _rev: doc._rev }, function(err, doc) {
+                assert.equal(null, err);
+                assert.notEqual(null, doc);
+                assert.equal('test0', doc._id);
+                assert.notEqual(null, doc._rev);
+                assert.equal('2', doc._rev[0]);
+                assert.equal('-', doc._rev[1]);
+                done();
+            });
+        });
+    });
+    
+    it('create a document with an id, then attempt to update it using the wrong rev', function(done) {
+        var db = conn.database(testDbName);
+        var test1 = _.extend({}, testDocument);
+        db.save('test1', test1, function(err, doc) {
+            assert.equal(null, err);
+            assert.notEqual(null, doc);
+            assert.equal('test1', doc._id);
+            assert.notEqual(null, doc._rev);
+            
+            db.save('test1', { _rev: '0' + doc._rev.slice(1) }, function(err, res) {
                 assert.notEqual(null, err);
                 assert.equal('conflict', err.error);
                 assert.equal(409, err.headers.status);
@@ -672,7 +693,7 @@ describe('avancedb -- docs --', function() {
         db.all(function(err, docs) {
             assert.equal(null, err);
             assert.notEqual(null, docs);
-            assert.equal(401, docs.length);
+            assert.equal(402, docs.length);
             for (var i = 0; i < docs.length; ++i) {
                 assert.notEqual(null, docs[i].id);
                 assert.equal(docs[i].id, docs[i].key);
@@ -688,8 +709,165 @@ describe('avancedb -- docs --', function() {
         db.info(function(err, info) {
             assert.equal(null, err);
             assert.notEqual(null, info);
-            assert.equal(401, info.doc_count);
+            assert.equal(402, info.doc_count);
             done();
+        });
+    });
+    
+    it('should delete a database', function(done) {
+        var db = conn.database(testDbName);
+        db.destroy(function(err, res) {
+            assert.equal(null, err);
+            assert.notEqual(null, res);
+            assert.notEqual(res.ok, 'true');
+            done();
+        });
+    });
+});
+
+describe('avancedb -- docs -- POST', function() {
+    // turns a PUT into a POST, removes the trailing doc id
+    var hijackRequest = function(conn) {
+        var oldRequest = conn.request;
+        conn.request = function(options, callback) {
+            conn.request = oldRequest;
+                    
+            if (options.method === 'PUT') {
+                options.method = 'POST';
+                options.path = options.path.replace(/[a-zA-Z0-9]*$/, '');
+            }
+            
+            return oldRequest.call(conn, options, callback);
+        };
+    };
+    
+    var testDbName = 'avancedb-docs-test-post';
+    var testDocument = { 'lorem' : 'ipsum', pi: 3.14159, sunny: true, free_lunch: false, the_answer: 42, 
+        taxRate: null, fibonnaci: [0, 1, 1, 2, 3, 5, 8, 13 ], child: { 'hello': 'world' }, 
+        events: [ null, 1969, 'avance', true, {}, [] ], //minNUm: Number.MIN_VALUE , maxNum: Number.MAX_VALUE,
+        data: '0123456789' };
+        
+    for (var i = 0; i < 8; ++i) {
+        testDocument.data += testDocument.data;
+    }
+    
+    it('should create a database', function(done) {
+        var db = conn.database(testDbName);
+        db.create(function(err, res) {
+            assert.equal(null, err);
+            assert.notEqual(null, res);
+            assert.notEqual(res.ok, 'true');
+            done();
+        });
+    });
+    
+    it('create a document without an id', function(done) {
+        var db = conn.database(testDbName);
+        var test0 = _.extend({}, testDocument);
+        db.save(test0, function(err, doc) {
+            assert.equal(null, err);
+            assert.notEqual(null, doc);
+            assert.notEqual(null, doc._id);
+            assert.notEqual(null, doc._rev);
+            done();
+        });
+    });
+    
+    it('create a document without an id but a rev', function(done) {
+        var db = conn.database(testDbName);
+        var test0 = _.extend({_rev: '1-abcdabcdabcdabcdabcdabcdabcdabcd'}, testDocument);
+        db.save(test0, function(err, doc) {
+            assert.equal(null, err);
+            assert.notEqual(null, doc);
+            assert.equal(true, doc.ok);
+            assert.notEqual(null, doc._id);
+            assert.notEqual(null, doc._rev);
+            assert.equal(2, doc._rev[0]);
+            assert.equal('-', doc._rev[1]);
+            done();
+        });
+    });
+    
+    it('create a document without an id but a bad rev', function(done) {
+        var db = conn.database(testDbName);
+        var test0 = _.extend({_rev: 'abcdef'}, testDocument);
+        db.save(test0, function(err, res) {
+            assert.notEqual(null, err);
+            assert.equal(400, err.headers.status);        
+            assert.equal('bad_request', err.error);
+            assert.equal(null, res);        
+            done();
+        });
+    });
+    
+    it('create a document with an id', function(done) {
+        hijackRequest(conn);
+        
+        var db = conn.database(testDbName);
+        var test1 = _.extend({_id:'test1'}, testDocument);
+        db.save(test1, function(err, doc) {
+            assert.equal(null, err);
+            assert.notEqual(null, doc);
+            assert.equal('test1', doc._id);
+            assert.equal('1', doc._rev[0]);
+            assert.equal('-', doc._rev[1]);
+            done();
+        });
+    });
+    
+    it('update a document with an id but a bad rev', function(done) {
+        hijackRequest(conn);
+        
+        var db = conn.database(testDbName);
+        var test1 = _.extend({_id:'test1',_rev:'abcdef'}, testDocument);
+        db.save(test1, function(err, res) {
+            assert.notEqual(null, err);
+            assert.equal(409, err.headers.status);        
+            assert.equal('conflict', err.error);
+            assert.equal(null, res);       
+            done();
+        });
+    });
+    
+    it('create a document with an id and a rev', function(done) {
+        hijackRequest(conn);
+        
+        var db = conn.database(testDbName);
+        var test2 = _.extend({_id:'test2',_rev: '1-abcdabcdabcdabcdabcdabcdabcdabcd'}, testDocument);
+        db.save(test2, function(err, doc) {
+            assert.equal(null, err);
+            assert.notEqual(null, doc);
+            assert.equal('test2', doc._id);
+            assert.equal('2', doc._rev[0]);
+            assert.equal('-', doc._rev[1]);
+            done();
+        });
+    });
+    
+    it('create a document with an id then update it', function(done) {
+        hijackRequest(conn);
+        
+        var db = conn.database(testDbName);
+        var test3 = _.extend({_id:'test3'}, testDocument);
+        db.save(test3, function(err, doc) {
+            assert.equal(null, err);
+            assert.notEqual(null, doc);
+            assert.equal('test3', doc._id);
+            assert.notEqual(null, doc._rev);
+            assert.equal('1', doc._rev[0]);
+            assert.equal('-', doc._rev[1]);
+            
+            hijackRequest(conn);
+            
+            db.save({ _id: doc._id, _rev: doc._rev }, function(err, doc) {
+                assert.equal(null, err);
+                assert.notEqual(null, doc);
+                assert.equal('test3', doc._id);
+                assert.notEqual(null, doc._rev);
+                assert.equal('2', doc._rev[0]);
+                assert.equal('-', doc._rev[1]);
+                done();
+            });
         });
     });
     

@@ -88,7 +88,7 @@ document_ptr Documents::SetDocument(const char* id, script_object_ptr obj) {
     
     auto objRev = obj->getString("_rev", false);
 
-    if (!!doc) {                     
+    if (!!doc) {
         auto docRev = doc->getRev();
         
         if (objRev == nullptr || std::strcmp(objRev, docRev) != 0) {
