@@ -21,29 +21,34 @@ fi
 # add the gems executable dir to the path
 export PATH=${PATH}:`ruby -rubygems -e 'puts Gem.user_dir'`/bin
 
+USER_INSTALL=--user-install
+if [ -f ~/.rvm/scripts/rvm ]; then
+    unset USER_INSTALL
+fo
+
 gem list | grep bundler > /dev/null
 if [ $? -ne 0 ]; then
-    gem install --user-install bundler
+    gem install ${USER_INSTALL} bundler
 fi
 
 gem list | grep rake > /dev/null
 if [ $? -ne 0 ]; then
-    gem install --user-install rake
+    gem install ${USER_INSTALL} rake
 fi
 
 gem list | grep rspec > /dev/null
 if [ $? -ne 0 ]; then
-    gem install --user-install rspec
+    gem install ${USER_INSTALL} rspec
 fi
 
 gem list | grep faker > /dev/null
 if [ $? -ne 0 ]; then
-    gem install --user-install faker
+    gem install ${USER_INSTALL} faker
 fi
 
 gem list | grep airborne > /dev/null
 if [ $? -ne 0 ]; then
-    gem install --user-install airborne
+    gem install ${USER_INSTALL} airborne
 fi
 
 CONFIGURATION=$1
