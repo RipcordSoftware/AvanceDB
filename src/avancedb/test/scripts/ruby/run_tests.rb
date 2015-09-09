@@ -1,10 +1,9 @@
 require 'couchdb'
 require 'faker'
 
-
 # Using localhost
-server = CouchDB::Server.new "localhost", 5984
-database = CouchDB::Database.new server, "contact_test"
+server = CouchDB::Server.new "localhost", 5994
+database = CouchDB::Database.new server, "ruby_contact_test"
 database.delete_if_exists!
 database.create_if_missing!
 
@@ -34,5 +33,3 @@ doc_count.times { |index|
 
 puts "Created #{doc_count} contacts"
 puts "Done."
-
-
