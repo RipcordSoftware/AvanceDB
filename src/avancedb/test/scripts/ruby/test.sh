@@ -36,6 +36,11 @@ if [ $? -ne 0 ]; then
     gem install --user-install rspec
 fi
 
+gem list | grep faker > /dev/null
+if [ $? -ne 0 ]; then
+    gem install --user-install faker
+fi
+
 gem list | grep airborne > /dev/null
 if [ $? -ne 0 ]; then
     gem install --user-install airborne
