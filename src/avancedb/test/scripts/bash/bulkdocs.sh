@@ -43,5 +43,5 @@ do
     
     echo ']}' >> ${FILE}
 
-    curl -0 -s -X POST ${URL}/_bulk_docs --header 'Content-Type: application/json' --header "Expect: " --data-binary @${FILE}
+    curl -s -X POST ${URL}/_bulk_docs --header 'Content-Type: application/json' --data-binary @${FILE} > /dev/null
 done
