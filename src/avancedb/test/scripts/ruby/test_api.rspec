@@ -14,6 +14,7 @@
 
 require 'airborne'
 require 'faker'
+require 'json'
 
 DB="ruby_tests"
 HOST="127.0.0.1"
@@ -26,7 +27,8 @@ end
 
 1000.times { | i |
 
-  docs[i] = [i, {
+  docs[i] = {
+    :id => i.to_s,
     :first_name => Faker::Name.first_name,
     :last_name => Faker::Name.last_name,
     :company_name => Faker::Company.name,
@@ -36,18 +38,18 @@ end
     :email => Faker::Internet.email,
     :ip_v4_address => Faker::Internet.ip_v4_address,
     :ip_v6_address => Faker::Internet.ip_v6_address 
-  } ]
+  }
 }
 
-bulk_docs = [ "docs", docs ]
+bulk_docs = "{ docs: " + docs.to_json + "}"
 
 
 describe 'couch DB API spec' do
 
   it 'should have a database' do
-	  delete '/' + DB
-	  put '/' + DB
-	  expect_status 201
+    delete '/' + DB
+    put '/' + DB
+    expect_status 201
   end
 
   it 'should return futon' do
@@ -73,7 +75,7 @@ describe 'couch DB API spec' do
   # Hammer doc load
   it 'should be possible to load a bunch of docs' do
     docs.each {  |doc|
-      put '/'+ DB + '/' + doc[0].to_s , doc[1]
+      put '/'+ DB + '/' + doc[:id].to_s , doc.to_json
       expect_status 201
     }
   end
@@ -81,7 +83,7 @@ describe 'couch DB API spec' do
   # Hammer doc find
   it 'should be possible to find a bunch of docs' do
     docs.each {  |doc|
-      get '/' + DB + '/' + doc[0].to_s
+      get '/' + DB + '/' + doc[:id].to_s
       expect_status 200
     }
   end
@@ -97,7 +99,7 @@ describe 'couch DB API spec' do
   # Bulk load docs
   it 'should be possible to bulk load docs' do
     docs.each {  |doc|
-      put '/'+ DB + '/' + doc[0].to_s , doc[1]
+      put '/'+ DB + '/' + doc[:id].to_s , doc.to_json
       expect_status 201
     }
     post '/' + DB + '/_bulkdocs', bulk_docs
@@ -105,6 +107,3 @@ describe 'couch DB API spec' do
   end
 
 end
-
-
-
