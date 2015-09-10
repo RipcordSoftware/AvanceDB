@@ -1,4 +1,4 @@
-# Simple ruby api tests for rspec to be extended over time to cover Avance functionality
+# Simple ruby api tests for rspec to be extended over time to cover AvanceDB functionality
 # 
 # Copyright (c) Simon Stearn, 2015
 
@@ -26,7 +26,6 @@ Airborne.configure do |config|
 end
 
 1000.times { | i |
-
   docs[i] = {
     :id => i.to_s,
     :first_name => Faker::Name.first_name,
@@ -41,15 +40,14 @@ end
   }
 }
 
-bulk_docs = "{ docs: " + docs.to_json + "}"
-
+bulk_docs = { :docs => docs }.to_json
 
 describe 'couch DB API spec' do
 
-  it 'should have a database' do
-    delete '/' + DB
-    put '/' + DB
-    expect_status 201
+  it 'should return the signature' do
+    get '/'
+    expect_status 200
+    expect_json_types(couchdb: :string)
   end
 
   it 'should return futon' do
@@ -59,16 +57,25 @@ describe 'couch DB API spec' do
 
   # Other futon tests...
 
-  # Generic doc wrangling tests
-  it 'should be possible to create a document' do
-    put '/'+ DB + '/' + "001" , { :name => "Desdemona", :occupation => "street urchin", :age => 8}
+  it 'should have a database' do
+    delete '/' + DB
+    put '/' + DB
     expect_status 201
   end
 
+  # Generic doc wrangling tests
+  it 'should be possible to create a document' do
+    put '/'+ DB + '/' + "desdemona" , { :name => "Desdemona", :occupation => "street urchin", :age => 8}
+    expect_status 201
+    expect_json(id: "desdemona")
+    expect_json(ok: true)
+    expect_json_types(rev: :string)
+  end
+
   it 'should be possible to find the document' do
-    get '/'+ DB + '/' + "001" 
+    get '/'+ DB + '/' + "desdemona" 
     expect_json_types(_id: :string, name:  :string , occupation: :string, age: :integer)
-    expect_json(_id: "001",  name:  "Desdemona", occupation: "street urchin", age: 8)
+    expect_json(_id: "desdemona",  name:  "Desdemona", occupation: "street urchin", age: 8)
     expect_status 200
   end
 
@@ -77,14 +84,18 @@ describe 'couch DB API spec' do
     docs.each {  |doc|
       put '/'+ DB + '/' + doc[:id].to_s , doc.to_json
       expect_status 201
+      expect_json(id: doc[:id])
+      expect_json(ok: true)
+      expect_json_types(rev: :string)
     }
   end
 
   # Hammer doc find
   it 'should be possible to find a bunch of docs' do
     docs.each {  |doc|
-      get '/' + DB + '/' + doc[:id].to_s
+      get '/' + DB + '/' + doc[:id]
       expect_status 200
+      expect_json(doc)
     }
   end
 
@@ -95,15 +106,13 @@ describe 'couch DB API spec' do
     expect_status 201
   end
 
-
   # Bulk load docs
   it 'should be possible to bulk load docs' do
-    docs.each {  |doc|
-      put '/'+ DB + '/' + doc[:id].to_s , doc.to_json
-      expect_status 201
-    }
     post '/' + DB + '/_bulk_docs', bulk_docs
-    expect_status 400
+    expect_status 201
+    get '/' + DB
+    expect_status 200
+    expect_json(doc_count: docs.length)
   end
 
 end
