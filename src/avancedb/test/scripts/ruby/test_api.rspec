@@ -102,7 +102,7 @@ describe 'couch DB API spec' do
       put '/'+ DB + '/' + doc[:id].to_s , doc.to_json
       expect_status 201
     }
-    post '/' + DB + '/_bulkdocs', bulk_docs
+    post '/' + DB + '/_bulk_docs', bulk_docs
     expect_status 400
   end
 
