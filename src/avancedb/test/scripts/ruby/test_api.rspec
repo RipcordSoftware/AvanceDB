@@ -1,48 +1,59 @@
-# Simple ruby api tests for rspec
+# Simple ruby api tests for rspec to be extended over time to cover Avance functionality
 # 
+# Copyright (c) Simon Stearn, 2015
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the 
+# Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the 
+# Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A 
+# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION 
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 require 'airborne'
 require 'faker'
+require 'json'
 
 DB="ruby_tests"
 HOST="127.0.0.1"
 PORT="15994"
-URL='http://' + HOST + ':' + PORT
 docs=[]
+
+Airborne.configure do |config|
+  config.base_url = 'http://' + HOST + ':' + PORT
+end
 
 1000.times { | i |
 
-docs[i] = [i, {
-  :first_name => Faker::Name.first_name,
-  :last_name => Faker::Name.last_name,
-  :company_name => Faker::Company.name,
-  :catch_phrase => Faker::Company.catch_phrase,
-  :BS => Faker::Company.bs,
-  :phone_number => Faker::PhoneNumber.phone_number,
-  :email => Faker::Internet.email,
-  :ip_v4_address => Faker::Internet.ip_v4_address,
-  :ip_v6_address => Faker::Internet.ip_v6_address } ]
-
+  docs[i] = {
+    :id => i.to_s,
+    :first_name => Faker::Name.first_name,
+    :last_name => Faker::Name.last_name,
+    :company_name => Faker::Company.name,
+    :catch_phrase => Faker::Company.catch_phrase,
+    :BS => Faker::Company.bs,
+    :phone_number => Faker::PhoneNumber.phone_number,
+    :email => Faker::Internet.email,
+    :ip_v4_address => Faker::Internet.ip_v4_address,
+    :ip_v6_address => Faker::Internet.ip_v6_address 
+  }
 }
 
+bulk_docs = "{ docs: " + docs.to_json + "}"
 
 
 describe 'couch DB API spec' do
 
-#  before :all do
-#
-#  end
-
-
-
   it 'should have a database' do
-	delete URL + '/' + DB
-	put URL + '/' + DB
-	expect_status 201
+    delete '/' + DB
+    put '/' + DB
+    expect_status 201
   end
 
-
   it 'should return futon' do
-    get URL+'/_utils/index.html'
+    get '/_utils/index.html'
     expect_status 200
   end
 
@@ -50,25 +61,49 @@ describe 'couch DB API spec' do
 
   # Generic doc wrangling tests
   it 'should be possible to create a document' do
-    put URL + '/'+ DB + '/' + "001" , { :name => "Desdemona", :occupation => "street urchin", :age => 8}
+    put '/'+ DB + '/' + "001" , { :name => "Desdemona", :occupation => "street urchin", :age => 8}
     expect_status 201
   end
 
   it 'should be possible to find the document' do
-    get URL + '/'+ DB + '/' + "001" 
+    get '/'+ DB + '/' + "001" 
     expect_json_types(_id: :string, name:  :string , occupation: :string, age: :integer)
     expect_json(_id: "001",  name:  "Desdemona", occupation: "street urchin", age: 8)
     expect_status 200
   end
 
-  # Add bulk api version once implemented
+  # Hammer doc load
   it 'should be possible to load a bunch of docs' do
     docs.each {  |doc|
-      put URL + '/'+ DB + '/' + doc[0].to_s , doc[1]
+      put '/'+ DB + '/' + doc[:id].to_s , doc.to_json
       expect_status 201
     }
   end
+
+  # Hammer doc find
+  it 'should be possible to find a bunch of docs' do
+    docs.each {  |doc|
+      get '/' + DB + '/' + doc[:id].to_s
+      expect_status 200
+    }
+  end
+
+  # Yes these should all be torn down and recreated for every test...
+  it 'should have a fresh database' do
+    delete '/' + DB
+    put '/' + DB
+    expect_status 201
+  end
+
+
+  # Bulk load docs
+  it 'should be possible to bulk load docs' do
+    docs.each {  |doc|
+      put '/'+ DB + '/' + doc[:id].to_s , doc.to_json
+      expect_status 201
+    }
+    post '/' + DB + '/_bulkdocs', bulk_docs
+    expect_status 400
+  end
+
 end
-
-
-
