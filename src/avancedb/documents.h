@@ -16,27 +16,12 @@
 #include "document.h"
 #include "get_all_documents_options.h"
 #include "post_all_documents_options.h"
+#include "bulk_documents_result.h"
 
 class Database;
 
 class Documents final : public boost::enable_shared_from_this<Documents>, private boost::noncopyable {
 public:
-    
-    struct BulkDocumentsResult final {
-        BulkDocumentsResult(const char* id, const char* rev) : 
-            ok_(true), id_(id), rev_(rev) {}
-        
-        BulkDocumentsResult(const char* id, const char* error, const char* reason) : 
-            ok_(false), id_(id), error_(error), reason_(reason) {}
-        
-        const bool ok_;
-        const std::string id_;
-        const std::string rev_;        
-        const std::string error_;
-        const std::string reason_;
-    };
-    
-    using BulkDocumentsResults = std::vector<BulkDocumentsResult>;
     
     using collection = rs::LazyFlatSet<document_ptr, Document::Less, Document::Equal, rs::LazyFlatSetQuickSort<document_ptr, Document::Less>, std::allocator<document_ptr>, true>;
 
@@ -94,6 +79,10 @@ private:
     boost::mutex localDocsMtx_;
     collection localDocs_;
     boost::atomic<sequence_type> localUpdateSeq_;
+    
+    boost::mutex allDocsCacheMtx_;
+    boost::atomic<sequence_type> allDocsCacheUpdateSequence_;
+    document_array_ptr allDocsCacheDocs_;    
 
 };
 

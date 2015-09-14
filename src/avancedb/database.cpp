@@ -58,6 +58,6 @@ document_ptr Database::SetLocalDocument(const char* id, script_object_ptr obj) {
     return docs_->SetLocalDocument(id, obj);
 }
 
-Documents::BulkDocumentsResults Database::PostBulkDocuments(script_array_ptr docs, bool newEdits) {
+BulkDocumentsResults Database::PostBulkDocuments(script_array_ptr docs, bool newEdits) {
     return docs_->PostBulkDocuments(docs, newEdits);
 }

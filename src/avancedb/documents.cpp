@@ -14,7 +14,9 @@
 #include "uuid_helper.h"
 
 Documents::Documents(database_ptr db) : db_(db), updateSeq_(0), localUpdateSeq_(0),
-        collections_(GetCollectionCount()), docsMtx_(collections_) {
+        collections_(GetCollectionCount()), docsMtx_(collections_),
+        allDocsCacheDocs_(boost::make_shared<document_array>()),
+        allDocsCacheUpdateSequence_(0) {
    
     for (unsigned i = 0; i < collections_; ++i) {
         docs_.emplace_back(64, 32 * 1024);
@@ -106,29 +108,43 @@ document_ptr Documents::SetDocument(const char* id, script_object_ptr obj) {
 }
 
 document_array_ptr Documents::GetAllDocuments(sequence_type& updateSequence) {
-    auto count = getCount();
+    boost::unique_lock<decltype(allDocsCacheMtx_)> guard(allDocsCacheMtx_);
+    updateSequence = allDocsCacheUpdateSequence_;
     
-    auto allDocs = boost::make_shared<document_array>();
-    allDocs->reserve(count);
-    
-    for (unsigned i = 0; i < collections_; ++i) {
-        boost::unique_lock<DocumentsMutex> guard{docsMtx_[i]};
-        auto old_size = allDocs->size();
-        allDocs->insert(allDocs->end(), docs_[i].cbegin(), docs_[i].cend());
+    if (allDocsCacheUpdateSequence_ == updateSeq_) {
+        return allDocsCacheDocs_;
+    } else {
+        auto count = getCount();
+
+        auto allDocs = boost::make_shared<document_array>();
+        allDocs->reserve(count);
         
-        guard.unlock();
-        std::inplace_merge(allDocs->begin(), allDocs->begin() + old_size, allDocs->end(), Document::Less{});
+        std::vector<boost::unique_lock<DocumentsMutex>> locks{docsMtx_.begin(), docsMtx_.end()};
+        
+        updateSequence = updateSeq_;
+        allDocsCacheUpdateSequence_ = updateSequence;
+
+        for (unsigned i = 0; i < collections_; ++i) {
+            auto oldSize = allDocs->size();
+            allDocs->insert(allDocs->end(), docs_[i].cbegin(), docs_[i].cend());
+            locks[i].unlock();
+            
+            if (i > 0) {
+                std::inplace_merge(allDocs->begin(), allDocs->begin() + oldSize, allDocs->end(), Document::Less{});
+            }
+        }
+
+        allDocsCacheDocs_ = allDocs;
+
+        return allDocs;
     }
-    
-    updateSequence = updateSeq_;
-    
-    return allDocs;
 }
 
 document_array_ptr Documents::GetDocuments(const GetAllDocumentsOptions& options, collection::size_type& offset, collection::size_type& totalDocs, sequence_type& updateSequence) {       
     auto docs = GetAllDocuments(updateSequence);
     
     if (options.Descending()) {
+        docs = boost::make_shared<document_array>(docs->begin(), docs->end());        
         std::reverse(docs->begin(), docs->end());
     }
 
@@ -175,7 +191,7 @@ document_array_ptr Documents::GetDocuments(const GetAllDocumentsOptions& options
 
         docs = boost::make_shared<document_array>(docs->cbegin() + startIndex, docs->cbegin() + endIndex);
     } else {
-        docs->clear();
+        docs = boost::make_shared<document_array>();
     }
 
     return docs;
@@ -221,7 +237,7 @@ document_array_ptr Documents::PostDocuments(const PostAllDocumentsOptions& optio
     return results;
 }
 
-Documents::BulkDocumentsResults Documents::PostBulkDocuments(script_array_ptr docs, bool newEdits) {
+BulkDocumentsResults Documents::PostBulkDocuments(script_array_ptr docs, bool newEdits) {
     BulkDocumentsResults results;
     UuidHelper::UuidGenerator gen;
     UuidHelper::UuidString newId;

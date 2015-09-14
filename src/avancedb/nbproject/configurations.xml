@@ -4,6 +4,7 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>bulk_documents_result.h</itemPath>
       <itemPath>../../externals/cityhash/src/city.h</itemPath>
       <itemPath>config.h</itemPath>
       <itemPath>database.h</itemPath>
@@ -144,6 +145,8 @@
             ex="false"
             tool="3"
             flavor2="0">
+      </item>
+      <item path="bulk_documents_result.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="config.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -305,6 +308,8 @@
             ex="false"
             tool="3"
             flavor2="0">
+      </item>
+      <item path="bulk_documents_result.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="config.cpp" ex="false" tool="1" flavor2="0">
       </item>
