@@ -38,6 +38,7 @@ RestServer::RestServer() {
     
     AddRoute("POST", REGEX_DBNAME_GROUP "/+_all_docs", &RestServer::PostDatabaseAllDocs);
     AddRoute("POST", REGEX_DBNAME_GROUP "/+_bulk_docs", &RestServer::PostDatabaseBulkDocs);
+    AddRoute("POST", REGEX_DBNAME_GROUP "/+_revs_diff", &RestServer::PostDatabaseRevsDiff);
     AddRoute("POST", REGEX_DBNAME_GROUP "/{0,}$", &RestServer::PostDatabase);
     
     AddRoute("GET", "/+_active_tasks/{0,}$", &RestServer::GetActiveTasks);
@@ -82,14 +83,12 @@ bool RestServer::GetSession(rs::httpserver::request_ptr request, const rs::https
 bool RestServer::GetAllDbs(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response) {
     auto dbs = databases_.GetDatabases();
     
-    std::stringstream stream;
-    stream << "[";
+    JsonStream stream{JsonStream::ContextType::Array};
     for (int i = 0; i < dbs.size(); ++i) {
-        stream << (i > 0 ? "," : "") << "\"" << dbs[i] << "\"";
+        stream.Append(dbs[i]);
     }
-    stream << "]";
     
-    response->setContentType("application/json").Send(stream.str());
+    response->setContentType("application/json").Send(stream.Flush());
     return true;
 }
 
@@ -112,22 +111,18 @@ bool RestServer::GetUuids(rs::httpserver::request_ptr request, const rs::httpser
         throw UuidCountLimit();
     }
     
-    std::stringstream stream;
-    stream << std::hex << std::setfill('0') << "{\"uuids\":[";
+    JsonStream stream;
+    stream.PushContext(JsonStream::ContextType::Array, "uuids");
     
     UuidHelper::UuidGenerator gen;
     for (int i = 0; i < count; ++i) {                
-        stream << (i > 0 ? "," : "") << "\"";
-
         UuidHelper::UuidString uuidString;
         UuidHelper::FormatUuid(gen(), uuidString);
         
-        stream << uuidString << "\"";
+        stream.Append(uuidString);
     }
     
-    stream << "]}";
-    
-    response->setContentType("application/json").Send(stream.str());    
+    response->setContentType("application/json").Send(stream.Flush());    
     return true;
 }
 
@@ -317,9 +312,10 @@ bool RestServer::PostDatabaseBulkDocs(rs::httpserver::request_ptr request, const
         auto docs = obj->getArray("docs");
         
         auto results = db->PostBulkDocuments(docs, newEdits);
-        
-        JsonStream stream{"["};
+
+        JsonStream stream{JsonStream::ContextType::Array};
         for (auto result : results) {
+            stream.PushContext(JsonStream::ContextType::Object);
             stream.Append("id", result.id_);
             
             if (result.ok_) {
@@ -330,15 +326,68 @@ bool RestServer::PostDatabaseBulkDocs(rs::httpserver::request_ptr request, const
                 stream.Append("reason", result.reason_);
             }
             
-            stream.NextObject();
+            stream.PopContext();
         }
         
-        response->setStatusCode(201).setContentType("application/json").Send(stream.Flush("]"));
+        response->setStatusCode(201).setContentType("application/json").Send(stream.Flush());
         
         created = true;
     }
     
     return created;
+}
+
+bool RestServer::PostDatabaseRevsDiff(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
+    bool handled = false;
+    auto db = GetDatabase(args);
+    if (!!db) {
+        JsonStream stream;
+        
+        auto obj = GetJsonBody(request, false);
+        
+        try {
+            auto count = obj->getCount();
+            for (decltype(count) i = 0; i < count; ++i) {
+                auto id = obj->getName(i);            
+                auto revs = obj->getArray(i);
+
+                stream.PushContext(JsonStream::ContextType::Object, id);
+                stream.PushContext(JsonStream::ContextType::Array, "missing");
+
+                const char* possibleAncestor = nullptr;
+                auto doc = db->GetDocument(id, false);                
+                
+                auto revsCount = revs->getCount();
+                for (decltype(revsCount) j = 0; j < revsCount; ++j) {
+                    auto rev = revs->getString(j);
+                    
+                    if (!doc || std::strcmp(doc->getRev(), rev) != 0) {
+                        stream.Append(rev);
+                    } else {
+                        possibleAncestor = rev;
+                    }
+                }
+                
+                stream.PopContext();
+                
+                if (possibleAncestor) {
+                    stream.PushContext(JsonStream::ContextType::Array, "possible_ancestors");
+                    stream.Append(possibleAncestor);
+                    stream.PopContext();
+                }
+                
+                stream.PopContext();
+            }
+
+            response->setStatusCode(200).setContentType("application/json").Send(stream.Flush());
+
+            handled = true;
+        } catch (const rs::scriptobject::ScriptObjectException&) {
+            throw InvalidJson{};
+        }
+    }
+    
+    return handled;
 }
 
 bool RestServer::GetLocalDocument(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
@@ -615,7 +664,7 @@ const std::string& RestServer::GetParameter(const char* param, const rs::httpser
     return qs.getValue(param);
 }
 
-rs::scriptobject::ScriptObjectPtr RestServer::GetJsonBody(rs::httpserver::request_ptr request) {
+rs::scriptobject::ScriptObjectPtr RestServer::GetJsonBody(rs::httpserver::request_ptr request, bool useCachedObjectKeys) {
     if (request->HasBody()) {
         if (request->getContentType().find("application/json") == std::string::npos) {
             throw InvalidJson();
@@ -642,7 +691,7 @@ rs::scriptobject::ScriptObjectPtr RestServer::GetJsonBody(rs::httpserver::reques
         
         try {
             rs::scriptobject::ScriptObjectJsonSource source(json);        
-            return rs::scriptobject::ScriptObjectFactory::CreateObject(source);
+            return rs::scriptobject::ScriptObjectFactory::CreateObject(source, useCachedObjectKeys);
         } catch (const std::exception&) {
             throw InvalidJson();
         }

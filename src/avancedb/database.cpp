@@ -26,8 +26,8 @@ unsigned long Database::DocCount() {
     return docs_->getCount(); 
 }
 
-document_ptr Database::GetDocument(const char* id) {
-    return docs_->GetDocument(id);
+document_ptr Database::GetDocument(const char* id, bool throwOnFail) {
+    return docs_->GetDocument(id, throwOnFail);
 }
 
 document_ptr Database::DeleteDocument(const char* id, const char* rev) {

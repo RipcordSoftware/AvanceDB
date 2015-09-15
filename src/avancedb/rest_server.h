@@ -40,6 +40,7 @@ private:
     bool PutDocument(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response);
     
     bool PostDatabaseBulkDocs(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response);
+    bool PostDatabaseRevsDiff(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response);
     bool PostDatabase(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response);
     
     bool DeleteDatabase(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response);
@@ -53,7 +54,7 @@ private:
     const char* GetDatabaseName(const rs::httpserver::RequestRouter::CallbackArgs&);
     const std::string& GetParameter(const char* param, const rs::httpserver::QueryString&, bool throwIfMissing = false);
     const char* GetParameter(const char* param, const rs::httpserver::RequestRouter::CallbackArgs&);
-    rs::scriptobject::ScriptObjectPtr GetJsonBody(rs::httpserver::request_ptr request);
+    rs::scriptobject::ScriptObjectPtr GetJsonBody(rs::httpserver::request_ptr request, bool useCachedObjectKeys = true);
     
     rs::httpserver::RequestRouter router_;        
     Databases databases_;

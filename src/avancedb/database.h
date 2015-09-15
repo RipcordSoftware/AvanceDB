@@ -24,7 +24,7 @@ public:
     unsigned long DocDelCount() { return docDelCount_; }
     unsigned long InstanceStartTime() { return instanceStartTime_; }
     
-    document_ptr GetDocument(const char* id);
+    document_ptr GetDocument(const char* id, bool throwOnFail = true);
     document_ptr DeleteDocument(const char* id, const char* rev);
     document_ptr SetDocument(const char* id, script_object_ptr);
     

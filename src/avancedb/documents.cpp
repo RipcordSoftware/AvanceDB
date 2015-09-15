@@ -41,7 +41,7 @@ sequence_type Documents::getUpdateSequence() {
     return updateSeq_;
 }
 
-document_ptr Documents::GetDocument(const char* id) {
+document_ptr Documents::GetDocument(const char* id, bool throwOnFail) {
     auto coll = GetDocumentCollectionIndex(id);
     
     boost::lock_guard<DocumentsMutex> guard{docsMtx_[coll]};
@@ -49,7 +49,7 @@ document_ptr Documents::GetDocument(const char* id) {
     Document::Compare compare{id};
     auto doc = docs_[coll].find_fn(compare);
     
-    if (!doc) {
+    if (!doc && throwOnFail) {
         throw DocumentMissing();
     }
     

@@ -27,7 +27,7 @@ public:
 
     static documents_ptr Create(database_ptr db);
     
-    document_ptr GetDocument(const char* id);
+    document_ptr GetDocument(const char* id, bool throwOnFail = true);
     document_ptr DeleteDocument(const char* id, const char* rev);
     document_ptr SetDocument(const char* id, script_object_ptr obj);
     
