@@ -2091,3 +2091,218 @@ describe('avancedb -- _bulk_docs --', function() {
         });
     });
 });
+
+describe('avancedb -- _revs_diff --', function() {
+    var testDbName = 'avancedb-revs_diff-test';
+    var db = conn.database(testDbName);
+    
+    var revsDiff = function(obj, callback) {
+        var options = {};
+        options.body = obj;
+        options.method = 'POST';
+        options.path = '/_revs_diff';
+        db.query(options, callback);
+    };
+        
+    var hijackRequest = function() { 
+        var oldRequest = conn.request;
+        conn.request = function(options, callback) {
+            conn.request = oldRequest;
+            
+            if (options.method === 'POST' && options.body && Array.isArray(options.body.docs)) {
+                options.body.new_edits = false;
+            }
+            
+            return oldRequest.call(conn, options, callback);
+        };
+    };
+    
+    var testRevs = ['1-aaaabbbbccccddddaaaabbbbccccdddd','2-00001111222233330000111122223333','3-aaaabbbbccccddddaaaabbbbccccdddd'];
+    
+    it('should create a database', function(done) {
+        db.create(function(err, res) {
+            assert.equal(null, err);
+            assert.notEqual(null, res);
+            assert.notEqual(res.ok, 'true');
+            done();
+        });
+    });
+    
+    it('get revs diff of a non-existent doc', function(done) {
+        var obj = {'1234': testRevs};
+        var keys = Object.keys(obj);
+        revsDiff(obj, function(err, result) {
+            assert.equal(null, err);
+            assert.notEqual(null, result);
+            assert.notEqual(null, result[keys[0]]);
+            assert.notEqual(null, result[keys[0]].missing);
+            assert.equal(null, result[keys[0]].possible_ancestors);
+            assert.deepEqual(result[keys[0]].missing, result[keys[0]].missing);
+            done();
+        });
+    });
+    
+    it('create a document with an id(0) and rev(1)', function(done) {
+        hijackRequest();
+        var db = conn.database(testDbName);
+        var obj = {_id:'0', _rev:testRevs[0]};
+        db.save([obj], function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            assert.equal(obj._id, docs[0].id);
+            assert.equal(obj._rev, docs[0].rev);
+            done();
+        });
+    });
+    
+    it('get revs diff - id(0)', function(done) {                
+        var obj = {'0': testRevs};
+        var keys = Object.keys(obj);
+        var revs = obj[keys[0]];
+        revsDiff(obj, function(err, results) {
+            assert.equal(null, err);            
+            assert.notEqual(null, results);
+            var result = results[keys[0]];
+            assert.notEqual(null, result);
+            assert.notEqual(null, result.missing);
+            assert.equal(revs[1], result.missing[0]);
+            assert.equal(revs[2], result.missing[1]);            
+            assert.notEqual(null, result.possible_ancestors);
+            assert.equal(revs[0], result.possible_ancestors[0]);
+            done();
+        });
+    });
+    
+    it('create a document with an id(1) and rev(2)', function(done) {
+        hijackRequest();
+        var db = conn.database(testDbName);
+        var obj = {_id:'1', _rev:testRevs[1]};
+        db.save([obj], function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            assert.equal(obj._id, docs[0].id);
+            assert.equal(obj._rev, docs[0].rev);
+            done();
+        });
+    });
+    
+    it('get missing revs - id(1)', function(done) {                
+        var obj = {'1': testRevs};
+        var keys = Object.keys(obj);
+        var revs = obj[keys[0]];
+        revsDiff(obj, function(err, results) {
+            assert.equal(null, err);            
+            assert.notEqual(null, results);
+            var result = results[keys[0]];
+            assert.notEqual(null, result);
+            assert.notEqual(null, result.missing);
+            assert.equal(revs[0], result.missing[0]);
+            assert.equal(revs[2], result.missing[1]);            
+            assert.notEqual(null, result.possible_ancestors);
+            assert.equal(revs[1], result.possible_ancestors[0]);
+            done();
+        });
+    });    
+    
+    it('create a document with an id(2) and rev(3)', function(done) {
+        hijackRequest();
+        var db = conn.database(testDbName);
+        var obj = {_id:'2', _rev:testRevs[2]};
+        db.save([obj], function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            assert.equal(obj._id, docs[0].id);
+            assert.equal(obj._rev, docs[0].rev);
+            done();
+        });
+    });    
+    
+    it('get revs diff - id(2)', function(done) {                
+        var obj = {'2': testRevs};
+        var keys = Object.keys(obj);
+        var revs = obj[keys[0]];
+        revsDiff(obj, function(err, results) {
+            assert.equal(null, err);            
+            assert.notEqual(null, results);
+            var result = results[keys[0]];
+            assert.notEqual(null, result);
+            assert.notEqual(null, result.missing);
+            assert.equal(revs[0], result.missing[0]);
+            assert.equal(revs[1], result.missing[1]);            
+            assert.notEqual(null, result.possible_ancestors);
+            assert.equal(revs[2], result.possible_ancestors[0]);
+            done();
+        });
+    });
+    
+    it('get revs diff - id(0, 1, 2, 3)', function(done) {                
+        var obj = {'0': testRevs, '1': testRevs, '2': testRevs, '3': testRevs};
+        var keys = Object.keys(obj);
+        var revs = obj[keys[0]];
+        revsDiff(obj, function(err, results) {
+            assert.equal(null, err);            
+            assert.notEqual(null, results);
+            assert.equal(4, Object.keys(results).length);
+            var result = results[keys[0]];
+            assert.notEqual(null, result);
+            assert.notEqual(null, result.missing);
+            assert.equal(revs[1], result.missing[0]);
+            assert.equal(revs[2], result.missing[1]);            
+            assert.notEqual(null, result.possible_ancestors);
+            assert.equal(revs[0], result.possible_ancestors[0]);
+            result = results[keys[1]];
+            assert.notEqual(null, result);
+            assert.notEqual(null, result.missing);
+            assert.equal(revs[0], result.missing[0]);
+            assert.equal(revs[2], result.missing[1]);            
+            assert.notEqual(null, result.possible_ancestors);
+            assert.equal(revs[1], result.possible_ancestors[0]);
+            result = results[keys[2]];
+            assert.notEqual(null, result);
+            assert.notEqual(null, result.missing);
+            assert.equal(revs[0], result.missing[0]);
+            assert.equal(revs[1], result.missing[1]);            
+            assert.notEqual(null, result.possible_ancestors);
+            assert.equal(revs[2], result.possible_ancestors[0]);
+            result = results[keys[3]];
+            assert.notEqual(null, result);
+            assert.notEqual(null, result.missing);
+            assert.equal(revs[0], result.missing[0]);
+            assert.equal(revs[1], result.missing[1]);            
+            assert.equal(revs[2], result.missing[2]);            
+            assert.equal(null, result.possible_ancestors);
+            done();
+        });
+    });
+    
+    it('get missing revs of a deleted doc - id(0)', function(done) {
+        db.remove('0', testRevs[0], function(err, res) {        
+            assert.equal(null, err);            
+            assert.notEqual(null, res);            
+            
+            var obj = {'0': testRevs};
+            var keys = Object.keys(obj);
+            var revs = obj[keys[0]];
+            revsDiff(obj, function(err, results) {
+                assert.equal(null, err);            
+                assert.notEqual(null, results);
+                var result = results[keys[0]];
+                assert.notEqual(null, result);
+                assert.notEqual(null, result.missing);
+                assert.equal(revs[0], result.missing[0]);
+                assert.equal(revs[1], result.missing[1]);            
+                assert.equal(revs[2], result.missing[2]);            
+                assert.equal(null, result.possible_ancestors);
+                done();
+            });
+        });
+    });
+    
+    it('delete the database', function(done) {
+        db.destroy(function(err, res) {
+            assert.equal(null, err);            
+            assert.notEqual(null, res);
+            done();
+        });
+    });
+});
