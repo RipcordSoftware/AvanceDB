@@ -39,6 +39,7 @@ RestServer::RestServer() {
     AddRoute("POST", REGEX_DBNAME_GROUP "/+_all_docs", &RestServer::PostDatabaseAllDocs);
     AddRoute("POST", REGEX_DBNAME_GROUP "/+_bulk_docs", &RestServer::PostDatabaseBulkDocs);
     AddRoute("POST", REGEX_DBNAME_GROUP "/+_revs_diff", &RestServer::PostDatabaseRevsDiff);
+    AddRoute("POST", REGEX_DBNAME_GROUP "/+_ensure_full_commit", &RestServer::PostEnsureFullCommit);
     AddRoute("POST", REGEX_DBNAME_GROUP "/{0,}$", &RestServer::PostDatabase);
     
     AddRoute("GET", "/+_active_tasks/{0,}$", &RestServer::GetActiveTasks);
@@ -385,6 +386,23 @@ bool RestServer::PostDatabaseRevsDiff(rs::httpserver::request_ptr request, const
         } catch (const rs::scriptobject::ScriptObjectException&) {
             throw InvalidJson{};
         }
+    }
+    
+    return handled;
+}
+
+bool RestServer::PostEnsureFullCommit(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
+    bool handled = false;
+    auto db = GetDatabase(args);
+    if (!!db) {
+        JsonStream stream;
+        
+        stream.Append("instance_start_time", db->InstanceStartTime());
+        stream.Append("ok", true);
+        
+        response->setStatusCode(201).setContentType("application/json").Send(stream.Flush());
+        
+        handled = true;
     }
     
     return handled;
