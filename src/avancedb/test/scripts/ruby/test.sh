@@ -64,7 +64,7 @@ fi
 TEST_DIR=$PWD
 
 pushd ../../../dist/${CONFIGURATION}/GNU-Linux-x86
-./avancedb -p 15994 &> ${TEST_DIR}/avance_test.log &
+./avancedb -p 15995 &> ${TEST_DIR}/avance_test.log &
 ADB_PID=$!
 sleep ${DELAY}
 popd

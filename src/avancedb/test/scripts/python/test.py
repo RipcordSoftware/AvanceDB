@@ -4,7 +4,7 @@ import requests
 from copy import deepcopy
 
 host = 'http://localhost'
-port = '15994'
+port = '15996'
 url = host + ':' + port
 couch = couchdb.Server(url)
 

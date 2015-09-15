@@ -18,7 +18,7 @@ require 'json'
 
 DB="ruby_tests"
 HOST="127.0.0.1"
-PORT="15994"
+PORT="15995"
 docs=[]
 
 Airborne.configure do |config|
