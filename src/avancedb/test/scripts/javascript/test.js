@@ -4,12 +4,14 @@ var assert = require('assert');
 var cradle = require('cradle');
 var _ = require('underscore');
 var http = require('http');
+var faker = require('faker');
 
 var host = 'http://localhost';
 var port = 15994;
 //var port = 5994;
 var url = host + ':' + port;
 var conn = new cradle.Connection(host, port, { cache: false });
+var couch_conn = new cradle.Connection(host, 5984, { cache: false });
 
 describe('avancedb -- server info --', function() {
     it('should validate server signature', function(done) {
@@ -2305,4 +2307,158 @@ describe('avancedb -- _revs_diff --', function() {
             done();
         });
     });
+});
+
+describe('avancedb -- replication --', function() {
+    var testDbName = 'avancedb-repl-test';
+    var testDbName2 = 'avancedb-repl-test2';
+    var replTarget = url + '/' + testDbName;
+    var replTarget2 = url + '/' + testDbName2;
+    var db = conn.database(testDbName);
+    var db2 = conn.database(testDbName2);
+    var couch_db = couch_conn.database(testDbName);
+    
+    var hijackRequest = function() { 
+        var oldRequest = couch_conn.request;
+        couch_conn.request = function(options, callback) {
+            couch_conn.request = oldRequest;
+            
+            if (options.method === 'POST' && options.body && Array.isArray(options.body.docs)) {
+                options.body.new_edits = false;
+            }
+            
+            return oldRequest.call(couch_conn, options, callback);
+        };
+    };
+    
+    var data = [];
+    for (var i = 0; i < 1000; i++) {
+        data[i] = { _id: ('00000000' + i).slice(-8), _rev: '1-00000000000000000000000000000000', name: faker.fake('{{name.lastName}}, {{name.firstName}} {{name.suffix}}'), lorem: faker.lorem.sentence() };
+    }
+    
+    var data2 = [];
+    for (var i = 0; i < 1000; i++) {
+        data[i] = { _id: ('00000000' + i).slice(-8), _rev: '1-00000000000000000000000000000000', name: faker.fake('{{name.lastName}}, {{name.firstName}} {{name.suffix}}'), lorem: faker.lorem.sentence() };
+    }
+    
+    it('should create a database - 1', function(done) {
+        couch_db.create(function(err, res) {
+            assert.equal(null, err);
+            assert.notEqual(null, res);
+            assert.notEqual(res.ok, 'true');
+            done();
+        });
+    });
+    
+    it('bulk create documents - 1', function(done) {
+        hijackRequest();
+        
+        couch_db.save(data, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            // couchdb returns an array of zero items when new_edits is true
+            assert.equal(0, docs.length);
+            done();
+        });
+    });
+    
+    it('replicate documents - non-continuous', function(done) {
+        couch_conn.replicate({source: testDbName, target: replTarget, create_target: true, continuous: false }, function(err, res) {
+            assert.equal(null, err);            
+            assert.notEqual(null, res);
+            assert.equal(true, res.ok);            
+            assert.notEqual(null, res.history);            
+            assert.equal(1, res.history.length);            
+            assert.equal(data.length, res.history[0].docs_written);
+            done();
+        });
+    });
+    
+    it('should get database info - 1', function(done) {        
+        db.info(function(err, info) {
+            assert.equal(null, err);
+            assert.notEqual(null, info);
+            assert.equal(data.length, info.doc_count);
+            assert.equal(data.length, info.update_seq);
+            done();
+        });
+    });
+    
+    it('check replicated documents - 1', function(done) {
+        db.all({include_docs:true}, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            assert.equal(data.length, docs.length);
+            for (var i = 0; i < data.length; ++i) {
+                var doc = docs[i];
+                assert.notEqual(null, doc.value);
+                delete doc.value.doc._revisions;
+                assert.deepEqual(data[i], doc.value.doc);
+            }
+            done();
+        });
+    });
+    
+    it('replicate documents - continuous', function(done) {
+        couch_conn.replicate({source: testDbName, target: replTarget2, create_target: true, continuous: true }, function(err, res) {
+            assert.equal(null, err);            
+            assert.notEqual(null, res);
+            assert.equal(true, res.ok);
+            done();
+        });
+    });
+    
+    it('bulk create documents - 2', function(done) {
+        hijackRequest();
+        
+        couch_db.save(data2, function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            // couchdb returns an array of zero items when new_edits is true
+            assert.equal(0, docs.length);
+            done();
+        });
+    });
+    
+    it('wait for replication to complete', function(done) {
+        this.timeout(10000);
+        
+        var pollReplication = function() {
+            couch_conn.activeTasks(function(err, tasks) {                
+                assert.equal(null, err);
+                assert.notEqual(null, tasks);
+                var finished = tasks.length == 0;
+                for (var i = 0; !finished && i < tasks.length; ++i) {
+                    var task = tasks[i];
+                    finished = task.type == 'replication' && task.progress == 100 && task.target.indexOf(replTarget2) == 0;
+                }
+                
+                if (finished) {
+                    done();
+                } else {
+                    setTimeout(pollReplication, 500);
+                }                
+            });                            
+        };
+        
+        pollReplication();
+    });
+    
+    it('should get database info - 2', function(done) {        
+        db2.info(function(err, info) {
+            assert.equal(null, err);
+            assert.notEqual(null, info);
+            assert.equal(data.length + data2.length, info.doc_count);
+            assert.equal(data.length + data2.length, info.update_seq);
+            done();
+        });
+    });
+    
+    it('delete the database', function(done) {
+        couch_db.destroy(function(err, res) {
+            assert.equal(null, err);            
+            assert.notEqual(null, res);
+            done();
+        });
+    });    
 });

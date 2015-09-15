@@ -6,6 +6,12 @@ if [ $? -eq 127 ]; then
     exit 1
 fi
 
+ps -A | grep couchdb &> /dev/null
+if [ $? -ne 0 ]; then
+    echo 'You should install and/or start couchdb before running this test'
+    exit 2
+fi
+
 if [ ! -d "node_modules" ]; then
     npm install
     if [ $? -ne 0 ]; then

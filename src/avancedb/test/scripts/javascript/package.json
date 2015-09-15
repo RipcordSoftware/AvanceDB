@@ -4,6 +4,7 @@
     "dependencies": {
         "cradle": "*",
         "underscore": "*",
-        "mocha": "*"
+        "mocha": "*",
+        "faker": "*"
     }
 }
