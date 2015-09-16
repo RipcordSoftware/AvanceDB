@@ -6,27 +6,12 @@ if [ $? -eq 127 ]; then
     exit 1
 fi
 
-ps -A | grep couchdb &> /dev/null
+netstat -an | grep tcp | grep -P 'couchdb|5984' &> /dev/null
 if [ $? -ne 0 ]; then
     if [ "${CI}" == "" ]; then
         echo 'You should install and/or start couchdb before running this test'
         exit 2
-    fi
-    
-    systemctl --version &> /dev/null
-    if [ $? -eq 0 ]; then
-        sudo -n systemctl start couchdb
-    else
-        service --version &> /dev/null
-        if [ $? -eq 0 ]; then
-            sudo -n service couchdb start
-        fi
-    fi
-    
-    if [ $? -ne 0 ]; then
-        echo 'Unable to start CouchDB'
-        exit 3
-    fi
+    fi   
 fi
 
 if [ ! -d "node_modules" ]; then
