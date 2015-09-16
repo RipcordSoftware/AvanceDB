@@ -316,18 +316,20 @@ bool RestServer::PostDatabaseBulkDocs(rs::httpserver::request_ptr request, const
 
         JsonStream stream{JsonStream::ContextType::Array};
         for (auto result : results) {
-            stream.PushContext(JsonStream::ContextType::Object);
-            stream.Append("id", result.id_);
-            
-            if (result.ok_) {
-                stream.Append("ok", true);
-                stream.Append("rev", result.rev_);
-            } else {
-                stream.Append("error", result.error_);
-                stream.Append("reason", result.reason_);
+            if (newEdits || !result.ok_) {
+                stream.PushContext(JsonStream::ContextType::Object);
+                stream.Append("id", result.id_);
+
+                if (result.ok_) {
+                    stream.Append("ok", true);
+                    stream.Append("rev", result.rev_);
+                } else {
+                    stream.Append("error", result.error_);
+                    stream.Append("reason", result.reason_);
+                }
+
+                stream.PopContext();
             }
-            
-            stream.PopContext();
         }
         
         response->setStatusCode(201).setContentType("application/json").Send(stream.Flush());

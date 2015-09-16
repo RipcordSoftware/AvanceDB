@@ -1872,6 +1872,19 @@ describe('avancedb -- _bulk_docs --', function() {
     var testDbName = 'avancedb-bulk_docs-test';
     var db = conn.database(testDbName);
     var regexRev = /\d+\-[a-zA-Z0-9]{32}/;
+    
+    var hijackRequest = function() { 
+        var oldRequest = conn.request;
+        conn.request = function(options, callback) {
+            conn.request = oldRequest;
+            
+            if (options.method === 'POST' && options.body && Array.isArray(options.body.docs)) {
+                options.body.new_edits = false;
+            }
+            
+            return oldRequest.call(conn, options, callback);
+        };
+    };
 
     it('should create a database', function(done) {
         db.create(function(err, res) {
@@ -1975,113 +1988,106 @@ describe('avancedb -- _bulk_docs --', function() {
     });
     
     it('bulk save documents with revs and new_edits=false', function(done) {
-        var oldRequest = conn.request;
-        conn.request = function(options, callback) {
-            conn.request = oldRequest;
-            
-            if (options.body && Array.isArray(options.body.docs)) {
-                options.body.new_edits = false;
-            }
-            
-            return oldRequest.call(conn, options, callback);
-        };
+        hijackRequest();
         
-        db.save([{_id:'R2-D2',_rev:'1-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'},{_id:'Greedo',_rev:'2-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'},{_id:'Luke',_rev:'3-cccccccccccccccccccccccccccccccc'}], function(err, results) {
+        var ids = [ 'R2-D2', 'Greedo', 'Luke' ];
+        var revs = [ '1-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', '2-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', '3-cccccccccccccccccccccccccccccccc'];
+        
+        db.save([{_id:ids[0],_rev:revs[0]},{_id:ids[1],_rev:revs[1]},{_id:ids[2],_rev:revs[2]}], function(err, results) {
             assert.equal(null, err);
-            assert.equal(3, results.length);
-            assert.equal(true, results[0].ok);
-            assert.equal('R2-D2', results[0].id);
-            assert.equal(true, regexRev.test(results[0].rev));
-            assert.equal(1, results[0].rev[0]);
-            assert.equal('-', results[0].rev[1]);
-            assert.equal('a', results[0].rev[2]);
-            assert.equal(true, results[1].ok);
-            assert.equal('Greedo', results[1].id);
-            assert.equal(true, regexRev.test(results[1].rev));
-            assert.equal(2, results[1].rev[0]);
-            assert.equal('-', results[1].rev[1]);
-            assert.equal('b', results[1].rev[2]);
-            assert.equal(true, results[2].ok);
-            assert.equal('Luke', results[2].id);
-            assert.equal(true, regexRev.test(results[2].rev));
-            assert.equal(3, results[2].rev[0]);
-            assert.equal('-', results[2].rev[1]);
-            assert.equal('c', results[2].rev[2]);
-            done();
+            assert.equal(0, results.length);
+            
+            db.get(ids, function(err, results) {
+                assert.equal(3, results.length);
+                assert.equal(ids[0], results[0].id);
+                assert.equal(revs[0], results[0].value.rev);
+                assert.notEqual(null, results[0].value.doc);
+                assert.equal(ids[1], results[1].id);
+                assert.equal(revs[1], results[1].value.rev);
+                assert.notEqual(null, results[1].value.doc);
+                assert.equal(ids[2], results[2].id);
+                assert.equal(revs[2], results[2].value.rev);
+                assert.notEqual(null, results[2].value.doc);
+                done();
+            });
         });
     });
     
     it('bulk save existing documents with matching version revs and new_edits=false', function(done) {
-        var oldRequest = conn.request;
-        conn.request = function(options, callback) {
-            conn.request = oldRequest;
-            
-            if (options.body && Array.isArray(options.body.docs)) {
-                options.body.new_edits = false;
-            }
-            
-            return oldRequest.call(conn, options, callback);
-        };
+        hijackRequest();
         
-        db.save([{_id:'R2-D2',_rev:'1-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'},{_id:'Greedo',_rev:'2-cccccccccccccccccccccccccccccccc'},{_id:'Luke',_rev:'3-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'}], function(err, results) {
+        var ids = [ 'R2-D2', 'Greedo', 'Luke' ];
+        var revs = [ '1-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', '2-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', '3-cccccccccccccccccccccccccccccccc'];
+        
+        db.save([{_id:ids[0],_rev:revs[0]},{_id:ids[1],_rev:revs[1]},{_id:ids[2],_rev:revs[2]}], function(err, results) {
             assert.equal(null, err);
-            assert.equal(3, results.length);
-            assert.equal(true, results[0].ok);
-            assert.equal('R2-D2', results[0].id);
-            assert.equal(true, regexRev.test(results[0].rev));
-            assert.equal(1, results[0].rev[0]);
-            assert.equal('-', results[0].rev[1]);
-            assert.equal('b', results[0].rev[2]);
-            assert.equal(true, results[1].ok);
-            assert.equal('Greedo', results[1].id);
-            assert.equal(true, regexRev.test(results[1].rev));
-            assert.equal(2, results[1].rev[0]);
-            assert.equal('-', results[1].rev[1]);
-            assert.equal('c', results[1].rev[2]);
-            assert.equal(true, results[2].ok);
-            assert.equal('Luke', results[2].id);
-            assert.equal(true, regexRev.test(results[2].rev));
-            assert.equal(3, results[2].rev[0]);
-            assert.equal('-', results[2].rev[1]);
-            assert.equal('a', results[2].rev[2]);
-            done();
+            assert.equal(0, results.length);
+            
+            db.get(ids, function(err, results) {
+                assert.equal(3, results.length);
+                assert.equal(ids[0], results[0].id);
+                assert.equal(revs[0], results[0].value.rev);
+                assert.notEqual(null, results[0].value.doc);
+                assert.equal(ids[1], results[1].id);
+                assert.equal(revs[1], results[1].value.rev);
+                assert.notEqual(null, results[1].value.doc);
+                assert.equal(ids[2], results[2].id);
+                assert.equal(revs[2], results[2].value.rev);
+                assert.notEqual(null, results[2].value.doc);
+                done();
+            });
         });
     }); 
     
     it('bulk save existing documents with higher version revs and new_edits=false', function(done) {
-        var oldRequest = conn.request;
-        conn.request = function(options, callback) {
-            conn.request = oldRequest;
-            
-            if (options.body && Array.isArray(options.body.docs)) {
-                options.body.new_edits = false;
-            }
-            
-            return oldRequest.call(conn, options, callback);
-        };
+        hijackRequest();        
         
-        db.save([{_id:'R2-D2',_rev:'6-cccccccccccccccccccccccccccccccc'},{_id:'Greedo',_rev:'5-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'},{_id:'Luke',_rev:'4-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'}], function(err, results) {
+        var ids = [ 'R2-D2', 'Greedo', 'Luke' ];
+        var revs = [ '6-cccccccccccccccccccccccccccccccc', '5-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', '4-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'];
+        
+        db.save([{_id:ids[0],_rev:revs[0]},{_id:ids[1],_rev:revs[1]},{_id:ids[2],_rev:revs[2]}], function(err, results) {
             assert.equal(null, err);
-            assert.equal(3, results.length);
-            assert.equal(true, results[0].ok);
-            assert.equal('R2-D2', results[0].id);
-            assert.equal(true, regexRev.test(results[0].rev));
-            assert.equal(6, results[0].rev[0]);
-            assert.equal('-', results[0].rev[1]);
-            assert.equal('c', results[0].rev[2]);
-            assert.equal(true, results[1].ok);
-            assert.equal('Greedo', results[1].id);
-            assert.equal(true, regexRev.test(results[1].rev));
-            assert.equal(5, results[1].rev[0]);
-            assert.equal('-', results[1].rev[1]);
-            assert.equal('a', results[1].rev[2]);
-            assert.equal(true, results[2].ok);
-            assert.equal('Luke', results[2].id);
-            assert.equal(true, regexRev.test(results[2].rev));
-            assert.equal(4, results[2].rev[0]);
-            assert.equal('-', results[2].rev[1]);
-            assert.equal('b', results[2].rev[2]);
-            done();
+            assert.equal(0, results.length);
+            
+            db.get(ids, function(err, results) {
+                assert.equal(3, results.length);
+                assert.equal(ids[0], results[0].id);
+                assert.equal(revs[0], results[0].value.rev);
+                assert.notEqual(null, results[0].value.doc);
+                assert.equal(ids[1], results[1].id);
+                assert.equal(revs[1], results[1].value.rev);
+                assert.notEqual(null, results[1].value.doc);
+                assert.equal(ids[2], results[2].id);
+                assert.equal(revs[2], results[2].value.rev);
+                assert.notEqual(null, results[2].value.doc);
+                done();
+            });
+        });
+    });
+    
+    it('bulk save existing documents with lower version revs and new_edits=false', function(done) {
+        hijackRequest();        
+        
+        var ids = [ 'R2-D2', 'Greedo', 'Luke' ];
+        var revs = [ '1-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee', '1-ffffffffffffffffffffffffffffffff', '1-dddddddddddddddddddddddddddddddd'];
+        
+        db.save([{_id:ids[0],_rev:revs[0]},{_id:ids[1],_rev:revs[1]},{_id:ids[2],_rev:revs[2]}], function(err, results) {
+            assert.equal(null, err);
+            assert.equal(0, results.length);
+            
+            db.get(ids, function(err, results) {
+                assert.equal(3, results.length);
+                assert.equal(ids[0], results[0].id);
+                assert.equal(revs[0], results[0].value.rev);
+                assert.notEqual(null, results[0].value.doc);
+                assert.equal(ids[1], results[1].id);
+                assert.equal(revs[1], results[1].value.rev);
+                assert.notEqual(null, results[1].value.doc);
+                assert.equal(ids[2], results[2].id);
+                assert.equal(revs[2], results[2].value.rev);
+                assert.notEqual(null, results[2].value.doc);
+                done();
+            });
         });
     }); 
 
@@ -2150,9 +2156,7 @@ describe('avancedb -- _revs_diff --', function() {
         var obj = {_id:'0', _rev:testRevs[0]};
         db.save([obj], function(err, docs) {
             assert.equal(null, err);
-            assert.notEqual(null, docs);
-            assert.equal(obj._id, docs[0].id);
-            assert.equal(obj._rev, docs[0].rev);
+            assert.equal(0, docs.length);
             done();
         });
     });
@@ -2181,9 +2185,7 @@ describe('avancedb -- _revs_diff --', function() {
         var obj = {_id:'1', _rev:testRevs[1]};
         db.save([obj], function(err, docs) {
             assert.equal(null, err);
-            assert.notEqual(null, docs);
-            assert.equal(obj._id, docs[0].id);
-            assert.equal(obj._rev, docs[0].rev);
+            assert.equal(0, docs.length);
             done();
         });
     });
@@ -2212,9 +2214,7 @@ describe('avancedb -- _revs_diff --', function() {
         var obj = {_id:'2', _rev:testRevs[2]};
         db.save([obj], function(err, docs) {
             assert.equal(null, err);
-            assert.notEqual(null, docs);
-            assert.equal(obj._id, docs[0].id);
-            assert.equal(obj._rev, docs[0].rev);
+            assert.equal(0, docs.length);
             done();
         });
     });    
