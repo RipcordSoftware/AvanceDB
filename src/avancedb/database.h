@@ -46,6 +46,10 @@ public:
     document_ptr DeleteDocument(const char* id, const char* rev);
     document_ptr SetDocument(const char* id, script_object_ptr);
     
+    document_ptr GetDesignDocument(const char* id, bool throwOnFail = true);
+    document_ptr DeleteDesignDocument(const char* id, const char* rev);
+    document_ptr SetDesignDocument(const char* id, script_object_ptr);
+    
     document_ptr GetLocalDocument(const char* id);
     document_ptr DeleteLocalDocument(const char* id, const char* rev);
     document_ptr SetLocalDocument(const char* id, script_object_ptr);

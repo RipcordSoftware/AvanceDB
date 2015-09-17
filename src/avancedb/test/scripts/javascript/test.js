@@ -985,7 +985,7 @@ describe('avancedb -- _all_docs --', function() {
 
             for (var i = 0; i < ids.length; i++) {
                 assert.equal(ids[i], docs[i].id);
-                assert.equal(ids[i], docs[i].value.doc._id);
+                assert.equal(ids[i], docs[i].doc._id);
             }
 
             done();
@@ -1514,7 +1514,7 @@ describe('avancedb -- _all_docs --', function() {
 
             for (var i = 0; i < keys.length; i++) {
                 assert.equal(keys[i], docs[i].id);
-                assert.equal(keys[i], docs[i].value.doc._id);
+                assert.equal(keys[i], docs[i].doc._id);
             }
 
             done();
@@ -2001,13 +2001,13 @@ describe('avancedb -- _bulk_docs --', function() {
                 assert.equal(3, results.length);
                 assert.equal(ids[0], results[0].id);
                 assert.equal(revs[0], results[0].value.rev);
-                assert.notEqual(null, results[0].value.doc);
+                assert.notEqual(null, results[0].doc);
                 assert.equal(ids[1], results[1].id);
                 assert.equal(revs[1], results[1].value.rev);
-                assert.notEqual(null, results[1].value.doc);
+                assert.notEqual(null, results[1].doc);
                 assert.equal(ids[2], results[2].id);
                 assert.equal(revs[2], results[2].value.rev);
-                assert.notEqual(null, results[2].value.doc);
+                assert.notEqual(null, results[2].doc);
                 done();
             });
         });
@@ -2027,13 +2027,13 @@ describe('avancedb -- _bulk_docs --', function() {
                 assert.equal(3, results.length);
                 assert.equal(ids[0], results[0].id);
                 assert.equal(revs[0], results[0].value.rev);
-                assert.notEqual(null, results[0].value.doc);
+                assert.notEqual(null, results[0].doc);
                 assert.equal(ids[1], results[1].id);
                 assert.equal(revs[1], results[1].value.rev);
-                assert.notEqual(null, results[1].value.doc);
+                assert.notEqual(null, results[1].doc);
                 assert.equal(ids[2], results[2].id);
                 assert.equal(revs[2], results[2].value.rev);
-                assert.notEqual(null, results[2].value.doc);
+                assert.notEqual(null, results[2].doc);
                 done();
             });
         });
@@ -2053,13 +2053,13 @@ describe('avancedb -- _bulk_docs --', function() {
                 assert.equal(3, results.length);
                 assert.equal(ids[0], results[0].id);
                 assert.equal(revs[0], results[0].value.rev);
-                assert.notEqual(null, results[0].value.doc);
+                assert.notEqual(null, results[0].doc);
                 assert.equal(ids[1], results[1].id);
                 assert.equal(revs[1], results[1].value.rev);
-                assert.notEqual(null, results[1].value.doc);
+                assert.notEqual(null, results[1].doc);
                 assert.equal(ids[2], results[2].id);
                 assert.equal(revs[2], results[2].value.rev);
-                assert.notEqual(null, results[2].value.doc);
+                assert.notEqual(null, results[2].doc);
                 done();
             });
         });
@@ -2079,13 +2079,13 @@ describe('avancedb -- _bulk_docs --', function() {
                 assert.equal(3, results.length);
                 assert.equal(ids[0], results[0].id);
                 assert.equal(revs[0], results[0].value.rev);
-                assert.notEqual(null, results[0].value.doc);
+                assert.notEqual(null, results[0].doc);
                 assert.equal(ids[1], results[1].id);
                 assert.equal(revs[1], results[1].value.rev);
-                assert.notEqual(null, results[1].value.doc);
+                assert.notEqual(null, results[1].doc);
                 assert.equal(ids[2], results[2].id);
                 assert.equal(revs[2], results[2].value.rev);
-                assert.notEqual(null, results[2].value.doc);
+                assert.notEqual(null, results[2].doc);
                 done();
             });
         });
@@ -2385,15 +2385,15 @@ describe('avancedb -- replication --', function() {
     });
     
     it('check replicated documents - 1', function(done) {
-        db.all({include_docs:true}, function(err, docs) {
+        db.all({include_docs:true}, function(err, results) {
             assert.equal(null, err);
-            assert.notEqual(null, docs);
-            assert.equal(data.length, docs.length);
+            assert.notEqual(null, results);
+            assert.equal(data.length, results.length);
             for (var i = 0; i < data.length; ++i) {
-                var doc = docs[i];
-                assert.notEqual(null, doc.value);
-                delete doc.value.doc._revisions;
-                assert.deepEqual(data[i], doc.value.doc);
+                var result = results[i];
+                assert.notEqual(null, result.value);
+                delete result.doc._revisions;
+                assert.deepEqual(data[i], result.doc);
             }
             done();
         });

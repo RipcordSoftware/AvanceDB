@@ -47,7 +47,7 @@ public:
             case rs::scriptobject::ScriptObjectType::Int32: Serialize(arr->getInt32(index)); break;
             case rs::scriptobject::ScriptObjectType::Null: Serialize("null"); break;
             case rs::scriptobject::ScriptObjectType::Object: Serialize(arr->getObject(index)); break;
-            case rs::scriptobject::ScriptObjectType::String: *this << '"' << arr->getString(index) << '"'; break;
+            case rs::scriptobject::ScriptObjectType::String: AppendString(arr->getString(index)); break;
             default: Serialize("undefined"); break;
         }
     }

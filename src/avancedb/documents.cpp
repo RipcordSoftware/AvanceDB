@@ -95,6 +95,8 @@ document_ptr Documents::DeleteDocument(const char* id, const char* rev) {
     
     docs_[coll].erase(doc);
     
+    ++updateSeq_;
+    
     return doc;
 }
 
@@ -123,6 +125,24 @@ document_ptr Documents::SetDocument(const char* id, script_object_ptr obj) {
     docs_[coll].insert(doc);
 
     return doc;
+}
+
+document_ptr Documents::GetDesignDocument(const char* id, bool throwOnFail) {
+    std::string designId = "_design/";
+    designId += id;
+    return GetDocument(designId.c_str(), throwOnFail);
+}
+
+document_ptr Documents::DeleteDesignDocument(const char* id, const char* rev) {
+    std::string designId = "_design/";
+    designId += id;
+    return DeleteDocument(designId.c_str(), rev);
+}
+
+document_ptr Documents::SetDesignDocument(const char* id, script_object_ptr obj) {
+    std::string designId = "_design/";
+    designId += id;
+    return SetDocument(designId.c_str(), obj);
 }
 
 document_array_ptr Documents::GetAllDocuments(sequence_type& updateSequence) {

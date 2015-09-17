@@ -56,6 +56,18 @@ document_ptr Database::SetDocument(const char* id, script_object_ptr obj) {
     return docs_->SetDocument(id, obj);
 }
 
+document_ptr Database::GetDesignDocument(const char* id, bool throwOnFail) {
+    return docs_->GetDesignDocument(id, throwOnFail);
+}
+
+document_ptr Database::DeleteDesignDocument(const char* id, const char* rev) {
+    return docs_->DeleteDesignDocument(id, rev);
+}
+
+document_ptr Database::SetDesignDocument(const char* id, script_object_ptr obj) {
+    return docs_->SetDesignDocument(id, obj);
+}
+
 document_array_ptr Database::GetDocuments(const GetAllDocumentsOptions& options, Documents::collection::size_type& offset, Documents::collection::size_type& totalDocs, sequence_type& updateSequence) {
     return docs_->GetDocuments(options, offset, totalDocs, updateSequence);
 }

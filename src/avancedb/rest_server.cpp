@@ -40,17 +40,22 @@
 #define REGEX_DBNAME_GROUP "/(?<db>" REGEX_DBNAME ")"
 
 #define REGEX_DOCID R"([a-zA-Z0-9\$\+\-\(\)\:\.\~][a-zA-Z0-9_\$\+\-\(\)\:\.\~]*)"
+#define REGEX_DESIGNID R"([a-zA-Z0-9\$\+\-\(\)\:\.\~][a-zA-Z0-9_\$\+\-\(\)\:\.\~]*)"
 #define REGEX_DOCID_GROUP "/+(?<id>" REGEX_DOCID ")"
+#define REGEX_DESIGNID_GROUP "/+(?<designid>" REGEX_DESIGNID ")"
 
 RestServer::RestServer() {
     AddRoute("HEAD", REGEX_DBNAME_GROUP "/{0,}$", &RestServer::HeadDatabase);   
     AddRoute("HEAD", REGEX_DBNAME_GROUP REGEX_DOCID_GROUP, &RestServer::HeadDocument);
+    AddRoute("HEAD", REGEX_DBNAME_GROUP "/+_design" REGEX_DESIGNID_GROUP, &RestServer::HeadDesignDocument);
     
     AddRoute("DELETE", REGEX_DBNAME_GROUP "/+_local" REGEX_DOCID_GROUP, &RestServer::DeleteLocalDocument);
     AddRoute("DELETE", REGEX_DBNAME_GROUP "/{0,}$", &RestServer::DeleteDatabase);
+    AddRoute("DELETE", REGEX_DBNAME_GROUP "/+_design" REGEX_DESIGNID_GROUP, &RestServer::DeleteDesignDocument);
     AddRoute("DELETE", REGEX_DBNAME_GROUP REGEX_DOCID_GROUP, &RestServer::DeleteDocument);
     
     AddRoute("PUT", REGEX_DBNAME_GROUP "/+_local" REGEX_DOCID_GROUP, &RestServer::PutLocalDocument);
+    AddRoute("PUT", REGEX_DBNAME_GROUP "/+_design" REGEX_DESIGNID_GROUP, &RestServer::PutDesignDocument);
     AddRoute("PUT", REGEX_DBNAME_GROUP REGEX_DOCID_GROUP, &RestServer::PutDocument);
     AddRoute("PUT", REGEX_DBNAME_GROUP "/{0,}$", &RestServer::PutDatabase);
     
@@ -68,6 +73,7 @@ RestServer::RestServer() {
     AddRoute("GET", "/+_config/native_query_servers/{0,}$", &RestServer::GetConfigNativeQueryServers);
     AddRoute("GET", "/+_config/{0,}$", &RestServer::GetConfig);
     AddRoute("GET", REGEX_DBNAME_GROUP "/+_local" REGEX_DOCID_GROUP, &RestServer::GetLocalDocument);
+    AddRoute("GET", REGEX_DBNAME_GROUP "/+_design" REGEX_DESIGNID_GROUP, &RestServer::GetDesignDocument);
     AddRoute("GET", REGEX_DBNAME_GROUP REGEX_DOCID_GROUP, &RestServer::GetDocument);
     AddRoute("GET", REGEX_DBNAME_GROUP "/+_all_docs/{0,}$", &RestServer::GetDatabaseAllDocs);
     AddRoute("GET", REGEX_DBNAME_GROUP "/{0,}$", &RestServer::GetDatabase);    
@@ -287,6 +293,28 @@ bool RestServer::GetDocument(rs::httpserver::request_ptr request, const rs::http
     return gotDoc;
 }
 
+bool RestServer::GetDesignDocument(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
+    bool gotDoc = false;
+    auto db = GetDatabase(args);
+    if (!!db) {
+        auto id = GetParameter("designid", args);
+        
+        auto doc = db->GetDesignDocument(id);
+        auto obj = doc->getObject();
+        
+        auto rev = doc->getRev();
+
+        auto& stream = response->setStatusCode(200).setContentType("application/json").setETag(rev).getResponseStream();
+        ScriptObjectResponseStream<> objStream{stream};
+        objStream << obj;
+        objStream.Flush();
+        
+        gotDoc = true;
+    }
+    
+    return gotDoc;
+}
+
 bool RestServer::PutDocument(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
     bool created = false;
     auto db = GetDatabase(args);
@@ -296,6 +324,32 @@ bool RestServer::PutDocument(rs::httpserver::request_ptr request, const rs::http
 
         if (!!obj) {
             auto doc = db->SetDocument(id, obj);
+            
+            auto rev = doc->getRev();
+            
+            JsonStream stream;
+            stream.Append("ok", true);
+            stream.Append("id", doc->getId());
+            stream.Append("rev", rev);
+
+            response->setStatusCode(201).setContentType("application/json").setETag(rev).Send(stream.Flush());
+
+            created = true;
+        }
+    }
+    
+    return created;
+}
+
+bool RestServer::PutDesignDocument(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
+    bool created = false;
+    auto db = GetDatabase(args);
+    if (!!db) {
+        auto id = GetParameter("designid", args);
+        auto obj = GetJsonBody(request);        
+
+        if (!!obj) {
+            auto doc = db->SetDesignDocument(id, obj);
             
             auto rev = doc->getRev();
             
@@ -500,6 +554,31 @@ bool RestServer::DeleteDocument(rs::httpserver::request_ptr request, const rs::h
     return deleted;
 }
 
+bool RestServer::DeleteDesignDocument(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
+    bool deleted = false;
+    auto db = GetDatabase(args);
+    if (!!db) {
+        auto id = GetParameter("designid", args);
+        auto oldRev = GetParameter("rev", request->getQueryString()).c_str();
+        
+        db->DeleteDesignDocument(id, oldRev);
+        
+        DocumentRevision::RevString newRev;
+        DocumentRevision::Parse(oldRev).Increment().FormatRevision(newRev);
+            
+        JsonStream stream;
+        stream.Append("ok", true);
+        stream.Append("id", id);
+        stream.Append("rev", newRev.data());
+
+        response->setStatusCode(200).setContentType("application/json").setETag(newRev.data()).Send(stream.Flush());
+        
+        deleted = true;        
+    }
+    
+    return deleted;
+}
+
 bool RestServer::DeleteLocalDocument(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
     bool deleted = false;
     auto db = GetDatabase(args);
@@ -530,6 +609,23 @@ bool RestServer::HeadDocument(rs::httpserver::request_ptr request, const rs::htt
     auto db = GetDatabase(args);
     if (!!db) {
         auto id = GetParameter("id", args);
+        
+        auto doc = db->GetDocument(id);
+        auto rev = doc->getRev();
+        
+        response->setStatusCode(200).setContentType("application/json").setETag(rev).Send();
+        
+        gotHead = true;
+    }
+    
+    return gotHead;
+}
+
+bool RestServer::HeadDesignDocument(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
+    bool gotHead = false;
+    auto db = GetDatabase(args);
+    if (!!db) {
+        auto id = GetParameter("designid", args);
         
         auto doc = db->GetDocument(id);
         auto rev = doc->getRev();
@@ -576,13 +672,13 @@ bool RestServer::GetDatabaseAllDocs(rs::httpserver::request_ptr request, const r
 
             objStream << R"({"id":")" << id << R"(",)";
             objStream << R"("key":")" << id << R"(",)";
-            objStream << R"("value":{"rev":")" << rev << '"';
+            objStream << R"("value":{"rev":")" << rev << R"("})";
 
             if (includeDocs) {
                 objStream << R"(,"doc":)" << doc->getObject();
             }
 
-            objStream << "}}";
+            objStream << '}';
         }
         
         objStream << "]}";
@@ -632,13 +728,13 @@ bool RestServer::PostDatabaseAllDocs(rs::httpserver::request_ptr request, const 
 
                 objStream << R"({"id":")" << id << R"(",)";
                 objStream << R"("key":")" << id << R"(",)";
-                objStream << R"("value":{"rev":")" << rev << '"';
+                objStream << R"("value":{"rev":")" << rev << R"("})";
 
                 if (includeDocs) {
                     objStream << R"(,"doc":)" << doc->getObject();
                 }
 
-                objStream << "}}";
+                objStream << '}';
             } else {
                 objStream << R"({"key":)";
                 objStream.Serialize(keys, i);
