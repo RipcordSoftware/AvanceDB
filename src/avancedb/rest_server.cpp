@@ -627,7 +627,7 @@ bool RestServer::HeadDesignDocument(rs::httpserver::request_ptr request, const r
     if (!!db) {
         auto id = GetParameter("designid", args);
         
-        auto doc = db->GetDocument(id);
+        auto doc = db->GetDesignDocument(id);
         auto rev = doc->getRev();
         
         response->setStatusCode(200).setContentType("application/json").setETag(rev).Send();

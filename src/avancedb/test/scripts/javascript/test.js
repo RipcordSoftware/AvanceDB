@@ -13,6 +13,15 @@ var url = host + ':' + port;
 var conn = new cradle.Connection(host, port, { cache: false });
 var couch_conn = new cradle.Connection(host, 5984, { cache: false });
 
+var isValidRevision = function(rev) {
+    var regexRev = /\d+\-[a-zA-Z0-9]{32}/;
+    return regexRev.test(rev);
+}
+
+var isRevisionVersion = function(rev, ver) {
+    return rev[0] == ('' + ver) && rev[1] == '-';
+}
+
 describe('avancedb -- server info --', function() {
     it('should validate server signature', function(done) {
         conn.info(function (err, res) {
@@ -339,12 +348,12 @@ describe('avancedb -- db --', function() {
     });
 });
 
-describe('avancedb -- docs -- PUT', function() {
+describe('avancedb -- docs -- PUT --', function() {
     var testDbName = 'avancedb-docs-test-put';
     var testDocument = { 'lorem' : 'ipsum', pi: 3.14159, sunny: true, free_lunch: false, the_answer: 42, 
         taxRate: null, fibonnaci: [0, 1, 1, 2, 3, 5, 8, 13 ], child: { 'hello': 'world' }, 
         events: [ null, 1969, 'avance', true, {}, [] ], //minNUm: Number.MIN_VALUE , maxNum: Number.MAX_VALUE,
-        data: '0123456789' };
+        data: '0123456789', formatting: '\r\n\t\f\b\\/"' };
         
     for (var i = 0; i < 8; ++i) {
         testDocument.data += testDocument.data;
@@ -376,7 +385,7 @@ describe('avancedb -- docs -- PUT', function() {
             assert.equal(null, err);
             assert.notEqual(null, doc);
             assert.equal('test0', doc._id);
-            assert.notEqual(null, doc._rev);
+            assert(isValidRevision(doc._rev));
             done();
         });
     });
@@ -412,7 +421,7 @@ describe('avancedb -- docs -- PUT', function() {
             assert.equal(null, err);
             assert.notEqual(null, doc);
             assert.equal('test0', doc._id);
-            assert.notEqual(null, doc._rev);
+            assert(isValidRevision(doc._rev));
             done();
         });
     });
@@ -439,7 +448,7 @@ describe('avancedb -- docs -- PUT', function() {
             assert.notEqual(null, docs[0].id);
             assert.equal(docs[0].id, docs[0].key);
             assert.notEqual(null, docs[0].value);
-            assert.notEqual(null, docs[0].value.rev);
+            assert(isValidRevision(docs[0].value.rev));
             done();
         });
     });
@@ -456,7 +465,7 @@ describe('avancedb -- docs -- PUT', function() {
         });
     });
     
-    it('delete a document with an id', function(done) {
+    it('delete a document with an id (cradle only)', function(done) {
         var db = conn.database(testDbName);
 
         db.remove('test0', function(err, res) {
@@ -505,15 +514,14 @@ describe('avancedb -- docs -- PUT', function() {
             assert.equal(null, err);
             assert.notEqual(null, doc);
             assert.equal('test0', doc._id);
-            assert.notEqual(null, doc._rev);
+            assert(isValidRevision(doc._rev));
             
             db.save('test0', { _rev: doc._rev }, function(err, doc) {
                 assert.equal(null, err);
                 assert.notEqual(null, doc);
                 assert.equal('test0', doc._id);
-                assert.notEqual(null, doc._rev);
-                assert.equal('2', doc._rev[0]);
-                assert.equal('-', doc._rev[1]);
+                assert(isValidRevision(doc._rev));
+                assert(isRevisionVersion(doc._rev, 2));
                 done();
             });
         });
@@ -526,7 +534,7 @@ describe('avancedb -- docs -- PUT', function() {
             assert.equal(null, err);
             assert.notEqual(null, doc);
             assert.equal('test1', doc._id);
-            assert.notEqual(null, doc._rev);
+            assert(isValidRevision(doc._rev));
             
             db.save('test1', { _rev: '0' + doc._rev.slice(1) }, function(err, res) {
                 assert.notEqual(null, err);
@@ -700,7 +708,7 @@ describe('avancedb -- docs -- PUT', function() {
                 assert.notEqual(null, docs[i].id);
                 assert.equal(docs[i].id, docs[i].key);
                 assert.notEqual(null, docs[i].value);
-                assert.notEqual(null, docs[i].value.rev);
+                assert(isValidRevision(docs[i].value.rev));
             }
             done();
         });
@@ -727,7 +735,7 @@ describe('avancedb -- docs -- PUT', function() {
     });
 });
 
-describe('avancedb -- docs -- POST', function() {
+describe('avancedb -- docs -- POST --', function() {
     // turns a PUT into a POST, removes the trailing doc id
     var hijackRequest = function(conn) {
         var oldRequest = conn.request;
@@ -747,7 +755,7 @@ describe('avancedb -- docs -- POST', function() {
     var testDocument = { 'lorem' : 'ipsum', pi: 3.14159, sunny: true, free_lunch: false, the_answer: 42, 
         taxRate: null, fibonnaci: [0, 1, 1, 2, 3, 5, 8, 13 ], child: { 'hello': 'world' }, 
         events: [ null, 1969, 'avance', true, {}, [] ], //minNUm: Number.MIN_VALUE , maxNum: Number.MAX_VALUE,
-        data: '0123456789' };
+        data: '0123456789', formatting: '\r\n\t\f\b\\/"' };
         
     for (var i = 0; i < 8; ++i) {
         testDocument.data += testDocument.data;
@@ -770,7 +778,8 @@ describe('avancedb -- docs -- POST', function() {
             assert.equal(null, err);
             assert.notEqual(null, doc);
             assert.notEqual(null, doc._id);
-            assert.notEqual(null, doc._rev);
+            assert(isValidRevision(doc._rev));
+            assert(isRevisionVersion(doc._rev, 1));
             done();
         });
     });
@@ -783,9 +792,8 @@ describe('avancedb -- docs -- POST', function() {
             assert.notEqual(null, doc);
             assert.equal(true, doc.ok);
             assert.notEqual(null, doc._id);
-            assert.notEqual(null, doc._rev);
-            assert.equal(2, doc._rev[0]);
-            assert.equal('-', doc._rev[1]);
+            assert(isValidRevision(doc._rev));
+            assert(isRevisionVersion(doc._rev, 2));
             done();
         });
     });
@@ -811,8 +819,8 @@ describe('avancedb -- docs -- POST', function() {
             assert.equal(null, err);
             assert.notEqual(null, doc);
             assert.equal('test1', doc._id);
-            assert.equal('1', doc._rev[0]);
-            assert.equal('-', doc._rev[1]);
+            assert(isValidRevision(doc._rev));
+            assert(isRevisionVersion(doc._rev, 1));
             done();
         });
     });
@@ -840,8 +848,8 @@ describe('avancedb -- docs -- POST', function() {
             assert.equal(null, err);
             assert.notEqual(null, doc);
             assert.equal('test2', doc._id);
-            assert.equal('2', doc._rev[0]);
-            assert.equal('-', doc._rev[1]);
+            assert(isValidRevision(doc._rev));
+            assert(isRevisionVersion(doc._rev, 2));
             done();
         });
     });
@@ -855,9 +863,8 @@ describe('avancedb -- docs -- POST', function() {
             assert.equal(null, err);
             assert.notEqual(null, doc);
             assert.equal('test3', doc._id);
-            assert.notEqual(null, doc._rev);
-            assert.equal('1', doc._rev[0]);
-            assert.equal('-', doc._rev[1]);
+            assert(isValidRevision(doc._rev));
+            assert(isRevisionVersion(doc._rev, 1));
             
             hijackRequest(conn);
             
@@ -865,11 +872,251 @@ describe('avancedb -- docs -- POST', function() {
                 assert.equal(null, err);
                 assert.notEqual(null, doc);
                 assert.equal('test3', doc._id);
-                assert.notEqual(null, doc._rev);
-                assert.equal('2', doc._rev[0]);
-                assert.equal('-', doc._rev[1]);
+                assert(isValidRevision(doc._rev));
+                assert(isRevisionVersion(doc._rev, 2));
                 done();
             });
+        });
+    });
+    
+    it('should delete a database', function(done) {
+        var db = conn.database(testDbName);
+        db.destroy(function(err, res) {
+            assert.equal(null, err);
+            assert.notEqual(null, res);
+            assert.notEqual(res.ok, 'true');
+            done();
+        });
+    });
+});
+
+describe('avancedb -- designs --', function() {
+    var testDbName = 'avancedb-designs-test';
+    var testDesign = { views: { test: { map: function(doc) { emit(null, doc); } } } };
+    var testDesign2 = { views: { test: { map: function(doc) { emit('hello world', 'I\nam\na\nmulti-line\nand\ttabbed\tstring'); } } } };
+    
+    it('should create a database', function(done) {
+        var db = conn.database(testDbName);
+        db.create(function(err, res) {
+            assert.equal(null, err);
+            assert.notEqual(null, res);
+            assert.notEqual(res.ok, 'true');
+            done();
+        });
+    });
+    
+    it('get a non-existent design', function(done) {
+        var db = conn.database(testDbName);
+        db.get('_design/testX', function(err, doc) {
+            assert.notEqual(null, err);
+            assert.equal('not_found', err.error);
+            assert.equal(404 , err.headers.status);
+            done();
+        });
+    });
+
+    it('create a design with an id', function(done) {
+        var db = conn.database(testDbName);
+        var test0 = _.extend({}, testDesign);
+        db.save('_design/test0', test0, function(err, doc) {
+            assert.equal(null, err);
+            assert.notEqual(null, doc);
+            assert.equal('_design/test0', doc._id);
+            assert(isValidRevision(doc._rev));
+            done();
+        });
+    });
+    
+    it('create a design with an id but a bad rev', function(done) {
+        var db = conn.database(testDbName);
+        var test1 = _.extend({_rev: 'abcdef'}, testDesign);
+        db.save('_design/test1', test1, function(err, res) {
+            assert.notEqual(null, err);
+            assert.equal(400, err.headers.status);        
+            assert.equal('bad_request', err.error);
+            assert.equal(null, res);        
+            done();
+        });
+    });
+    
+    it('update a design with an id but a bad rev', function(done) {
+        var db = conn.database(testDbName);
+        var test0 = _.extend({_rev:'abcdef'}, testDesign);
+        db.save('_design/test0', test0, function(err, res) {
+            assert.notEqual(null, err);
+            assert.equal(409, err.headers.status);        
+            assert.equal('conflict', err.error);
+            assert.equal(null, res);       
+            done();
+        });
+    });
+    
+    it('re-use a design id (cradle only)', function(done) {
+        var db = conn.database(testDbName);
+        var test1 = _.extend({}, testDesign);
+        db.save('_design/test0', test1, function(err, doc) {
+            assert.equal(null, err);
+            assert.notEqual(null, doc);
+            assert.equal('_design/test0', doc._id);
+            assert(isValidRevision(doc._rev));
+            done();
+        });
+    });
+    
+    it('get a design', function(done) {
+        var db = conn.database(testDbName);
+        db.get('_design/test0', function(err, doc) {
+            assert.equal(null, err);
+            assert.notEqual(null, doc);
+            assert.equal('_design/test0', doc._id);
+            assert(isValidRevision(doc._rev));
+            var compDoc = _.extend({}, testDesign);            
+            compDoc._id = doc._id;
+            compDoc._rev = doc._rev;
+            assert.deepEqual(doc, compDoc);
+            done();
+        });
+    });
+    
+    it('get a design via _all_docs', function(done) {
+        var db = conn.database(testDbName);
+        db.all(function(err, docs) {
+            assert.equal(null, err);
+            assert.notEqual(null, docs);
+            assert.equal(1, docs.length);
+            assert.equal('_design/test0', docs[0].id);
+            assert.equal(docs[0].id, docs[0].key);
+            assert.notEqual(null, docs[0].value);
+            assert(isValidRevision(docs[0].value.rev));
+            done();
+        });
+    });
+    
+    it('delete a design with an id but bad rev', function(done) {
+        var db = conn.database(testDbName);
+
+        db.remove('_design/test0', 'abcdef', function(err, doc) {
+            assert.notEqual(null, err);
+            assert.equal('bad_request', err.error);
+            assert.equal(400, err.headers.status);
+            assert.equal(null, doc);
+            done();
+        });
+    });
+    
+    it('delete a design with an id (cradle only)', function(done) {
+        var db = conn.database(testDbName);
+
+        db.remove('_design/test0', function(err, res) {
+            assert.equal(null, err);
+            assert.equal(true, res.ok);
+            assert.notEqual(null, res.rev);
+
+            db.get('_design/test0', function(err, doc) {
+                assert.notEqual(null, err);
+                assert.equal('not_found', err.error);
+                assert.equal(404, err.headers.status);
+                assert.equal(null, doc);
+                done();
+            });
+        });
+    });
+    
+    it('delete a non-existent design with an id', function(done) {
+        var db = conn.database(testDbName);
+
+        db.remove('_design/test0', function(err, res) {
+            assert.notEqual(null, err);
+            assert.equal('not_found', err.error);
+            assert.equal(404, err.headers.status);
+            assert.equal(null, res);
+            done();
+        });
+    });
+    
+    it('delete a non-existent document with an id and bad rev', function(done) {
+        var db = conn.database(testDbName);
+
+        db.remove('_design/test0', 'abcdef', function(err, res) {
+            assert.notEqual(null, err);
+            assert.equal('not_found', err.error);
+            assert.equal(404, err.headers.status);
+            assert.equal(null, res);
+            done();
+        });
+    });
+    
+    it('create a design with an id then update it', function(done) {
+        var db = conn.database(testDbName);
+        var test0 = _.extend({}, testDesign);
+        db.save('_design/test0', test0, function(err, doc) {
+            assert.equal(null, err);
+            assert.notEqual(null, doc);
+            assert.equal('_design/test0', doc._id);
+            assert(isValidRevision(doc._rev));
+            assert(isRevisionVersion(doc._rev, 1));
+            
+            db.save('_design/test0', { _rev: doc._rev }, function(err, doc) {
+                assert.equal(null, err);
+                assert.notEqual(null, doc);
+                assert.equal('_design/test0', doc._id);
+                assert(isValidRevision(doc._rev));
+                assert(isRevisionVersion(doc._rev, 2));
+                done();
+            });
+        });
+    });
+    
+    it('create a design with an id, then attempt to update it using the wrong rev', function(done) {
+        var db = conn.database(testDbName);
+        var test1 = _.extend({}, testDesign);
+        db.save('_design/test1', test1, function(err, doc) {
+            assert.equal(null, err);
+            assert.notEqual(null, doc);
+            assert.equal('_design/test1', doc._id);
+            assert.notEqual(null, doc._rev);
+            
+            db.save('_design/test1', _.extend({ _rev: '0' + doc._rev.slice(1) }, testDesign), function(err, res) {
+                assert.notEqual(null, err);
+                assert.equal('conflict', err.error);
+                assert.equal(409, err.headers.status);
+                done();
+            });
+        });
+    });
+    
+    it('create a design with an id - with encoded chars', function(done) {
+        var db = conn.database(testDbName);
+        var test2 = _.extend({}, testDesign2);
+        db.save('_design/test2', test2, function(err, doc) {
+            assert.equal(null, err);
+            assert.notEqual(null, doc);
+            assert.equal('_design/test2', doc._id);
+            assert(isValidRevision(doc._rev));
+            done();
+        });
+    });
+    
+    it('get a design - with encoded chars', function(done) {
+        var db = conn.database(testDbName);
+        db.get('_design/test2', function(err, doc) {
+            assert.equal(null, err);
+            assert.notEqual(null, doc);
+            assert.equal('_design/test2', doc._id);
+            assert(isValidRevision(doc._rev));
+            var compDoc = _.extend({_id:doc._id, _rev:doc._rev}, testDesign2);
+            assert.deepEqual(doc, compDoc);
+            done();
+        });
+    });
+    
+    it('should get document count', function(done) {
+        var db = conn.database(testDbName);
+        db.info(function(err, info) {
+            assert.equal(null, err);
+            assert.notEqual(null, info);
+            assert.equal(3, info.doc_count);
+            done();
         });
     });
     
@@ -1871,7 +2118,6 @@ describe('avancedb -- local docs --', function() {
 describe('avancedb -- _bulk_docs --', function() {
     var testDbName = 'avancedb-bulk_docs-test';
     var db = conn.database(testDbName);
-    var regexRev = /\d+\-[a-zA-Z0-9]{32}/;
     
     var hijackRequest = function() { 
         var oldRequest = conn.request;
@@ -1901,13 +2147,13 @@ describe('avancedb -- _bulk_docs --', function() {
             assert.equal(3, results.length);
             assert.equal(true, results[0].ok);
             assert.notEqual(null, results[0].id);
-            assert.equal(true, regexRev.test(results[0].rev));
+            assert.equal(true, isValidRevision(results[0].rev));
             assert.equal(true, results[1].ok);
             assert.notEqual(null, results[1].id);
-            assert.equal(true, regexRev.test(results[1].rev));
+            assert.equal(true, isValidRevision(results[1].rev));
             assert.equal(true, results[2].ok);
             assert.notEqual(null, results[2].id);
-            assert.equal(true, regexRev.test(results[2].rev));
+            assert.equal(true, isValidRevision(results[2].rev));
             done();
         });
     });
@@ -1918,13 +2164,13 @@ describe('avancedb -- _bulk_docs --', function() {
             assert.equal(3, results.length);
             assert.equal(true, results[0].ok);
             assert.equal('Yoda', results[0].id);
-            assert.equal(true, regexRev.test(results[0].rev));
+            assert.equal(true, isValidRevision(results[0].rev));
             assert.equal(true, results[1].ok);
             assert.equal('HanSolo', results[1].id);
-            assert.equal(true, regexRev.test(results[1].rev));
+            assert.equal(true, isValidRevision(results[1].rev));
             assert.equal(true, results[2].ok);
             assert.equal('Leia', results[2].id);
-            assert.equal(true, regexRev.test(results[2].rev));
+            assert.equal(true, isValidRevision(results[2].rev));
             done();
         });
     });
@@ -1939,7 +2185,7 @@ describe('avancedb -- _bulk_docs --', function() {
             assert.equal('HanSolo', results[1].id);            
             assert.equal(true, results[2].ok);
             assert.equal('Chewy', results[2].id);
-            assert.equal(true, regexRev.test(results[2].rev));
+            assert.equal(true, isValidRevision(results[2].rev));
             assert.equal('conflict', results[3].error);
             assert.equal('Leia', results[3].id);            
             done();
@@ -1973,15 +2219,15 @@ describe('avancedb -- _bulk_docs --', function() {
             assert.equal(3, results.length);
             assert.equal(true, results[0].ok);
             assert.equal('Vader', results[0].id);
-            assert.equal(true, regexRev.test(results[0].rev));
+            assert.equal(true, isValidRevision(results[0].rev));
             assert.equal(2, results[0].rev[0]);
             assert.equal(true, results[1].ok);
             assert.equal('Lando', results[1].id);
-            assert.equal(true, regexRev.test(results[1].rev));
+            assert.equal(true, isValidRevision(results[1].rev));
             assert.equal(3, results[1].rev[0]);
             assert.equal(true, results[2].ok);
             assert.equal('Dooku', results[2].id);
-            assert.equal(true, regexRev.test(results[2].rev));
+            assert.equal(true, isValidRevision(results[2].rev));
             assert.equal(4, results[2].rev[0]);
             done();
         });
@@ -2331,14 +2577,26 @@ describe('avancedb -- replication --', function() {
         };
     };
     
+    var makeObject = function(i) {
+        return { _id: ('00000000' + i).slice(-8), 
+            _rev: '1-00000000000000000000000000000000', 
+            name: faker.fake('{{name.lastName}}, {{name.firstName}} {{name.suffix}}'), 
+            lorem: faker.lorem.paragraphs(), 
+            phone: faker.phone.phoneNumber(), 
+            uuid: faker.random.uuid,
+            ip: faker.internet.ip,
+            userAgent: faker.internet.userAgent,
+            images: faker.image.imageUrl };
+    }
+    
     var data = [];
     for (var i = 0; i < 1000; i++) {
-        data[i] = { _id: ('00000000' + i).slice(-8), _rev: '1-00000000000000000000000000000000', name: faker.fake('{{name.lastName}}, {{name.firstName}} {{name.suffix}}'), lorem: faker.lorem.sentence() };
+        data[i] = makeObject(i);
     }
     
     var data2 = [];
     for (var i = 0; i < 1000; i++) {
-        data[i] = { _id: ('00000000' + i).slice(-8), _rev: '1-00000000000000000000000000000000', name: faker.fake('{{name.lastName}}, {{name.firstName}} {{name.suffix}}'), lorem: faker.lorem.sentence() };
+        data[i] = makeObject(i);
     }
     
     it('should create a database - 1', function(done) {
@@ -2356,7 +2614,6 @@ describe('avancedb -- replication --', function() {
         couch_db.save(data, function(err, docs) {
             assert.equal(null, err);
             assert.notEqual(null, docs);
-            // couchdb returns an array of zero items when new_edits is true
             assert.equal(0, docs.length);
             done();
         });
@@ -2414,7 +2671,6 @@ describe('avancedb -- replication --', function() {
         couch_db.save(data2, function(err, docs) {
             assert.equal(null, err);
             assert.notEqual(null, docs);
-            // couchdb returns an array of zero items when new_edits is true
             assert.equal(0, docs.length);
             done();
         });
