@@ -40,9 +40,11 @@
 #define REGEX_DBNAME_GROUP "/(?<db>" REGEX_DBNAME ")"
 
 #define REGEX_DOCID R"([a-zA-Z0-9\$\+\-\(\)\:\.\~][a-zA-Z0-9_\$\+\-\(\)\:\.\~]*)"
-#define REGEX_DESIGNID R"([a-zA-Z0-9\$\+\-\(\)\:\.\~][a-zA-Z0-9_\$\+\-\(\)\:\.\~]*)"
+#define REGEX_DESIGNID REGEX_DOCID
+#define REGEX_VIEWID REGEX_DOCID
 #define REGEX_DOCID_GROUP "/+(?<id>" REGEX_DOCID ")"
 #define REGEX_DESIGNID_GROUP "/+(?<designid>" REGEX_DESIGNID ")"
+#define REGEX_VIEWID_GROUP "/+(?<viewid>" REGEX_VIEWID ")"
 
 RestServer::RestServer() {
     AddRoute("HEAD", REGEX_DBNAME_GROUP "/{0,}$", &RestServer::HeadDatabase);   
@@ -63,6 +65,7 @@ RestServer::RestServer() {
     AddRoute("POST", REGEX_DBNAME_GROUP "/+_bulk_docs", &RestServer::PostDatabaseBulkDocs);
     AddRoute("POST", REGEX_DBNAME_GROUP "/+_revs_diff", &RestServer::PostDatabaseRevsDiff);
     AddRoute("POST", REGEX_DBNAME_GROUP "/+_ensure_full_commit", &RestServer::PostEnsureFullCommit);
+    AddRoute("POST", REGEX_DBNAME_GROUP "/+_temp_view", &RestServer::PostTempView);
     AddRoute("POST", REGEX_DBNAME_GROUP "/{0,}$", &RestServer::PostDatabase);
     
     AddRoute("GET", "/+_active_tasks/{0,}$", &RestServer::GetActiveTasks);
@@ -73,6 +76,7 @@ RestServer::RestServer() {
     AddRoute("GET", "/+_config/native_query_servers/{0,}$", &RestServer::GetConfigNativeQueryServers);
     AddRoute("GET", "/+_config/{0,}$", &RestServer::GetConfig);
     AddRoute("GET", REGEX_DBNAME_GROUP "/+_local" REGEX_DOCID_GROUP, &RestServer::GetLocalDocument);
+    AddRoute("GET", REGEX_DBNAME_GROUP "/+_design" REGEX_DESIGNID_GROUP "/_view" REGEX_VIEWID_GROUP, &RestServer::GetDesignDocumentView);
     AddRoute("GET", REGEX_DBNAME_GROUP "/+_design" REGEX_DESIGNID_GROUP, &RestServer::GetDesignDocument);
     AddRoute("GET", REGEX_DBNAME_GROUP REGEX_DOCID_GROUP, &RestServer::GetDocument);
     AddRoute("GET", REGEX_DBNAME_GROUP "/+_all_docs/{0,}$", &RestServer::GetDatabaseAllDocs);
@@ -313,6 +317,14 @@ bool RestServer::GetDesignDocument(rs::httpserver::request_ptr request, const rs
     }
     
     return gotDoc;
+}
+
+
+bool RestServer::GetDesignDocumentView(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
+    auto db = GetDatabase(args);
+    if (!!db) {
+        response->setStatusCode(200).setContentType("application/json").Send(R"({"offset":0,"rows":[],"total_rows":0})");
+    }    
 }
 
 bool RestServer::PutDocument(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
@@ -744,6 +756,13 @@ bool RestServer::PostDatabaseAllDocs(rs::httpserver::request_ptr request, const 
         
         objStream << "]}";
         objStream.Flush();
+    }
+}
+
+bool RestServer::PostTempView(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
+    auto db = GetDatabase(args);
+    if (!!db) {
+        response->setContentType("application/json").Send(R"({"rows":[{"key":42,"value":"I'm not implemented yet!"}]})");
     }
 }
 
