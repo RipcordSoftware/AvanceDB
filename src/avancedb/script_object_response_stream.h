@@ -21,6 +21,7 @@
 
 #include <cstring>
 #include <type_traits>
+#include <string>
 
 #include "libhttpserver.h"
 
@@ -186,7 +187,11 @@ private:
         buffer_[pos_++] = ':';
     }
     
-    void AppendString(const char* value, bool comma = false) {        
+    void AppendString(const char* value, bool comma = false) {
+        std::array<char, 1024> buffer = { { '\0' } };
+        std::string dynBuffer;
+        value = EscapeJsonString(value, buffer, dynBuffer);
+                
         auto strlen = std::strlen(value);
         auto len = strlen + 2 + (comma ? 1: 0);
         
@@ -212,6 +217,54 @@ private:
         }
         
         buffer_[pos_++] = '"';
+    }
+    
+    template <typename T, std::size_t N>
+    const T* EscapeJsonString(const T* value, std::array<T, N>& buffer, std::basic_string<T>& dynBuffer) {
+        std::size_t index = 0;
+        auto len = std::strlen(value);
+        if (len > 0 && len < N) {
+            decltype(index) i = 0;
+            for (; index < len && i < N - 2; ++index) {
+                switch (value[index]) {
+                    case '\\': buffer[i++] = '\\'; buffer[i++] = '\\'; break;
+                    case '"': buffer[i++] = '\\'; buffer[i++] = '"'; break;
+                    case '/': buffer[i++] = '\\'; buffer[i++] = '/'; break;
+                    case '\b': buffer[i++] = '\\'; buffer[i++] = 'b'; break;
+                    case '\f': buffer[i++] = '\\'; buffer[i++] = 'f'; break;
+                    case '\n': buffer[i++] = '\\'; buffer[i++] = 'n'; break;
+                    case '\r': buffer[i++] = '\\'; buffer[i++] = 'r'; break;
+                    case '\t': buffer[i++] = '\\'; buffer[i++] = 't'; break;
+                    default: buffer[i++] = value[index]; break;
+                }
+            }
+            
+            buffer[i] = '\0';
+        }
+        
+        if (index == len) {
+            return buffer.data();
+        } else {
+            if (index > 0) {
+                dynBuffer = buffer.data();
+            }
+            
+            for (; index < len; ++index) {
+                switch (value[index]) {
+                    case '\\': dynBuffer += "\\\\"; break;
+                    case '"': dynBuffer += "\""; break;
+                    case '/': dynBuffer += "\\/"; break;
+                    case '\b': dynBuffer += "\\b"; break;
+                    case '\f': dynBuffer += "\\f"; break;
+                    case '\n': dynBuffer += "\\n"; break;
+                    case '\r': dynBuffer += "\\r"; break;
+                    case '\t': dynBuffer += "\\t"; break;
+                    default:  dynBuffer += value[index]; break;
+                }
+            }
+            
+            return dynBuffer.c_str();
+        }
     }
     
     void AppendLiteralString(const char* str) {
