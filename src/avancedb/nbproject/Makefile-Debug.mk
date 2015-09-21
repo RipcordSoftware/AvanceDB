@@ -69,7 +69,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=../../externals/libhttpserver/src/libhttpserver/dist/Debug/GNU-Linux-x86/libhttpserver.a ../../externals/libscriptobject/src/libscriptobject_gason/dist/Debug/GNU-Linux-x86/liblibscriptobject_gason.a ../../externals/libscriptobject/src/libscriptobject/dist/Debug/GNU-Linux-x86/libscriptobject.a -lboost_regex -lboost_filesystem -lboost_program_options -lboost_thread -lboost_date_time -lboost_chrono -lboost_system `pkg-config --libs zlib` -lpthread   
+LDLIBSOPTIONS=../../externals/libhttpserver/src/libhttpserver/dist/Debug/GNU-Linux-x86/libhttpserver.a ../../externals/libscriptobject/src/libscriptobject_gason/dist/Debug/GNU-Linux-x86/liblibscriptobject_gason.a ../../externals/libscriptobject/src/libscriptobject/dist/Debug/GNU-Linux-x86/libscriptobject.a ../../externals/libjsapi/src/libjsapi/dist/Debug/GNU-Linux-x86/libjsapi.a -lboost_regex -lboost_filesystem -lboost_program_options -lboost_thread -lboost_date_time -lboost_chrono -lboost_system `pkg-config --libs zlib` -lpthread   
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
@@ -80,6 +80,8 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb: ../../externals/libhttpserv
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb: ../../externals/libscriptobject/src/libscriptobject_gason/dist/Debug/GNU-Linux-x86/liblibscriptobject_gason.a
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb: ../../externals/libscriptobject/src/libscriptobject/dist/Debug/GNU-Linux-x86/libscriptobject.a
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb: ../../externals/libjsapi/src/libjsapi/dist/Debug/GNU-Linux-x86/libjsapi.a
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
@@ -180,6 +182,7 @@ ${OBJECTDIR}/uuid_helper.o: uuid_helper.cpp
 	cd ../../externals/libhttpserver/src/libhttpserver && ${MAKE}  -f Makefile CONF=Debug
 	cd ../../externals/libscriptobject/src/libscriptobject_gason && ${MAKE}  -f Makefile CONF=Debug
 	cd ../../externals/libscriptobject/src/libscriptobject && ${MAKE}  -f Makefile CONF=Debug
+	cd ../../externals/libjsapi/src/libjsapi && ${MAKE}  -f Makefile CONF=Debug
 
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
@@ -191,6 +194,7 @@ ${OBJECTDIR}/uuid_helper.o: uuid_helper.cpp
 	cd ../../externals/libhttpserver/src/libhttpserver && ${MAKE}  -f Makefile CONF=Debug clean
 	cd ../../externals/libscriptobject/src/libscriptobject_gason && ${MAKE}  -f Makefile CONF=Debug clean
 	cd ../../externals/libscriptobject/src/libscriptobject && ${MAKE}  -f Makefile CONF=Debug clean
+	cd ../../externals/libjsapi/src/libjsapi && ${MAKE}  -f Makefile CONF=Debug clean
 
 # Enable dependency checking
 .dep.inc: .depcheck-impl
