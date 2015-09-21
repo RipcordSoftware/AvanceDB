@@ -6,7 +6,7 @@ if [ $? -eq 127 ]; then
     exit 1
 fi
 
-netstat -an | grep tcp | grep -P 'couchdb|5984' &> /dev/null
+netstat -an | grep tcp | grep -E 'couchdb|5984' &> /dev/null
 if [ $? -ne 0 ]; then
     if [ "${CI}" == "" ]; then
         echo 'You should install and/or start couchdb before running this test'
