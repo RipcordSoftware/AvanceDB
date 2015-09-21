@@ -36,6 +36,11 @@
 
 #include "libscriptobject_gason.h"
 
+#include "libjsapi.h"
+
+// create the runtime which hosts spidermonkey
+rs::jsapi::Runtime rt;
+
 #define REGEX_DBNAME R"(_?[a-z][a-z0-9_\$\+\-\(\)]+)"
 #define REGEX_DBNAME_GROUP "/(?<db>" REGEX_DBNAME ")"
 
@@ -760,10 +765,50 @@ bool RestServer::PostDatabaseAllDocs(rs::httpserver::request_ptr request, const 
 }
 
 bool RestServer::PostTempView(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
+    auto executed = false;
+    
     auto db = GetDatabase(args);
     if (!!db) {
-        response->setContentType("application/json").Send(R"({"rows":[{"key":42,"value":"I'm not implemented yet!"}]})");
+        auto obj = GetJsonBody(request);
+        if (!obj || obj->getType("map") != rs::scriptobject::ScriptObjectType::String) {
+            throw InvalidJson();
+        }
+        
+        std::string map = "(";
+        map += obj->getString("map");
+        map += ")();";
+        
+        // create a runtime on this thread
+        rs::jsapi::Runtime rt;
+        
+        std::string key;
+        std::string value;
+        
+        // define a function in global scope implemented by a C++ lambda
+        rs::jsapi::Global::DefineFunction(rt, "emit", 
+            [&](const std::vector<rs::jsapi::Value>& args, rs::jsapi::Value& result) { 
+                key = args[0].ToString();
+                value = args[1].ToString();
+        });
+
+        // execute a script in the context of the runtime, getting the result
+        rs::jsapi::Value result(rt);
+        rt.Evaluate(map.c_str(), result);
+        
+        JsonStream stream;
+        stream.PushContext(JsonStream::ContextType::Array, "rows");
+        stream.PushContext(JsonStream::ContextType::Object);
+        stream.Append("key", key);
+        stream.Append("value", value);
+        stream.PopContext();
+        stream.PopContext();
+        
+        response->setContentType("application/json").Send(stream.Flush());
+        
+        executed = true;
     }
+    
+    return executed;
 }
 
 bool RestServer::GetConfig(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response) {
