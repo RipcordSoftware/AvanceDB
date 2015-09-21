@@ -4,6 +4,7 @@ var assert = require('assert');
 var cradle = require('cradle');
 var _ = require('underscore');
 var http = require('http');
+var net = require('net');
 var faker = require('faker');
 
 var host = 'http://localhost';
@@ -2717,4 +2718,277 @@ describe('avancedb -- replication --', function() {
             done();
         });
     });    
+});
+
+describe('avancedb -- fuzz -- ', function() {        
+    it('sends an empty header', function(done) {
+        var response = '';
+        
+        var client = net.connect({port: port}, function() {
+            client.write('\r\n\r\n');
+        });
+        
+        client.on('data', function(data) {
+            response += data;
+        });    
+        
+        client.on('close', function() {
+            assert.equal(0, response.length);
+            done();
+        });
+    });
+    
+    it('sends a malformed header -- bad HTTP Version', function(done) {
+        var response = '';
+        
+        var client = net.connect({port: port}, function() {
+            client.write('GET / HTTP/\r\n\r\n');
+        });    
+        
+        client.on('data', function(data) {
+            response += data;
+        });        
+        
+        client.on('close', function() {
+            assert.equal(0, response.length);
+            done();
+        });
+    });
+    
+    it('sends a malformed header -- bad directive', function(done) {
+        var response = '';
+        
+        var client = net.connect({port: port}, function() {
+            client.write('GET / HTTP/1.1\r\nBad-Header\r\n\r\n');
+        });    
+        
+        client.on('data', function(data) {
+            response += data;
+        });        
+        
+        client.on('close', function() {
+            assert.equal(0, response.length);
+            done();
+        });
+    });
+    
+    it('sends a malformed header -- bad method', function(done) {
+        var response = '';
+        
+        var client = net.connect({port: port}, function() {
+            client.write('XXX / HTTP/1.1\r\n\r\n');
+        });    
+        
+        client.on('data', function(data) {
+            assert.notEqual(null, data);
+            assert.notEqual(0, data.length);
+            assert.equal(0, data.toString().indexOf('HTTP/1.1 404 Not Found'));
+            done();
+        });
+        
+        client.on('close', function() {
+        });
+    });
+    
+    it('sends a malformed header -- oversized uri', function(done) {
+        var response = '';
+        
+        var client = net.connect({port: port}, function() {
+            var uri = '/this_is_a_long_uri';
+            for (var i = 0; i < 10; ++i) { uri += uri; }
+            client.write('GET ' + uri + ' HTTP/1.1\r\n\r\n');
+        });    
+        
+        client.on('data', function(data) {
+            response += data;
+        });
+        
+        client.on('close', function() {
+            assert.equal(0, response.length);
+            done();
+        });
+    });
+    
+    it('sends a malformed header -- oversized directive', function(done) {
+        var response = '';
+        
+        var client = net.connect({port: port}, function() {
+            var directive = 'i_am_a_directive;';
+            for (var i = 0; i < 10; ++i) { directive += directive; }
+            client.write('GET / HTTP/1.1\r\nDirective: ' + directive + '\r\n\r\n');
+        });    
+        
+        client.on('data', function(data) {
+            response += data;
+        });
+        
+        client.on('close', function() {
+            assert.equal(0, response.length);
+            done();
+        });
+    });
+    
+    it('sends a malformed header -- too many directives', function(done) {
+        var response = '';
+        
+        var client = net.connect({port: port}, function() {
+            var directives = '';
+            for (var i = 0; i < 1000; ++i) { directives += 'Directive' + i + ': i_am_a_directive\r\n'; }
+            client.write('GET / HTTP/1.1\r\n' + directives + '\r\n');
+        });    
+        
+        client.on('data', function(data) {
+            response += data;
+        });
+        
+        client.on('close', function() {
+            assert.equal(0, response.length);
+            done();
+        });
+    });
+    
+    // this test will hit the 30s timeout limit, which is too long for normal testing
+    /*it('sends a malformed header -- wrong line terminator', function(done) {
+        this.timeout(40000);
+        var response = '';
+        
+        var client = net.connect({port: port}, function() {
+            client.write('GET / HTTP/1.1\r\r');
+        });    
+        
+        client.on('data', function(data) {
+            response += data;
+        });        
+        
+        client.on('close', function() {
+            assert.equal(0, response.length);
+            done();
+        });
+    });*/
+    
+    it('requests a sensitive file -- ~/.profile', function(done) {
+        var response = '';
+        
+        var client = net.connect({port: port}, function() {
+            client.write('GET /~/.profile HTTP/1.1\r\n\r\n');
+        });    
+        
+        client.on('data', function(data) {
+            assert.notEqual(null, data);
+            assert.notEqual(0, data.length);
+            assert.equal(0, data.toString().indexOf('HTTP/1.1 404 Not Found'));
+            done();
+        });
+        
+        client.on('close', function() {
+        });
+    });
+    
+    it('requests a sensitive file (encoded) -- ~%2f.profile', function(done) {
+        var response = '';
+        
+        var client = net.connect({port: port}, function() {
+            client.write('GET /~%2f.profile HTTP/1.1\r\n\r\n');
+        });    
+        
+        client.on('data', function(data) {
+            assert.notEqual(null, data);
+            assert.notEqual(0, data.length);
+            assert.equal(0, data.toString().indexOf('HTTP/1.1 404 Not Found'));
+            done();
+        });
+        
+        client.on('close', function() {
+        });
+    });
+    
+    it('requests a sensitive file -- /etc/passwd', function(done) {
+        var response = '';
+        
+        var client = net.connect({port: port}, function() {
+            client.write('GET //etc/passwd HTTP/1.1\r\n\r\n');
+        });    
+        
+        client.on('data', function(data) {
+            assert.notEqual(null, data);
+            assert.notEqual(0, data.length);
+            assert.equal(0, data.toString().indexOf('HTTP/1.1 404 Not Found'));
+            done();
+        });
+        
+        client.on('close', function() {
+        });
+    });
+    
+    it('requests a sensitive file (encoded) -- %2fetc%2fpasswd', function(done) {
+        var response = '';
+        
+        var client = net.connect({port: port}, function() {
+            client.write('GET /%2fetc%2fpasswd HTTP/1.1\r\n\r\n');
+        });    
+        
+        client.on('data', function(data) {
+            assert.notEqual(null, data);
+            assert.notEqual(0, data.length);
+            assert.equal(0, data.toString().indexOf('HTTP/1.1 404 Not Found'));
+            done();
+        });
+        
+        client.on('close', function() {
+        });
+    });
+    
+    it('requests a sensitive file -- ../avancedb', function(done) {
+        var response = '';
+        
+        var client = net.connect({port: port}, function() {
+            client.write('GET /../avancedb HTTP/1.1\r\n\r\n');
+        });    
+        
+        client.on('data', function(data) {
+            assert.notEqual(null, data);
+            assert.notEqual(0, data.length);
+            assert.equal(0, data.toString().indexOf('HTTP/1.1 404 Not Found'));
+            done();
+        });
+        
+        client.on('close', function() {
+        });
+    });
+    
+    it('requests a sensitive file (encoded) -- %2e%2e%2favancedb', function(done) {
+        var response = '';
+        
+        var client = net.connect({port: port}, function() {
+            client.write('GET /%2e%2e%2favancedb HTTP/1.1\r\n\r\n');
+        });    
+        
+        client.on('data', function(data) {
+            assert.notEqual(null, data);
+            assert.notEqual(0, data.length);
+            assert.equal(0, data.toString().indexOf('HTTP/1.1 404 Not Found'));
+            done();
+        });
+        
+        client.on('close', function() {
+        });
+    });
+    
+    it('requests a sensitive file (malformed encoded) -- %2x%2y%2zavancedb', function(done) {
+        var response = '';
+        
+        var client = net.connect({port: port}, function() {
+            client.write('GET /%2x%2y%2zavancedb HTTP/1.1\r\n\r\n');
+        });    
+        
+        client.on('data', function(data) {
+            assert.notEqual(null, data);
+            assert.notEqual(0, data.length);
+            assert.equal(0, data.toString().indexOf('HTTP/1.1 404 Not Found'));
+            done();
+        });
+        
+        client.on('close', function() {
+        });
+    });
 });
