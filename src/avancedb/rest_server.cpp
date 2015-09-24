@@ -774,9 +774,17 @@ bool RestServer::PostTempView(rs::httpserver::request_ptr request, const rs::htt
             throw InvalidJson();
         }
         
-        std::string map = "(";
+        // get the documents
+        GetAllDocumentsOptions options(request->getQueryString());
+        Documents::collection::size_type offset = 0;
+        Documents::collection::size_type totalDocs = 0;
+        sequence_type updateSequence = 0;
+        auto docs = db->GetDocuments(options, offset, totalDocs, updateSequence);
+        
+        // create the function script
+        std::string map = "(function() { return ";
         map += obj->getString("map");
-        map += ")();";
+        map += "; })();";
         
         // create a runtime on this thread
         rs::jsapi::Runtime rt;
@@ -791,16 +799,51 @@ bool RestServer::PostTempView(rs::httpserver::request_ptr request, const rs::htt
                 value = args[1].ToString();
         });
 
-        // execute a script in the context of the runtime, getting the result
-        rs::jsapi::Value result(rt);
-        rt.Evaluate(map.c_str(), result);
+        // execute the script in the context of the runtime, getting the resulting function
+        rs::jsapi::Value func(rt);
+        rt.Evaluate(map.c_str(), func);
+        
+        rs::scriptobject::ScriptObjectPtr scriptObj = nullptr;
+        rs::jsapi::Value object(rt);
+        rs::jsapi::DynamicObject::Create(rt, 
+            [&](const char* name, rs::jsapi::Value& value) {
+                switch (scriptObj->getType(name)) {
+                    case rs::scriptobject::ScriptObjectType::Boolean:
+                        value = scriptObj->getBoolean(name);
+                        return;
+                    case rs::scriptobject::ScriptObjectType::Int32:
+                        value = scriptObj->getInt32(name);
+                        return;
+                    case rs::scriptobject::ScriptObjectType::String:
+                        value = scriptObj->getString(name);
+                        return;
+                    case rs::scriptobject::ScriptObjectType::Double:
+                        value = scriptObj->getDouble(name);
+                        return;
+                    default:
+                        value = "null";
+                        return;
+                }
+            }, 
+            nullptr, nullptr, nullptr, object);
+            
+        rs::jsapi::FunctionArguments args(rt);
+        args.Append(object);
         
         JsonStream stream;
         stream.PushContext(JsonStream::ContextType::Array, "rows");
-        stream.PushContext(JsonStream::ContextType::Object);
-        stream.Append("key", key);
-        stream.Append("value", value);
-        stream.PopContext();
+        
+        for (Documents::collection::size_type i = 0, size = docs->size(); i < size; ++i) {
+            scriptObj = docs->at(i)->getObject();
+            
+            func.CallFunction(args);
+            
+            stream.PushContext(JsonStream::ContextType::Object);
+            stream.Append("key", key);
+            stream.Append("value", value);
+            stream.PopContext();
+        }
+        
         stream.PopContext();
         
         response->setContentType("application/json").Send(stream.Flush());
