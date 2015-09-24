@@ -27,6 +27,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/atomic.hpp>
 #include <boost/thread.hpp>
+#include <boost/make_shared.hpp>
 
 #include "../../externals/lazyflatset/lazyflatset.hpp"
 
@@ -66,6 +67,8 @@ public:
     sequence_type getUpdateSequence();
     
 private:
+    
+    friend documents_ptr boost::make_shared<documents_ptr::element_type>(database_ptr&);
     
     const collection::size_type findMissedFlag = ~(std::numeric_limits<collection::size_type>::max() / 2);
     

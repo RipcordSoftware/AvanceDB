@@ -28,7 +28,7 @@ Database::Database(const char* name) : name_(name), instanceStartTime_(Now()),
 }
 
 database_ptr Database::Create(const char* name) {
-    database_ptr ptr(new Database(name));
+    auto ptr = boost::make_shared<database_ptr::element_type>(name);
     if (!!ptr) {
         ptr->docs_ = Documents::Create(ptr);
     }

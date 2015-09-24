@@ -42,7 +42,7 @@ Documents::Documents(database_ptr db) : db_(db), updateSeq_(0), localUpdateSeq_(
 }
 
 documents_ptr Documents::Create(database_ptr db) {
-    return documents_ptr(new Documents(db));
+    return boost::make_shared<documents_ptr::element_type>(db);
 }
 
 Documents::collection::size_type Documents::getCount() {

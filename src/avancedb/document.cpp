@@ -51,7 +51,7 @@ document_ptr Document::Create(const char* id, script_object_ptr obj, sequence_ty
         oldRev != nullptr &&
         obj->setString("_id", id) &&
         (newRev == nullptr || obj->setString("_rev", newRev))) {
-        doc = document_ptr(new Document(obj, seqNum));
+        doc = boost::make_shared<document_ptr::element_type>(obj, seqNum);
     } else {
         rs::scriptobject::utils::ObjectVector tempDefn = {
             std::make_pair("_id", rs::scriptobject::utils::VectorValue(id)),
@@ -64,7 +64,7 @@ document_ptr Document::Create(const char* id, script_object_ptr obj, sequence_ty
         
         auto newObj = rs::scriptobject::ScriptObject::Merge(obj, tempObj, rs::scriptobject::ScriptObject::MergeStrategy::Front);
         
-        doc = document_ptr(new Document(newObj, seqNum));
+        doc = boost::make_shared<document_ptr::element_type>(newObj, seqNum);
     }
     
     return doc;

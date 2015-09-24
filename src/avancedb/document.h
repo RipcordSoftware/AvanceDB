@@ -22,6 +22,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 
 #include <cstring>
 
@@ -66,7 +67,9 @@ public:
     
     const script_object_ptr getObject() const;
         
-private:        
+private:
+    
+    friend document_ptr boost::make_shared<document_ptr::element_type>(script_object_ptr&, sequence_type&);
 
     Document(script_object_ptr obj, sequence_type seqNum);
     

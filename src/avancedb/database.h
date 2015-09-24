@@ -23,6 +23,7 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/atomic.hpp>
+#include <boost/make_shared.hpp>
 
 #include "documents.h"
 #include "get_all_documents_options.h"
@@ -60,6 +61,8 @@ public:
     BulkDocumentsResults PostBulkDocuments(script_array_ptr docs, bool newEdits);
     
 private:
+    friend database_ptr boost::make_shared<database_ptr::element_type>(const char*&);
+
     Database(const char*);
     
     static unsigned long Now();
