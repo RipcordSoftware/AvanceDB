@@ -82,14 +82,11 @@
             <pElem>../../externals/libscriptobject/src/libscriptobject_gason</pElem>
             <pElem>../../externals/libscriptobject/externals/gason/src</pElem>
             <pElem>../../externals/cityhash/src</pElem>
-            <pElem>../../externals/libjsapi/externals/installed/include/mozjs-31</pElem>
+            <pElem>../../externals/libjsapi/externals/installed/include/mozjs-</pElem>
           </incDir>
           <commandLine>--coverage</commandLine>
         </ccTool>
         <linkerTool>
-          <linkerAddLib>
-            <pElem>../../externals/libjsapi/externals/installed/lib</pElem>
-          </linkerAddLib>
           <linkerLibItems>
             <linkerLibProjectItem>
               <makeArtifact PL="../../externals/libhttpserver/src/libhttpserver"
@@ -139,7 +136,7 @@
                             OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libjsapi.a">
               </makeArtifact>
             </linkerLibProjectItem>
-            <linkerLibLibItem>mozjs-31</linkerLibLibItem>
+            <linkerLibFileItem>../../externals/libjsapi/externals/installed/lib/libjs_static.ajs</linkerLibFileItem>
             <linkerLibLibItem>boost_regex</linkerLibLibItem>
             <linkerLibLibItem>boost_filesystem</linkerLibLibItem>
             <linkerLibLibItem>boost_program_options</linkerLibLibItem>
@@ -258,7 +255,7 @@
             <pElem>../../externals/libscriptobject/src/libscriptobject_gason</pElem>
             <pElem>../../externals/libscriptobject/externals/gason/src</pElem>
             <pElem>../../externals/cityhash/src</pElem>
-            <pElem>../../externals/libjsapi/externals/installed/include/mozjs-31</pElem>
+            <pElem>../../externals/libjsapi/externals/installed/include/mozjs-</pElem>
           </incDir>
         </ccTool>
         <fortranCompilerTool>
@@ -268,9 +265,6 @@
           <developmentMode>5</developmentMode>
         </asmTool>
         <linkerTool>
-          <linkerAddLib>
-            <pElem>../../externals/libjsapi/externals/installed/lib</pElem>
-          </linkerAddLib>
           <linkerLibItems>
             <linkerLibProjectItem>
               <makeArtifact PL="../../externals/libhttpserver/src/libhttpserver"
@@ -320,7 +314,7 @@
                             OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libjsapi.a">
               </makeArtifact>
             </linkerLibProjectItem>
-            <linkerLibLibItem>mozjs-31</linkerLibLibItem>
+            <linkerLibFileItem>../../externals/libjsapi/externals/installed/lib/libjs_static.ajs</linkerLibFileItem>
             <linkerLibLibItem>boost_regex</linkerLibLibItem>
             <linkerLibLibItem>boost_filesystem</linkerLibLibItem>
             <linkerLibLibItem>boost_program_options</linkerLibLibItem>
