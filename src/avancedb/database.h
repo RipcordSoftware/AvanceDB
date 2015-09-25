@@ -28,6 +28,7 @@
 #include "documents.h"
 #include "get_all_documents_options.h"
 #include "post_all_documents_options.h"
+#include "json_stream.h"
 
 class Database final : public boost::enable_shared_from_this<Database>, private boost::noncopyable {
 public:
@@ -59,6 +60,8 @@ public:
     document_array_ptr PostDocuments(const PostAllDocumentsOptions& options, Documents::collection::size_type& totalDocs, sequence_type& updateSequence);
     
     BulkDocumentsResults PostBulkDocuments(script_array_ptr docs, bool newEdits);
+    
+    void PostTempView(rs::scriptobject::ScriptObjectPtr obj, JsonStream& stream);
     
 private:
     friend database_ptr boost::make_shared<database_ptr::element_type>(const char*&);

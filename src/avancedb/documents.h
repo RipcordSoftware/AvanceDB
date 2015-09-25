@@ -36,6 +36,7 @@
 #include "get_all_documents_options.h"
 #include "post_all_documents_options.h"
 #include "bulk_documents_result.h"
+#include "json_stream.h"
 
 class Database;
 
@@ -62,6 +63,8 @@ public:
     document_array_ptr PostDocuments(const PostAllDocumentsOptions& options, Documents::collection::size_type& totalDocs, sequence_type& updateSequence);
     
     BulkDocumentsResults PostBulkDocuments(script_array_ptr docs, bool newEdits);
+    
+    void PostTempView(rs::scriptobject::ScriptObjectPtr obj, JsonStream& stream);
     
     collection::size_type getCount();
     sequence_type getUpdateSequence();

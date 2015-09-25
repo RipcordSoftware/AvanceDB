@@ -91,3 +91,7 @@ document_ptr Database::SetLocalDocument(const char* id, script_object_ptr obj) {
 BulkDocumentsResults Database::PostBulkDocuments(script_array_ptr docs, bool newEdits) {
     return docs_->PostBulkDocuments(docs, newEdits);
 }
+
+void Database::PostTempView(rs::scriptobject::ScriptObjectPtr obj, JsonStream& stream) {
+    return docs_->PostTempView(obj, stream);
+}

@@ -31,6 +31,8 @@
 #include "config.h"
 #include "uuid_helper.h"
 
+#include "libjsapi.h"
+
 Documents::Documents(database_ptr db) : db_(db), updateSeq_(0), localUpdateSeq_(0),
         collections_(GetCollectionCount()), docsMtx_(collections_),
         allDocsCacheDocs_(boost::make_shared<document_array>()),
@@ -394,6 +396,76 @@ document_ptr Documents::DeleteLocalDocument(const char* id, const char* rev) {
     
     return doc;
 }   
+
+void Documents::PostTempView(rs::scriptobject::ScriptObjectPtr obj, JsonStream& stream) {
+    sequence_type updateSequence = 0;
+    auto docs = GetAllDocuments(updateSequence);
+    
+    // create the function script
+    std::string map = "(function() { return ";
+    map += obj->getString("map");
+    map += "; })();";
+
+    // create a runtime on this thread
+    rs::jsapi::Runtime rt;
+
+    bool emitted = false;
+    std::string key;
+    std::string value;
+
+    // define a function in global scope implemented by a C++ lambda
+    rs::jsapi::Global::DefineFunction(rt, "emit", 
+        [&](const std::vector<rs::jsapi::Value>& args, rs::jsapi::Value& result) {
+            emitted = true;
+            key = args[0].ToString();
+            value = args[1].ToString();
+    });
+
+    // execute the script in the context of the runtime, getting the resulting function
+    rs::jsapi::Value func(rt);
+    rt.Evaluate(map.c_str(), func);
+
+    rs::scriptobject::ScriptObjectPtr scriptObj = nullptr;
+    rs::jsapi::Value object(rt);
+    rs::jsapi::DynamicObject::Create(rt, 
+        [&](const char* name, rs::jsapi::Value& value) {
+            switch (scriptObj->getType(name)) {
+                case rs::scriptobject::ScriptObjectType::Boolean:
+                    value = scriptObj->getBoolean(name);
+                    return;
+                case rs::scriptobject::ScriptObjectType::Int32:
+                    value = scriptObj->getInt32(name);
+                    return;
+                case rs::scriptobject::ScriptObjectType::String:
+                    value = scriptObj->getString(name);
+                    return;
+                case rs::scriptobject::ScriptObjectType::Double:
+                    value = scriptObj->getDouble(name);
+                    return;
+                default:
+                    value = "null";
+                    return;
+            }
+        }, 
+        nullptr, nullptr, nullptr, object);
+
+    rs::jsapi::FunctionArguments args(rt);
+    args.Append(object);
+
+    for (Documents::collection::size_type i = 0, size = docs->size(); i < size; ++i) {
+        scriptObj = docs->at(i)->getObject();
+
+        func.CallFunction(args);
+
+        if (emitted) {
+            stream.PushContext(JsonStream::ContextType::Object);
+            stream.Append("key", key);
+            stream.Append("value", value);
+            stream.PopContext();
+            emitted = false;
+        }
+    }
+}
 
 Documents::collection::size_type Documents::FindDocument(const document_array& docs, const std::string& id, bool descending) {
     const auto size = docs.size();

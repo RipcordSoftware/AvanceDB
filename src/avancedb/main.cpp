@@ -16,11 +16,14 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "http_server.h"
-
+#include <iostream>
 #include <string>
 
 #include <boost/program_options.hpp>
+
+#include "http_server.h"
+
+#include "libjsapi.h"
 
 int main(int argc, char** argv) {
     std::string addr = "0.0.0.0";
@@ -40,7 +43,10 @@ int main(int argc, char** argv) {
     if (vm.count("help")) {
         std::cout << desc << std::endl;
         return 1;
-    } else {    
+    } else {
+        // create the runtime which hosts spidermonkey
+        rs::jsapi::Runtime rt;
+
         HttpServer server(addr.c_str(), port);
         server.Start();
         return 0;
