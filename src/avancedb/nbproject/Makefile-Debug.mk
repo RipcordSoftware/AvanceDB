@@ -52,8 +52,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/rest_config.o \
 	${OBJECTDIR}/rest_exceptions.o \
 	${OBJECTDIR}/rest_server.o \
+	${OBJECTDIR}/script_array_jsapi_key_value_source.o \
 	${OBJECTDIR}/script_array_jsapi_source.o \
-	${OBJECTDIR}/script_object_jsapi_key_value_source.o \
 	${OBJECTDIR}/script_object_jsapi_source.o \
 	${OBJECTDIR}/script_object_response_stream.o \
 	${OBJECTDIR}/uuid_helper.o
@@ -178,15 +178,15 @@ ${OBJECTDIR}/rest_server.o: rest_server.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- `pkg-config --cflags zlib` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/rest_server.o rest_server.cpp
 
+${OBJECTDIR}/script_array_jsapi_key_value_source.o: script_array_jsapi_key_value_source.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- `pkg-config --cflags zlib` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/script_array_jsapi_key_value_source.o script_array_jsapi_key_value_source.cpp
+
 ${OBJECTDIR}/script_array_jsapi_source.o: script_array_jsapi_source.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- `pkg-config --cflags zlib` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/script_array_jsapi_source.o script_array_jsapi_source.cpp
-
-${OBJECTDIR}/script_object_jsapi_key_value_source.o: script_object_jsapi_key_value_source.cpp 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- `pkg-config --cflags zlib` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/script_object_jsapi_key_value_source.o script_object_jsapi_key_value_source.cpp
 
 ${OBJECTDIR}/script_object_jsapi_source.o: script_object_jsapi_source.cpp 
 	${MKDIR} -p ${OBJECTDIR}

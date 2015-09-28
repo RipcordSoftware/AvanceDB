@@ -779,7 +779,7 @@ bool RestServer::PostTempView(rs::httpserver::request_ptr request, const rs::htt
         
         auto prefixComma = false;
         for (auto result : *results) {
-            auto resultObj = result->getResultObj();
+            auto resultObj = result->getResultArray();
             
             objStream << (prefixComma ? ',' : ' ');
             objStream << R"({"id":")" << result->getId() << R"(","key":)";

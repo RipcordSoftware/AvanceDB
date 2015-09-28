@@ -32,8 +32,8 @@
 #include "uuid_helper.h"
 #include "map_reduce_result.h"
 
-#include "script_object_jsapi_key_value_source.h"
-#include "script_object_factory.h"
+#include "script_array_jsapi_key_value_source.h"
+#include "script_array_factory.h"
 
 #include "libjsapi.h"
 
@@ -422,10 +422,10 @@ map_reduce_result_array_ptr Documents::PostTempView(rs::scriptobject::ScriptObje
     // define a function in global scope implemented by a C++ lambda
     rs::jsapi::Global::DefineFunction(rt, "emit", 
         [&](const std::vector<rs::jsapi::Value>& args, rs::jsapi::Value&) {
-            auto source = ScriptObjectJsapiKeyValueSource::Create(args[0], args[1]);
+            auto source = ScriptArrayJsapiKeyValueSource::Create(args[0], args[1]);
             
-            auto resultObj = rs::scriptobject::ScriptObjectFactory::CreateObject(source);
-            auto result = MapReduceResult::Create(resultObj, doc);
+            auto resultArr = rs::scriptobject::ScriptArrayFactory::CreateArray(source);
+            auto result = MapReduceResult::Create(resultArr, doc);
             results->push_back(result);
     });
 

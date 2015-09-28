@@ -32,11 +32,11 @@ public:
     const static unsigned KeyIndex /* = 0*/;
     const static unsigned ValueIndex /* = 1*/;
     
-    static map_reduce_result_ptr Create(script_object_ptr result, document_ptr doc);
+    static map_reduce_result_ptr Create(script_array_ptr result, document_ptr doc);
     
     const char* getId() const;
     const document_ptr getDoc() const;
-    const script_object_ptr getResultObj() const;
+    const script_array_ptr getResultArray() const;
     
     rs::scriptobject::ScriptObjectType getKeyType() const;
     rs::scriptobject::ScriptObjectType getValueType() const;        
@@ -59,12 +59,12 @@ public:
     
 private:
     
-    friend map_reduce_result_ptr boost::make_shared<map_reduce_result_ptr::element_type>(script_object_ptr&, document_ptr&);
+    friend map_reduce_result_ptr boost::make_shared<map_reduce_result_ptr::element_type>(script_array_ptr&, document_ptr&);
     
-    MapReduceResult(script_object_ptr, document_ptr);
+    MapReduceResult(script_array_ptr, document_ptr);
     
     document_ptr doc_;
-    script_object_ptr result_;
+    script_array_ptr result_;
 
 };
 

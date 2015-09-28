@@ -22,8 +22,8 @@
       <itemPath>rest_config.h</itemPath>
       <itemPath>rest_exceptions.h</itemPath>
       <itemPath>rest_server.h</itemPath>
+      <itemPath>script_array_jsapi_key_value_source.h</itemPath>
       <itemPath>script_array_jsapi_source.h</itemPath>
-      <itemPath>script_object_jsapi_key_value_source.h</itemPath>
       <itemPath>script_object_jsapi_source.h</itemPath>
       <itemPath>script_object_response_stream.h</itemPath>
       <itemPath>types.h</itemPath>
@@ -53,8 +53,8 @@
       <itemPath>rest_config.cpp</itemPath>
       <itemPath>rest_exceptions.cpp</itemPath>
       <itemPath>rest_server.cpp</itemPath>
+      <itemPath>script_array_jsapi_key_value_source.cpp</itemPath>
       <itemPath>script_array_jsapi_source.cpp</itemPath>
-      <itemPath>script_object_jsapi_key_value_source.cpp</itemPath>
       <itemPath>script_object_jsapi_source.cpp</itemPath>
       <itemPath>script_object_response_stream.cpp</itemPath>
       <itemPath>uuid_helper.cpp</itemPath>
@@ -235,19 +235,19 @@
       </item>
       <item path="rest_server.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="script_array_jsapi_source.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="script_array_jsapi_source.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="script_object_jsapi_key_value_source.cpp"
+      <item path="script_array_jsapi_key_value_source.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="script_object_jsapi_key_value_source.h"
+      <item path="script_array_jsapi_key_value_source.h"
             ex="false"
             tool="3"
             flavor2="0">
+      </item>
+      <item path="script_array_jsapi_source.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="script_array_jsapi_source.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="script_object_jsapi_source.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -435,19 +435,19 @@
       </item>
       <item path="rest_server.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="script_array_jsapi_source.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="script_array_jsapi_source.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="script_object_jsapi_key_value_source.cpp"
+      <item path="script_array_jsapi_key_value_source.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="script_object_jsapi_key_value_source.h"
+      <item path="script_array_jsapi_key_value_source.h"
             ex="false"
             tool="3"
             flavor2="0">
+      </item>
+      <item path="script_array_jsapi_source.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="script_array_jsapi_source.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="script_object_jsapi_source.cpp" ex="false" tool="1" flavor2="0">
       </item>

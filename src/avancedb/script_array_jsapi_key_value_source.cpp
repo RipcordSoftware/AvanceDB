@@ -16,7 +16,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "script_object_jsapi_key_value_source.h"
+#include "script_array_jsapi_key_value_source.h"
 
 #include "script_object_jsapi_source.h"
 #include "script_array_jsapi_source.h"
@@ -24,8 +24,8 @@
 #include "script_object_factory.h"
 #include "script_array_factory.h"
 
-ScriptObjectJsapiKeyValueSource ScriptObjectJsapiKeyValueSource::Create(const rs::jsapi::Value& key, const rs::jsapi::Value& value) {
-    ScriptObjectJsapiKeyValueSource source;
+ScriptArrayJsapiKeyValueSource ScriptArrayJsapiKeyValueSource::Create(const rs::jsapi::Value& key, const rs::jsapi::Value& value) {
+    ScriptArrayJsapiKeyValueSource source;
     
     auto cx = key.getContext();
     JSAutoRequest ar{cx};        
@@ -59,73 +59,57 @@ ScriptObjectJsapiKeyValueSource ScriptObjectJsapiKeyValueSource::Create(const rs
     return source;
 }
 
-ScriptObjectJsapiKeyValueSource::ScriptObjectJsapiKeyValueSource() {
+ScriptArrayJsapiKeyValueSource::ScriptArrayJsapiKeyValueSource() {
     
 }
 
-ScriptObjectJsapiKeyValueSource::ScriptObjectJsapiKeyValueSource(ScriptObjectJsapiKeyValueSource&& rhs) :
+ScriptArrayJsapiKeyValueSource::ScriptArrayJsapiKeyValueSource(ScriptArrayJsapiKeyValueSource&& rhs) :
         values_(std::move(rhs.values_)),
         types_(std::move(rhs.types_)), stringValues_(std::move(stringValues_)) {
     
 }
 
-ScriptObjectJsapiKeyValueSource& ScriptObjectJsapiKeyValueSource::operator=(ScriptObjectJsapiKeyValueSource&& rhs) {
+ScriptArrayJsapiKeyValueSource& ScriptArrayJsapiKeyValueSource::operator=(ScriptArrayJsapiKeyValueSource&& rhs) {
     values_ = std::move(rhs.values_);
     stringValues_ = std::move(rhs.stringValues_);
     types_ = std::move(rhs.types_);
     return *this;
 }
 
-unsigned ScriptObjectJsapiKeyValueSource::count() const {
+unsigned ScriptArrayJsapiKeyValueSource::count() const {
     return values_.size();
 }
 
-rs::scriptobject::ScriptObjectType ScriptObjectJsapiKeyValueSource::type(int index) const { 
+rs::scriptobject::ScriptObjectType ScriptArrayJsapiKeyValueSource::type(int index) const { 
     return types_[index];
 }
 
-const char* ScriptObjectJsapiKeyValueSource::name(int index) const {
-    switch (index) {
-        case 0: return "key";
-        case 1: return "value";
-        default: return nullptr;
-    }
-}
-
-unsigned ScriptObjectJsapiKeyValueSource::length(int index) const {
-    switch (index) {
-        case 0: return sizeof("key") - 1;
-        case 1: return sizeof("value") - 1;
-        default: return 0;
-    }
-}
-
-bool ScriptObjectJsapiKeyValueSource::getBoolean(int index) const {
+bool ScriptArrayJsapiKeyValueSource::getBoolean(int index) const {
     return values_[index].toBoolean();
 }
 
-std::int32_t ScriptObjectJsapiKeyValueSource::getInt32(int index) const {
+std::int32_t ScriptArrayJsapiKeyValueSource::getInt32(int index) const {
     return values_[index].toInt32();
 }
 
-double ScriptObjectJsapiKeyValueSource::getDouble(int index) const {
+double ScriptArrayJsapiKeyValueSource::getDouble(int index) const {
     return values_[index].toNumber();
 }
 
-const char* ScriptObjectJsapiKeyValueSource::getString(int index) const {
+const char* ScriptArrayJsapiKeyValueSource::getString(int index) const {
     return stringValues_[index].c_str();
 }
 
-int ScriptObjectJsapiKeyValueSource::getStringLength(int index) const {
+int ScriptArrayJsapiKeyValueSource::getStringLength(int index) const {
     return stringValues_[index].length();
 }
 
-const rs::scriptobject::ScriptObjectPtr ScriptObjectJsapiKeyValueSource::getObject(int index) const {
+const rs::scriptobject::ScriptObjectPtr ScriptArrayJsapiKeyValueSource::getObject(int index) const {
     auto source = ScriptObjectJsapiSource::Create(values_[index]);
     return rs::scriptobject::ScriptObjectFactory::CreateObject(source);
 }
 
-const rs::scriptobject::ScriptArrayPtr ScriptObjectJsapiKeyValueSource::getArray(int index) const {
+const rs::scriptobject::ScriptArrayPtr ScriptArrayJsapiKeyValueSource::getArray(int index) const {
     auto source = ScriptArrayJsapiSource::Create(values_[index]);
     return rs::scriptobject::ScriptArrayFactory::CreateArray(source);
 }

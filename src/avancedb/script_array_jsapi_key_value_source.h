@@ -19,25 +19,22 @@
 #ifndef SCRIPT_OBJECT_KEY_VALUE_SOURCE_H
 #define SCRIPT_OBJECT_KEY_VALUE_SOURCE_H
 
-#include "script_object_source.h"
+#include "script_array_source.h"
 
 #include "libjsapi.h"
 
-class ScriptObjectJsapiKeyValueSource final : public rs::scriptobject::ScriptObjectSource  {
+class ScriptArrayJsapiKeyValueSource final : public rs::scriptobject::ScriptArraySource  {
     using ScriptObjectType = rs::scriptobject::ScriptObjectType;
     
 public:
     
-    ScriptObjectJsapiKeyValueSource(ScriptObjectJsapiKeyValueSource&& rhs);
-    ScriptObjectJsapiKeyValueSource& operator=(ScriptObjectJsapiKeyValueSource&& rhs);
+    ScriptArrayJsapiKeyValueSource(ScriptArrayJsapiKeyValueSource&& rhs);
+    ScriptArrayJsapiKeyValueSource& operator=(ScriptArrayJsapiKeyValueSource&& rhs);
     
-    static ScriptObjectJsapiKeyValueSource Create(const rs::jsapi::Value& key, const rs::jsapi::Value& value);        
+    static ScriptArrayJsapiKeyValueSource Create(const rs::jsapi::Value& key, const rs::jsapi::Value& value);        
     
     virtual unsigned count() const override;
-    virtual ScriptObjectType type(int index) const override;
-    virtual const char* name(int index) const override;    
-    virtual unsigned length(int index) const override;
-    
+    virtual ScriptObjectType type(int index) const override;    
     virtual bool getBoolean(int index) const override;
     virtual std::int32_t getInt32(int index) const override;
     virtual double getDouble(int index) const override;
@@ -48,7 +45,7 @@ public:
     
 private:
     
-    ScriptObjectJsapiKeyValueSource();    
+    ScriptArrayJsapiKeyValueSource();    
     
     std::vector<rs::jsapi::Value> values_;
     std::vector<std::string> stringValues_;

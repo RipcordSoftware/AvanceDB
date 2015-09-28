@@ -23,11 +23,11 @@
 const unsigned MapReduceResult::KeyIndex = 0;
 const unsigned MapReduceResult::ValueIndex = 1;
 
-MapReduceResult::MapReduceResult(script_object_ptr result, document_ptr doc) :
+MapReduceResult::MapReduceResult(script_array_ptr result, document_ptr doc) :
         result_(result), doc_(doc) {
 }
 
-map_reduce_result_ptr MapReduceResult::Create(script_object_ptr result, document_ptr doc) {    
+map_reduce_result_ptr MapReduceResult::Create(script_array_ptr result, document_ptr doc) {    
     return boost::make_shared<MapReduceResult>(result, doc);
 }
 
@@ -47,7 +47,7 @@ const document_ptr MapReduceResult::getDoc() const {
     return doc_;
 }
 
-const script_object_ptr MapReduceResult::getResultObj() const {
+const script_array_ptr MapReduceResult::getResultArray() const {
     return result_;
 }
 
@@ -75,10 +75,6 @@ const script_array_ptr MapReduceResult::getKeyArray() const {
     return result_->getArray(KeyIndex);
 }
 
-unsigned MapReduceResult::getKeyStringFieldLength() const {
-    return result_->getStringFieldLength(KeyIndex);
-}
-
 const char* MapReduceResult::getValueString() const {
     return result_->getString(ValueIndex);
 }
@@ -101,8 +97,4 @@ const script_object_ptr MapReduceResult::getValueObject() const {
 
 const script_array_ptr MapReduceResult::getValueArray() const {
     return result_->getArray(ValueIndex);
-}
-
-unsigned MapReduceResult::getValueStringFieldLength() const {
-    return result_->getStringFieldLength(ValueIndex);
 }
