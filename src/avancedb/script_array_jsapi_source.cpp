@@ -35,7 +35,7 @@ ScriptArrayJsapiSource ScriptArrayJsapiSource::Create(const rs::jsapi::Value& ob
         for (decltype(length) i = 0; i < length; ++i) {
             rs::jsapi::Value value{cx};
             if (JS_GetElement(cx, obj, i, value)) {                
-                source.values_.emplace_back(cx);
+                source.values_.emplace_back(value);
                 
                 switch (JS_TypeOfValue(cx, value)) {
                     case JSTYPE_OBJECT: 
