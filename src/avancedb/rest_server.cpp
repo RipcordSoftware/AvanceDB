@@ -33,6 +33,7 @@
 #include "script_object_response_stream.h"
 #include "rest_config.h"
 #include "document_revision.h"
+#include "map_reduce_result.h"
 
 #include "libscriptobject_gason.h"
 
@@ -767,16 +768,30 @@ bool RestServer::PostTempView(rs::httpserver::request_ptr request, const rs::htt
         auto obj = GetJsonBody(request);
         if (!obj || obj->getType("map") != rs::scriptobject::ScriptObjectType::String) {
             throw InvalidJson();
-        }                
+        }
         
-        JsonStream stream;
-        stream.PushContext(JsonStream::ContextType::Array, "rows");
+        Documents::collection::size_type totalDocs = 0;
+        auto results = db->PostTempView(obj, totalDocs);
         
-        db->PostTempView(obj, stream);
+        auto& stream = response->setContentType("application/json").getResponseStream();
+        ScriptObjectResponseStream<> objStream{stream};
+        objStream << R"({"offset":0,"total_rows":)" << totalDocs << R"(,"rows":[)";
         
-        stream.PopContext();
+        auto prefixComma = false;
+        for (auto result : *results) {
+            auto resultObj = result->getResultObj();
+            
+            objStream << (prefixComma ? ',' : ' ');
+            objStream << R"({"id":")" << result->getId() << R"(","key":)";
+            objStream.Serialize(resultObj, MapReduceResult::KeyIndex);
+            objStream << R"(,"value":)";
+            objStream.Serialize(resultObj, MapReduceResult::ValueIndex);
+            objStream << '}';
+            prefixComma = true;
+        }
         
-        response->setContentType("application/json").Send(stream.Flush());
+        objStream << "]}";
+        objStream.Flush();
         
         executed = true;
     }

@@ -64,7 +64,7 @@ public:
     
     BulkDocumentsResults PostBulkDocuments(script_array_ptr docs, bool newEdits);
     
-    void PostTempView(rs::scriptobject::ScriptObjectPtr obj, JsonStream& stream);
+    map_reduce_result_array_ptr PostTempView(rs::scriptobject::ScriptObjectPtr obj, Documents::collection::size_type& totalDocs);
     
     collection::size_type getCount();
     sequence_type getUpdateSequence();

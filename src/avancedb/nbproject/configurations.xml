@@ -17,10 +17,14 @@
       <itemPath>http_server_exception.h</itemPath>
       <itemPath>http_server_log.h</itemPath>
       <itemPath>json_stream.h</itemPath>
+      <itemPath>map_reduce_result.h</itemPath>
       <itemPath>post_all_documents_options.h</itemPath>
       <itemPath>rest_config.h</itemPath>
       <itemPath>rest_exceptions.h</itemPath>
       <itemPath>rest_server.h</itemPath>
+      <itemPath>script_array_jsapi_source.h</itemPath>
+      <itemPath>script_object_jsapi_key_value_source.h</itemPath>
+      <itemPath>script_object_jsapi_source.h</itemPath>
       <itemPath>script_object_response_stream.h</itemPath>
       <itemPath>types.h</itemPath>
       <itemPath>uuid_helper.h</itemPath>
@@ -44,10 +48,14 @@
       <itemPath>http_server_log.cpp</itemPath>
       <itemPath>json_stream.cpp</itemPath>
       <itemPath>main.cpp</itemPath>
+      <itemPath>map_reduce_result.cpp</itemPath>
       <itemPath>post_all_documents_options.cpp</itemPath>
       <itemPath>rest_config.cpp</itemPath>
       <itemPath>rest_exceptions.cpp</itemPath>
       <itemPath>rest_server.cpp</itemPath>
+      <itemPath>script_array_jsapi_source.cpp</itemPath>
+      <itemPath>script_object_jsapi_key_value_source.cpp</itemPath>
+      <itemPath>script_object_jsapi_source.cpp</itemPath>
       <itemPath>script_object_response_stream.cpp</itemPath>
       <itemPath>uuid_helper.cpp</itemPath>
     </logicalFolder>
@@ -207,6 +215,10 @@
       </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>
+      <item path="map_reduce_result.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="map_reduce_result.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="post_all_documents_options.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="post_all_documents_options.h" ex="false" tool="3" flavor2="0">
@@ -222,6 +234,24 @@
       <item path="rest_server.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="rest_server.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="script_array_jsapi_source.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="script_array_jsapi_source.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="script_object_jsapi_key_value_source.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="script_object_jsapi_key_value_source.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="script_object_jsapi_source.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="script_object_jsapi_source.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="script_object_response_stream.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -385,6 +415,10 @@
       </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>
+      <item path="map_reduce_result.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="map_reduce_result.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="post_all_documents_options.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="post_all_documents_options.h" ex="false" tool="3" flavor2="0">
@@ -400,6 +434,24 @@
       <item path="rest_server.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="rest_server.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="script_array_jsapi_source.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="script_array_jsapi_source.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="script_object_jsapi_key_value_source.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="script_object_jsapi_key_value_source.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="script_object_jsapi_source.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="script_object_jsapi_source.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="script_object_response_stream.cpp" ex="false" tool="1" flavor2="0">
       </item>

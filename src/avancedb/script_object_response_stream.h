@@ -39,7 +39,7 @@ public:
     }
 
     template <typename T>    
-    void Serialize(T arr, unsigned index, typename std::enable_if<std::is_same<T, script_array_ptr>::value>::type* = nullptr) {
+    void Serialize(T arr, unsigned index, typename std::enable_if<std::is_same<T, script_array_ptr>::value || std::is_same<T, script_object_ptr>::value>::type* = nullptr) {
         auto type = index < arr->getCount() ? arr->getType(index) : rs::scriptobject::ScriptObjectType::Unknown;
         switch (type) {
             case rs::scriptobject::ScriptObjectType::Array: Serialize(arr->getArray(index)); break;

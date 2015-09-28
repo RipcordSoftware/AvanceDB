@@ -30,6 +30,10 @@
 #include "document_revision.h"
 #include "config.h"
 #include "uuid_helper.h"
+#include "map_reduce_result.h"
+
+#include "script_object_jsapi_key_value_source.h"
+#include "script_object_factory.h"
 
 #include "libjsapi.h"
 
@@ -397,9 +401,13 @@ document_ptr Documents::DeleteLocalDocument(const char* id, const char* rev) {
     return doc;
 }   
 
-void Documents::PostTempView(rs::scriptobject::ScriptObjectPtr obj, JsonStream& stream) {
+map_reduce_result_array_ptr Documents::PostTempView(rs::scriptobject::ScriptObjectPtr obj, Documents::collection::size_type& totalDocs) {
+    map_reduce_result_array_ptr results = boost::make_shared<map_reduce_result_array_ptr::element_type>();
+    
     sequence_type updateSequence = 0;
     auto docs = GetAllDocuments(updateSequence);
+    
+    totalDocs = docs->size();
     
     // create the function script
     std::string map = "(function() { return ";
@@ -408,17 +416,17 @@ void Documents::PostTempView(rs::scriptobject::ScriptObjectPtr obj, JsonStream& 
 
     // create a runtime on this thread
     rs::jsapi::Runtime rt;
-
-    bool emitted = false;
-    std::string key;
-    std::string value;
+    
+    document_ptr doc = nullptr;
 
     // define a function in global scope implemented by a C++ lambda
     rs::jsapi::Global::DefineFunction(rt, "emit", 
-        [&](const std::vector<rs::jsapi::Value>& args, rs::jsapi::Value& result) {
-            emitted = true;
-            key = args[0].ToString();
-            value = args[1].ToString();
+        [&](const std::vector<rs::jsapi::Value>& args, rs::jsapi::Value&) {
+            auto source = ScriptObjectJsapiKeyValueSource::Create(args[0], args[1]);
+            
+            auto resultObj = rs::scriptobject::ScriptObjectFactory::CreateObject(source);
+            auto result = MapReduceResult::Create(resultObj, doc);
+            results->push_back(result);
     });
 
     // execute the script in the context of the runtime, getting the resulting function
@@ -442,6 +450,12 @@ void Documents::PostTempView(rs::scriptobject::ScriptObjectPtr obj, JsonStream& 
                 case rs::scriptobject::ScriptObjectType::Double:
                     value = scriptObj->getDouble(name);
                     return;
+                /*case rs::scriptobject::ScriptObjectType::Object:
+                    value = scriptObj->getObject(name);
+                    return;
+                case rs::scriptobject::ScriptObjectType::Array:
+                    value = scriptObj->getArray(name);
+                    return;*/
                 default:
                     value = "null";
                     return;
@@ -453,18 +467,13 @@ void Documents::PostTempView(rs::scriptobject::ScriptObjectPtr obj, JsonStream& 
     args.Append(object);
 
     for (Documents::collection::size_type i = 0, size = docs->size(); i < size; ++i) {
-        scriptObj = docs->at(i)->getObject();
+        doc = docs->at(i);
+        scriptObj = doc->getObject();
 
         func.CallFunction(args);
-
-        if (emitted) {
-            stream.PushContext(JsonStream::ContextType::Object);
-            stream.Append("key", key);
-            stream.Append("value", value);
-            stream.PopContext();
-            emitted = false;
-        }
     }
+    
+    return results;
 }
 
 Documents::collection::size_type Documents::FindDocument(const document_array& docs, const std::string& id, bool descending) {

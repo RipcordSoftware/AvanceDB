@@ -92,6 +92,6 @@ BulkDocumentsResults Database::PostBulkDocuments(script_array_ptr docs, bool new
     return docs_->PostBulkDocuments(docs, newEdits);
 }
 
-void Database::PostTempView(rs::scriptobject::ScriptObjectPtr obj, JsonStream& stream) {
-    return docs_->PostTempView(obj, stream);
+map_reduce_result_array_ptr Database::PostTempView(rs::scriptobject::ScriptObjectPtr obj, Documents::collection::size_type& totalDocs) {
+    return docs_->PostTempView(obj, totalDocs);
 }
