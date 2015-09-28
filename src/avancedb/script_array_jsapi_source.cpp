@@ -39,10 +39,12 @@ ScriptArrayJsapiSource ScriptArrayJsapiSource::Create(const rs::jsapi::Value& ob
                 
                 switch (JS_TypeOfValue(cx, value)) {
                     case JSTYPE_OBJECT: 
-                        if (source.values_[i].isArray()) {
+                        if (source.values_[i].isArray() || rs::jsapi::DynamicArray::IsDynamicArray(source.values_[i])) {
                             source.types_.push_back(ScriptObjectType::Array);
-                        } else {
+                        } else if (!source.values_[i].isNull()) {
                             source.types_.push_back(ScriptObjectType::Object);
+                        } else {
+                            source.types_.push_back(ScriptObjectType::Null);
                         }
                         break;
                     
@@ -53,8 +55,7 @@ ScriptArrayJsapiSource ScriptArrayJsapiSource::Create(const rs::jsapi::Value& ob
                     
                     case JSTYPE_NUMBER: source.types_.push_back(ScriptObjectType::Double); break;
                     case JSTYPE_BOOLEAN: source.types_.push_back(ScriptObjectType::Boolean); break;
-                    case JSTYPE_NULL: source.types_.push_back(ScriptObjectType::Null); break;
-                    default: source.types_.push_back(ScriptObjectType::Undefined); break;
+                    default: source.types_.push_back(ScriptObjectType::Null); break;
                 }
             } else {
                 source.values_.emplace_back(cx);

@@ -37,10 +37,12 @@ ScriptArrayJsapiKeyValueSource ScriptArrayJsapiKeyValueSource::Create(const rs::
     for (decltype(source.values_.size()) i = 0, length = source.values_.size(); i < length; ++i) {
         switch (JS_TypeOfValue(cx, source.values_[i])) {
             case JSTYPE_OBJECT: 
-                if (source.values_[i].isArray()) {
+                if (source.values_[i].isArray() || rs::jsapi::DynamicArray::IsDynamicArray(source.values_[i])) {
                     source.types_.push_back(ScriptObjectType::Array);
-                } else {
+                } else if (!source.values_[i].isNull()) {
                     source.types_.push_back(ScriptObjectType::Object);
+                } else {
+                    source.types_.push_back(ScriptObjectType::Null);
                 }
                 break;
 
@@ -51,8 +53,7 @@ ScriptArrayJsapiKeyValueSource ScriptArrayJsapiKeyValueSource::Create(const rs::
 
             case JSTYPE_NUMBER: source.types_.push_back(ScriptObjectType::Double); break;
             case JSTYPE_BOOLEAN: source.types_.push_back(ScriptObjectType::Boolean); break;
-            case JSTYPE_NULL: source.types_.push_back(ScriptObjectType::Null); break;
-            default: source.types_.push_back(ScriptObjectType::Undefined); break;
+            default: source.types_.push_back(ScriptObjectType::Null); break;
         }
     }
     

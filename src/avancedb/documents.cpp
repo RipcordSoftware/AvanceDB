@@ -31,11 +31,7 @@
 #include "config.h"
 #include "uuid_helper.h"
 #include "map_reduce_result.h"
-
-#include "script_array_jsapi_key_value_source.h"
-#include "script_array_factory.h"
-
-#include "libjsapi.h"
+#include "map_reduce.h"
 
 Documents::Documents(database_ptr db) : db_(db), updateSeq_(0), localUpdateSeq_(0),
         collections_(GetCollectionCount()), docsMtx_(collections_),
@@ -402,77 +398,16 @@ document_ptr Documents::DeleteLocalDocument(const char* id, const char* rev) {
 }   
 
 map_reduce_result_array_ptr Documents::PostTempView(rs::scriptobject::ScriptObjectPtr obj, Documents::collection::size_type& totalDocs) {
-    map_reduce_result_array_ptr results = boost::make_shared<map_reduce_result_array_ptr::element_type>();
-    
+    // TODO: views should handle document collection shards, not the entire set of collections
     sequence_type updateSequence = 0;
     auto docs = GetAllDocuments(updateSequence);
     
     totalDocs = docs->size();
     
-    // create the function script
-    std::string map = "(function() { return ";
-    map += obj->getString("map");
-    map += "; })();";
-
-    // create a runtime on this thread
-    rs::jsapi::Runtime rt;
+    // TODO: add better error checking on the incoming doc
+    auto map = obj->getString("map");
     
-    document_ptr doc = nullptr;
-
-    // define a function in global scope implemented by a C++ lambda
-    rs::jsapi::Global::DefineFunction(rt, "emit", 
-        [&](const std::vector<rs::jsapi::Value>& args, rs::jsapi::Value&) {
-            auto source = ScriptArrayJsapiKeyValueSource::Create(args[0], args[1]);
-            
-            auto resultArr = rs::scriptobject::ScriptArrayFactory::CreateArray(source);
-            auto result = MapReduceResult::Create(resultArr, doc);
-            results->push_back(result);
-    });
-
-    // execute the script in the context of the runtime, getting the resulting function
-    rs::jsapi::Value func(rt);
-    rt.Evaluate(map.c_str(), func);
-
-    rs::scriptobject::ScriptObjectPtr scriptObj = nullptr;
-    rs::jsapi::Value object(rt);
-    rs::jsapi::DynamicObject::Create(rt, 
-        [&](const char* name, rs::jsapi::Value& value) {
-            switch (scriptObj->getType(name)) {
-                case rs::scriptobject::ScriptObjectType::Boolean:
-                    value = scriptObj->getBoolean(name);
-                    return;
-                case rs::scriptobject::ScriptObjectType::Int32:
-                    value = scriptObj->getInt32(name);
-                    return;
-                case rs::scriptobject::ScriptObjectType::String:
-                    value = scriptObj->getString(name);
-                    return;
-                case rs::scriptobject::ScriptObjectType::Double:
-                    value = scriptObj->getDouble(name);
-                    return;
-                /*case rs::scriptobject::ScriptObjectType::Object:
-                    value = scriptObj->getObject(name);
-                    return;
-                case rs::scriptobject::ScriptObjectType::Array:
-                    value = scriptObj->getArray(name);
-                    return;*/
-                default:
-                    value = "null";
-                    return;
-            }
-        }, 
-        nullptr, nullptr, nullptr, object);
-
-    rs::jsapi::FunctionArguments args(rt);
-    args.Append(object);
-
-    for (Documents::collection::size_type i = 0, size = docs->size(); i < size; ++i) {
-        doc = docs->at(i);
-        scriptObj = doc->getObject();
-
-        func.CallFunction(args);
-    }
-    
+    auto results = MapReduce::Execute(map, nullptr, docs);    
     return results;
 }
 

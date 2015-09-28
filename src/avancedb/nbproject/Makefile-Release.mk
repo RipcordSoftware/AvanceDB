@@ -47,6 +47,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/http_server_log.o \
 	${OBJECTDIR}/json_stream.o \
 	${OBJECTDIR}/main.o \
+	${OBJECTDIR}/map_reduce.o \
 	${OBJECTDIR}/map_reduce_result.o \
 	${OBJECTDIR}/post_all_documents_options.o \
 	${OBJECTDIR}/rest_config.o \
@@ -152,6 +153,11 @@ ${OBJECTDIR}/main.o: main.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- `pkg-config --cflags zlib` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
+
+${OBJECTDIR}/map_reduce.o: map_reduce.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- `pkg-config --cflags zlib` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/map_reduce.o map_reduce.cpp
 
 ${OBJECTDIR}/map_reduce_result.o: map_reduce_result.cpp 
 	${MKDIR} -p ${OBJECTDIR}

@@ -17,6 +17,7 @@
       <itemPath>http_server_exception.h</itemPath>
       <itemPath>http_server_log.h</itemPath>
       <itemPath>json_stream.h</itemPath>
+      <itemPath>map_reduce.h</itemPath>
       <itemPath>map_reduce_result.h</itemPath>
       <itemPath>post_all_documents_options.h</itemPath>
       <itemPath>rest_config.h</itemPath>
@@ -48,6 +49,7 @@
       <itemPath>http_server_log.cpp</itemPath>
       <itemPath>json_stream.cpp</itemPath>
       <itemPath>main.cpp</itemPath>
+      <itemPath>map_reduce.cpp</itemPath>
       <itemPath>map_reduce_result.cpp</itemPath>
       <itemPath>post_all_documents_options.cpp</itemPath>
       <itemPath>rest_config.cpp</itemPath>
@@ -214,6 +216,10 @@
       <item path="json_stream.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="map_reduce.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="map_reduce.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="map_reduce_result.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -414,6 +420,10 @@
       <item path="json_stream.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="map_reduce.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="map_reduce.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="map_reduce_result.cpp" ex="false" tool="1" flavor2="0">
       </item>
