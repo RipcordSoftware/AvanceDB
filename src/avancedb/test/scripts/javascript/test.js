@@ -14,6 +14,24 @@ var url = host + ':' + port;
 var conn = new cradle.Connection(host, port, { cache: false });
 var couch_conn = new cradle.Connection(host, 5984, { cache: false });
 
+var testDocument = { 'lorem' : 'ipsum', pi: 3.14159, sunny: true, free_lunch: false, the_answer: 42, 
+    taxRate: null, fibonnaci: [0, 1, 1, 2, 3, 5, 8, 13 ], child: { 'hello': 'world' }, 
+    events: [ null, 1969, 'avance', true, {}, [] ], //minNUm: Number.MIN_VALUE , maxNum: Number.MAX_VALUE,
+    data: 
+    '0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789' + 
+    '0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789' +
+    '0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789' +
+    '0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789' +
+    '0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789' +
+    '0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789' +
+    '0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789' +
+    '0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789',
+    formatting: '\r\n\t\f\b\\/"' };
+    
+for (var i = 0; i < 8; ++i) {
+    testDocument.data += testDocument.data;
+}
+
 var isValidRevision = function(rev) {
     var regexRev = /\d+\-[a-zA-Z0-9]{32}/;
     return regexRev.test(rev);
@@ -351,14 +369,6 @@ describe('avancedb -- db --', function() {
 
 describe('avancedb -- docs -- PUT --', function() {
     var testDbName = 'avancedb-docs-test-put';
-    var testDocument = { 'lorem' : 'ipsum', pi: 3.14159, sunny: true, free_lunch: false, the_answer: 42, 
-        taxRate: null, fibonnaci: [0, 1, 1, 2, 3, 5, 8, 13 ], child: { 'hello': 'world' }, 
-        events: [ null, 1969, 'avance', true, {}, [] ], //minNUm: Number.MIN_VALUE , maxNum: Number.MAX_VALUE,
-        data: '0123456789', formatting: '\r\n\t\f\b\\/"' };
-        
-    for (var i = 0; i < 8; ++i) {
-        testDocument.data += testDocument.data;
-    }
     
     it('should create a database', function(done) {
         var db = conn.database(testDbName);
@@ -547,6 +557,7 @@ describe('avancedb -- docs -- PUT --', function() {
     });
     
     it('create a document with an id, then get by that id - 100 times - ascending', function(done) {
+        this.timeout(6000);
         var db = conn.database(testDbName);
 
         var now = new Date().getTime();
@@ -583,6 +594,7 @@ describe('avancedb -- docs -- PUT --', function() {
     });
     
     it('create a document with an id, then get by that id - 100 times - descending', function(done) {
+        this.timeout(6000);
         var db = conn.database(testDbName);
 
         var now = new Date().getTime();
@@ -619,6 +631,7 @@ describe('avancedb -- docs -- PUT --', function() {
     });
     
     it('create a document with an id, then get by that id - 100 times - shuffled', function(done) {
+        this.timeout(6000);
         var db = conn.database(testDbName);
 
         var now = new Date().getTime();
@@ -662,6 +675,8 @@ describe('avancedb -- docs -- PUT --', function() {
     });
     
     it('create a document with an id, then get by that id - 100 times - uuid', function(done) {
+        this.timeout(6000);
+        
         conn.uuids(100, function(err, uuids) {
             assert.equal(null, err);
             assert.notEqual(null, uuids);
@@ -753,14 +768,6 @@ describe('avancedb -- docs -- POST --', function() {
     };
     
     var testDbName = 'avancedb-docs-test-post';
-    var testDocument = { 'lorem' : 'ipsum', pi: 3.14159, sunny: true, free_lunch: false, the_answer: 42, 
-        taxRate: null, fibonnaci: [0, 1, 1, 2, 3, 5, 8, 13 ], child: { 'hello': 'world' }, 
-        events: [ null, 1969, 'avance', true, {}, [] ], //minNUm: Number.MIN_VALUE , maxNum: Number.MAX_VALUE,
-        data: '0123456789', formatting: '\r\n\t\f\b\\/"' };
-        
-    for (var i = 0; i < 8; ++i) {
-        testDocument.data += testDocument.data;
-    }
     
     it('should create a database', function(done) {
         var db = conn.database(testDbName);
@@ -1962,10 +1969,6 @@ describe('avancedb -- _all_docs --', function() {
 
 describe('avancedb -- local docs --', function() {
     var testDbName = 'avancedb-local-test';
-    var testDocument = { 'lorem' : 'ipsum', pi: 3.14159, sunny: true, free_lunch: false, the_answer: 42, 
-        taxRate: null, fibonnaci: [0, 1, 1, 2, 3, 5, 8, 13 ], child: { 'hello': 'world' }, 
-        events: [ null, 1969, 'avance', true, {}, [] ], //minNUm: Number.MIN_VALUE , maxNum: Number.MAX_VALUE,
-        data: '0123456789' };
         
     var db = conn.database(testDbName);    
     var local = conn.database(testDbName);
@@ -2717,7 +2720,180 @@ describe('avancedb -- replication --', function() {
             assert.notEqual(null, res);
             done();
         });
-    });    
+    });
+});
+
+describe('avancedb -- temp views --', function() {
+    var testDbName = 'avancedb-temp-views-test';
+    var db = conn.database(testDbName);
+    var testId = 'test0';
+    
+    it('should create a database', function(done) {
+        db.create(function(err, res) {
+            assert.equal(null, err);
+            assert.notEqual(null, res);
+            assert.notEqual(res.ok, 'true');
+            done();
+        });
+    });
+    
+    it('create a document with an id', function(done) {
+        db.save(testId, testDocument, function(err, doc) {
+            assert.equal(null, err);
+            assert.notEqual(null, doc);
+            assert.equal('test0', doc._id);
+            assert(isValidRevision(doc._rev));
+            done();
+        });
+    });
+    
+    it('execute a simple temp view - (_id, null)', function(done) {
+        db.temporaryView(
+            { map: function(doc) { emit(doc._id, null); } },
+            function(err, doc) {
+                assert.equal(null, err);
+                assert.notEqual(null, doc);
+                assert.equal(1, doc.length);
+                assert.equal(testId, doc[0].key);
+                assert.equal(testId, doc[0].id);
+                assert.equal(null, doc[0].value);
+                done();
+            });
+    });
+    
+    it('execute a simple temp view - (_id, doc)', function(done) {
+        db.temporaryView(
+            { map: function(doc) { emit(doc._id, doc); } },
+            function(err, doc) {
+                assert.equal(null, err);
+                assert.notEqual(null, doc);
+                assert.equal(1, doc.length);
+                assert.equal(testId, doc[0].key);
+                assert.equal(testId, doc[0].id);
+                delete doc[0].value._id;
+                delete doc[0].value._rev;
+                assert.deepEqual(testDocument, doc[0].value);
+                done();
+            });
+    });
+    
+    it('execute a simple temp view - (doc, doc)', function(done) {
+        db.temporaryView(
+            { map: function(doc) { emit(doc, doc); } },
+            function(err, doc) {
+                assert.equal(null, err);
+                assert.notEqual(null, doc);
+                assert.equal(1, doc.length);
+                assert.equal(testId, doc[0].id);
+                delete doc[0].key._id;
+                delete doc[0].key._rev;
+                delete doc[0].value._id;
+                delete doc[0].value._rev;
+                assert.deepEqual(testDocument, doc[0].key);
+                assert.deepEqual(testDocument, doc[0].value);
+                done();
+            });
+    });
+    
+    it('execute a simple temp view - (1, 10)', function(done) {
+        db.temporaryView(
+            { map: function(doc) { emit(1, 10); } },
+            function(err, doc) {
+                assert.equal(null, err);
+                assert.notEqual(null, doc);
+                assert.equal(1, doc.length);
+                assert.equal(testId, doc[0].id);
+                assert.equal(1, doc[0].key);
+                assert.equal(10, doc[0].value);
+                done();
+            });
+    });
+    
+    it('execute a simple temp view - ("hello", "world")', function(done) {
+        db.temporaryView(
+            { map: function(doc) { emit('hello', 'world'); } },
+            function(err, doc) {
+                assert.equal(null, err);
+                assert.notEqual(null, doc);
+                assert.equal(1, doc.length);
+                assert.equal(testId, doc[0].id);
+                assert.equal('hello', doc[0].key);
+                assert.equal('world', doc[0].value);
+                done();
+            });
+    });
+    
+    it('execute a simple temp view - (true, false)', function(done) {
+        db.temporaryView(
+            { map: function(doc) { emit(true, false); } },
+            function(err, doc) {
+                assert.equal(null, err);
+                assert.notEqual(null, doc);
+                assert.equal(1, doc.length);
+                assert.equal(testId, doc[0].id);
+                assert.equal(true, doc[0].key);
+                assert.equal(false, doc[0].value);
+                done();
+            });
+    });
+    
+    it('execute a simple temp view - ([1,2,3,4], {"hello":"world"})', function(done) {
+        db.temporaryView(
+            { map: function(doc) { emit([1,2,3,4], {'hello':'world'}); } },
+            function(err, doc) {
+                assert.equal(null, err);
+                assert.notEqual(null, doc);
+                assert.equal(1, doc.length);
+                assert.equal(testId, doc[0].id);
+                assert.equal(4, doc[0].key.length);
+                assert.deepEqual([1,2,3,4], doc[0].key);
+                assert.deepEqual({'hello':'world'}, doc[0].value);
+                done();
+            });
+    });
+    
+    it('execute a simple temp view - ([{_id, null}, {1, 10} {[1,2,3,4], {"hello":"world"}}])', function(done) {
+        db.temporaryView(
+            { map: function(doc) { emit(doc._id, null); emit(1, 10); emit([1,2,3,4], {'hello':'world'}); } },
+            function(err, doc) {
+                assert.equal(null, err);
+                assert.notEqual(null, doc);
+                assert.equal(3, doc.length);
+                assert.equal(testId, doc[0].id);
+                assert.equal(testId, doc[0].key);
+                assert.equal(null, doc[0].value);
+                assert.equal(testId, doc[1].id);
+                assert.equal(1, doc[1].key);
+                assert.equal(10, doc[1].value);
+                assert.equal(testId, doc[2].id);
+                assert.equal(4, doc[2].key.length);
+                assert.deepEqual([1,2,3,4], doc[2].key);
+                assert.deepEqual({'hello':'world'}, doc[2].value);
+                done();
+            });
+    });
+    
+    it('execute a simple temp view - (xyz, pqr)', function(done) {
+        db.temporaryView(
+            { map: function(doc) { emit(doc.xyz, doc.pqr); } },
+            function(err, doc) {
+                assert.equal(null, err);
+                assert.notEqual(null, doc);
+                assert.equal(1, doc.length);
+                assert.equal(testId, doc[0].id);
+                assert.equal(null, doc[0].key);
+                assert.equal(null, doc[0].value);
+                done();
+            });
+    });
+    
+    it('delete the database', function(done) {
+        db.destroy(function(err, res) {
+            assert.equal(null, err);
+            assert.notEqual(null, res);
+            done();
+        });
+    });
 });
 
 describe('avancedb -- fuzz -- ', function() {        
