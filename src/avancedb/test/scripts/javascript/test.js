@@ -557,7 +557,7 @@ describe('avancedb -- docs -- PUT --', function() {
     });
     
     it('create a document with an id, then get by that id - 100 times - ascending', function(done) {
-        this.timeout(10000);
+        this.timeout(30000);
         var db = conn.database(testDbName);
 
         var now = new Date().getTime();
@@ -594,7 +594,7 @@ describe('avancedb -- docs -- PUT --', function() {
     });
     
     it('create a document with an id, then get by that id - 100 times - descending', function(done) {
-        this.timeout(10000);
+        this.timeout(30000);
         var db = conn.database(testDbName);
 
         var now = new Date().getTime();
@@ -631,7 +631,7 @@ describe('avancedb -- docs -- PUT --', function() {
     });
     
     it('create a document with an id, then get by that id - 100 times - shuffled', function(done) {
-        this.timeout(10000);
+        this.timeout(30000);
         var db = conn.database(testDbName);
 
         var now = new Date().getTime();
@@ -675,7 +675,7 @@ describe('avancedb -- docs -- PUT --', function() {
     });
     
     it('create a document with an id, then get by that id - 100 times - uuid', function(done) {
-        this.timeout(10000);
+        this.timeout(30000);
         
         conn.uuids(100, function(err, uuids) {
             assert.equal(null, err);
