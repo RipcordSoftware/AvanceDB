@@ -33,8 +33,8 @@ public:
 private:
     
     // TODO: merge with other type mapping functions where possible
-    static void GetFieldValue(script_object_ptr scriptObj, rs::jsapi::Context& context, const char* name, rs::jsapi::Value& value);
-    static void GetFieldValue(script_array_ptr scriptObj, rs::jsapi::Context& context, int index, rs::jsapi::Value& value);
+    static void GetFieldValue(script_object_ptr scriptObj, const char* name, rs::jsapi::Value& value);
+    static void GetFieldValue(script_array_ptr scriptObj, int index, rs::jsapi::Value& value);
 
 };
 
