@@ -22,7 +22,13 @@
 
 #include "script_array_jsapi_key_value_source.h"
 #include "map_reduce_result.h"
+#include "script_object_jsapi_source.h"
+#include "script_array_jsapi_source.h"
+#include "map_reduce_script_object_state.h"
 #include "documents.h"
+
+#include "script_object_factory.h"
+#include "script_array_factory.h"
 
 #include "libjsapi.h"
 
@@ -53,6 +59,8 @@ map_reduce_result_array_ptr MapReduce::Execute(const char* map, const char* redu
     // execute the script in the context of the runtime, getting the resulting function
     rs::jsapi::Value func(rt);
     rt.Evaluate(mapScript.c_str(), func);
+    
+    auto state = new MapReduceScriptObjectState{nullptr};
 
     rs::scriptobject::ScriptObjectPtr scriptObj = nullptr;
     rs::jsapi::Value object(rt);
@@ -68,7 +76,10 @@ map_reduce_result_array_ptr MapReduce::Execute(const char* map, const char* redu
             }
             return true;
         }, 
-        nullptr, object);
+        [state]() { delete state; },
+        object);
+
+    rs::jsapi::DynamicObject::SetPrivate(object, 0, state);
 
     rs::jsapi::FunctionArguments args(rt);
     args.Append(object);
@@ -77,6 +88,8 @@ map_reduce_result_array_ptr MapReduce::Execute(const char* map, const char* redu
         doc = (*docs)[i];
         scriptObj = doc->getObject();
 
+        state->scriptObj_ = scriptObj;
+
         // TODO: handle exception cases here
         func.CallFunction(args);
     }
@@ -84,7 +97,6 @@ map_reduce_result_array_ptr MapReduce::Execute(const char* map, const char* redu
     return results;
 }
 
-// TODO: merge with other type mapping functions where possible
 void MapReduce::GetFieldValue(script_object_ptr scriptObj, const char* name, rs::jsapi::Value& value) {
     switch (scriptObj->getType(name)) {
         case rs::scriptobject::ScriptObjectType::Boolean:
@@ -101,30 +113,12 @@ void MapReduce::GetFieldValue(script_object_ptr scriptObj, const char* name, rs:
             return;
         case rs::scriptobject::ScriptObjectType::Object: {
             auto childObj = scriptObj->getObject(name);
-            
-            auto cx = value.getContext();
-            rs::jsapi::DynamicObject::Create(cx, 
-                [childObj](const char* name, rs::jsapi::Value& value) {                    
-                    return MapReduce::GetFieldValue(childObj, name, value);
-                }, 
-                nullptr, 
-                [childObj](std::vector<std::string>& props, std::vector<std::pair<std::string, JSNative>>&) {
-                    for (decltype(childObj->getCount()) i = 0, count = childObj->getCount(); i < count; ++i) {
-                        props.emplace_back(childObj->getName(i));
-                    }
-                    return true;
-                }, nullptr, value);
+            MapReduce::CreateValueObject(childObj, value);
             return;
         }
         case rs::scriptobject::ScriptObjectType::Array: {
             auto childArr = scriptObj->getArray(name);
-            
-            auto cx = value.getContext();            
-            rs::jsapi::DynamicArray::Create(cx, 
-                [childArr](int index, rs::jsapi::Value& value) {                    
-                    return MapReduce::GetFieldValue(childArr, index, value);
-                }, 
-                nullptr, [childArr]() { return childArr->getCount(); }, nullptr, value);
+            MapReduce::CreateValueArray(childArr, value);
             return;
         }
         case rs::scriptobject::ScriptObjectType::Null:
@@ -136,7 +130,6 @@ void MapReduce::GetFieldValue(script_object_ptr scriptObj, const char* name, rs:
     }
 }
 
-// TODO: merge with other type mapping functions where possible
 void MapReduce::GetFieldValue(script_array_ptr scriptArr, int index, rs::jsapi::Value& value) {
     switch (scriptArr->getType(index)) {
         case rs::scriptobject::ScriptObjectType::Boolean:
@@ -152,31 +145,13 @@ void MapReduce::GetFieldValue(script_array_ptr scriptArr, int index, rs::jsapi::
             value = scriptArr->getDouble(index);
             return;
         case rs::scriptobject::ScriptObjectType::Object: {
-            auto childObj = scriptArr->getObject(index);
-            
-            auto cx = value.getContext();
-            rs::jsapi::DynamicObject::Create(cx, 
-                [childObj](const char* name, rs::jsapi::Value& value) {                    
-                    return MapReduce::GetFieldValue(childObj, name, value);
-                }, 
-                nullptr, 
-                [childObj](std::vector<std::string>& props, std::vector<std::pair<std::string, JSNative>>&) {
-                    for (decltype(childObj->getCount()) i = 0, count = childObj->getCount(); i < count; ++i) {
-                        props.emplace_back(childObj->getName(i));
-                    }
-                    return true;
-                }, nullptr, value);
+            auto childObj = scriptArr->getObject(index);           
+            MapReduce::CreateValueObject(childObj, value);
             return;
         }
         case rs::scriptobject::ScriptObjectType::Array: {
             auto childArr = scriptArr->getArray(index);
-
-            auto cx = value.getContext();
-            rs::jsapi::DynamicArray::Create(cx, 
-                [childArr](int index, rs::jsapi::Value& value) {                    
-                    return MapReduce::GetFieldValue(childArr, index, value);
-                }, 
-                nullptr, [childArr]() { return childArr->getCount(); }, nullptr, value);
+            MapReduce::CreateValueArray(childArr, value);            
             return;
         }
         case rs::scriptobject::ScriptObjectType::Null:
@@ -184,5 +159,68 @@ void MapReduce::GetFieldValue(script_array_ptr scriptArr, int index, rs::jsapi::
             return;
         default:
             value = JS::UndefinedHandleValue;
+    }
+}
+
+void MapReduce::CreateValueObject(script_object_ptr obj, rs::jsapi::Value& value) {
+    auto state = new MapReduceScriptObjectState{obj};
+            
+    auto cx = value.getContext();
+    rs::jsapi::DynamicObject::Create(cx, 
+        [state](const char* name, rs::jsapi::Value& value) {                    
+            return MapReduce::GetFieldValue(state->scriptObj_, name, value);
+        }, 
+        nullptr, 
+        [state](std::vector<std::string>& props, std::vector<std::pair<std::string, JSNative>>&) {
+            // TODO: it would be useful to cache this for performance
+            for (decltype(state->scriptObj_->getCount()) i = 0, count = state->scriptObj_->getCount(); i < count; ++i) {
+                props.emplace_back(state->scriptObj_->getName(i));
+            }
+            return true;
+        }, 
+        [state]() { delete state; },
+        value);
+
+    rs::jsapi::DynamicObject::SetPrivate(value, 0, state);
+}
+
+void MapReduce::CreateValueArray(script_array_ptr arr, rs::jsapi::Value& value) {
+    auto state = new MapReduceScriptArrayState{arr};
+    
+    auto cx = value.getContext();
+    rs::jsapi::DynamicArray::Create(cx, 
+        [state](int index, rs::jsapi::Value& value) {                    
+            return MapReduce::GetFieldValue(state->scriptArray_, index, value);
+        }, 
+        nullptr, 
+        [state]() { return state->scriptArray_->getCount(); }, 
+        [state]() { delete state; },
+        value);
+        
+    rs::jsapi::DynamicArray::SetPrivate(value, 0, state);
+}
+
+script_object_ptr MapReduce::GetValueScriptObject(const rs::jsapi::Value& obj) {   
+    if (rs::jsapi::DynamicObject::IsDynamicObject(obj)) {        
+        uint64_t value = 0;
+        void* ptr = nullptr;
+        rs::jsapi::DynamicObject::GetPrivate(obj, value, ptr);
+        return reinterpret_cast<MapReduceScriptObjectState*>(ptr)->scriptObj_;
+    }
+    else {
+        auto source = ScriptObjectJsapiSource::Create(obj);
+        return rs::scriptobject::ScriptObjectFactory::CreateObject(source);
+    }
+}
+
+script_array_ptr MapReduce::GetValueScriptArray(const rs::jsapi::Value& arr) {
+    if (rs::jsapi::DynamicArray::IsDynamicArray(arr)) {        
+        uint64_t value = 0;
+        void* ptr = nullptr;
+        rs::jsapi::DynamicArray::GetPrivate(arr, value, ptr);
+        return reinterpret_cast<MapReduceScriptArrayState*>(ptr)->scriptArray_;
+    } else {
+        auto source = ScriptArrayJsapiSource::Create(arr);
+        return rs::scriptobject::ScriptArrayFactory::CreateArray(source);
     }
 }

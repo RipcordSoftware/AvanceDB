@@ -17,7 +17,7 @@
  */
 
 #include "script_array_jsapi_source.h"
-#include "script_object_jsapi_source.h"
+#include "map_reduce.h"
 
 #include "script_array_factory.h"
 #include "script_object_factory.h"
@@ -110,11 +110,11 @@ int ScriptArrayJsapiSource::getStringLength(int index) const {
 }
 
 const rs::scriptobject::ScriptObjectPtr ScriptArrayJsapiSource::getObject(int index) const {
-    auto source = ScriptObjectJsapiSource::Create(values_[index]);
-    return rs::scriptobject::ScriptObjectFactory::CreateObject(source);
+    const auto& obj = values_[index];
+    return MapReduce::GetValueScriptObject(obj);
 }
 
 const rs::scriptobject::ScriptArrayPtr ScriptArrayJsapiSource::getArray(int index) const {
-    auto source = Create(values_[index]);
-    return rs::scriptobject::ScriptArrayFactory::CreateArray(source);
+    const auto& arr = values_[index];
+    return MapReduce::GetValueScriptArray(arr);
 }

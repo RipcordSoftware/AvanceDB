@@ -18,11 +18,8 @@
 
 #include "script_array_jsapi_key_value_source.h"
 
-#include "script_object_jsapi_source.h"
-#include "script_array_jsapi_source.h"
-
-#include "script_object_factory.h"
-#include "script_array_factory.h"
+#include "map_reduce_script_object_state.h"
+#include "map_reduce.h"
 
 ScriptArrayJsapiKeyValueSource ScriptArrayJsapiKeyValueSource::Create(const rs::jsapi::Value& key, const rs::jsapi::Value& value) {
     ScriptArrayJsapiKeyValueSource source;
@@ -106,11 +103,11 @@ int ScriptArrayJsapiKeyValueSource::getStringLength(int index) const {
 }
 
 const rs::scriptobject::ScriptObjectPtr ScriptArrayJsapiKeyValueSource::getObject(int index) const {
-    auto source = ScriptObjectJsapiSource::Create(values_[index]);
-    return rs::scriptobject::ScriptObjectFactory::CreateObject(source);
+    const auto& obj = values_[index];
+    return MapReduce::GetValueScriptObject(obj);
 }
 
 const rs::scriptobject::ScriptArrayPtr ScriptArrayJsapiKeyValueSource::getArray(int index) const {
-    auto source = ScriptArrayJsapiSource::Create(values_[index]);
-    return rs::scriptobject::ScriptArrayFactory::CreateArray(source);
+    const auto& arr = values_[index];
+    return MapReduce::GetValueScriptArray(arr);
 }

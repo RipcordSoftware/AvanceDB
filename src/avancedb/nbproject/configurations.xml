@@ -19,6 +19,7 @@
       <itemPath>json_stream.h</itemPath>
       <itemPath>map_reduce.h</itemPath>
       <itemPath>map_reduce_result.h</itemPath>
+      <itemPath>map_reduce_script_object_state.h</itemPath>
       <itemPath>post_all_documents_options.h</itemPath>
       <itemPath>rest_config.h</itemPath>
       <itemPath>rest_exceptions.h</itemPath>
@@ -225,6 +226,8 @@
       </item>
       <item path="map_reduce_result.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="map_reduce_script_object_state.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="post_all_documents_options.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="post_all_documents_options.h" ex="false" tool="3" flavor2="0">
@@ -428,6 +431,8 @@
       <item path="map_reduce_result.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="map_reduce_result.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="map_reduce_script_object_state.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="post_all_documents_options.cpp" ex="false" tool="1" flavor2="0">
       </item>
