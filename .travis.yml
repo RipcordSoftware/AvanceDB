@@ -1,6 +1,6 @@
 language: cpp
 compiler: gcc
-script: make all && make test && ./coverage.sh
+script: make && make test && ./coverage.sh
 
 services:
 - couchdb
