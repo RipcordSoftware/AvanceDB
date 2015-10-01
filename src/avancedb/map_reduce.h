@@ -21,26 +21,35 @@
 
 #include "types.h"
 
+#include <memory>
+
+#include "thread_pool.hpp"
+
 #include "libjsapi.h"
 
 class MapReduce final {
 public:
     
-    MapReduce() = delete;
+    MapReduce();
     
-    static map_reduce_result_array_ptr Execute(const char* map, const char* reduce, document_array_ptr docs);
+    map_reduce_result_array_ptr Execute(const char* map, const char* reduce, document_collections_ptr colls);
     
     static script_object_ptr GetValueScriptObject(const rs::jsapi::Value& value);
     static script_array_ptr GetValueScriptArray(const rs::jsapi::Value& value);
     
 private:
     
-    // TODO: merge with other type mapping functions where possible
+    map_reduce_result_array_ptr Execute(rs::jsapi::Runtime& rt, const char* map, const char* reduce, const document_array& docs);
+    
     static void GetFieldValue(script_object_ptr scriptObj, const char* name, rs::jsapi::Value& value);
     static void GetFieldValue(script_array_ptr scriptObj, int index, rs::jsapi::Value& value);
     
     static void CreateValueObject(script_object_ptr obj, rs::jsapi::Value& value);
     static void CreateValueArray(script_array_ptr arr, rs::jsapi::Value& value);
+        
+    // TODO: there should be a single thread pool for all map/reduce
+    std::vector<std::unique_ptr<rs::jsapi::Runtime>> threadPoolRuntimes_;
+    std::unique_ptr<ThreadPool> threadPool_;
 
 };
 

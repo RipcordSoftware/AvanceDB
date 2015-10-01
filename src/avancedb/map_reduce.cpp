@@ -19,6 +19,7 @@
 #include "map_reduce.h"
 
 #include <boost/make_shared.hpp>
+#include <boost/scope_exit.hpp>
 
 #include "script_array_jsapi_key_value_source.h"
 #include "map_reduce_result.h"
@@ -30,18 +31,66 @@
 #include "script_object_factory.h"
 #include "script_array_factory.h"
 
-#include "libjsapi.h"
+MapReduce::MapReduce() {
+    ThreadPoolOptions threadPoolOptions;
+    
+    threadPoolRuntimes_.resize(threadPoolOptions.threads_count);
+    
+    threadPoolOptions.onStart = [&](){ 
+        auto id = Worker::getWorkerIdForCurrentThread();
+        auto rt = new rs::jsapi::Runtime();
+        threadPoolRuntimes_[id].reset(rt);
+    };
+    
+    threadPoolOptions.onStop = [&]() {
+        auto id = Worker::getWorkerIdForCurrentThread();
+        threadPoolRuntimes_[id].release();
+    };
+    
+    threadPool_.reset(new ThreadPool(threadPoolOptions));
+}
 
-map_reduce_result_array_ptr MapReduce::Execute(const char* map, const char* reduce, document_array_ptr docs) {
+// TODO: this is still very basic
+map_reduce_result_array_ptr MapReduce::Execute(const char* map, const char* reduce, document_collections_ptr colls) {
+    auto results = boost::make_shared<map_reduce_result_array_ptr::element_type>();
+    
+    auto totalDocs = 0;
+    for (auto docs : *colls) {
+        totalDocs += docs.size();
+    }
+    
+    results->reserve(totalDocs);
+    
+    std::mutex m;
+    std::atomic<unsigned> threads(colls->size());
+    
+    for (auto& docs : *colls) {
+        threadPool_->post([&]() {
+            BOOST_SCOPE_EXIT(&threads) { --threads; } BOOST_SCOPE_EXIT_END
+            auto id = Worker::getWorkerIdForCurrentThread();
+            auto& rt = threadPoolRuntimes_[id];
+                        
+            auto result = Execute(*rt, map, nullptr, docs);
+            std::unique_lock<std::mutex> l(m);
+            results->insert(results->end(), result->cbegin(), result->cend());
+        });
+    }
+    
+    while (threads.load() > 0) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+    
+    return results;
+}
+
+// TODO: this is still very basic
+map_reduce_result_array_ptr MapReduce::Execute(rs::jsapi::Runtime& rt, const char* map, const char* reduce, const document_array& docs) {
     map_reduce_result_array_ptr results = boost::make_shared<map_reduce_result_array_ptr::element_type>();
     
     // create the function script
     std::string mapScript = "(function() { return ";
     mapScript += map;
     mapScript += "; })();";
-
-    // create a runtime on this thread
-    rs::jsapi::Runtime rt;
     
     document_ptr doc = nullptr;
 
@@ -84,8 +133,8 @@ map_reduce_result_array_ptr MapReduce::Execute(const char* map, const char* redu
     rs::jsapi::FunctionArguments args(rt);
     args.Append(object);
 
-    for (Documents::collection::size_type i = 0, size = docs->size(); i < size; ++i) {
-        doc = (*docs)[i];
+    for (Documents::collection::size_type i = 0, size = docs.size(); i < size; ++i) {
+        doc = docs[i];
         scriptObj = doc->getObject();
 
         state->scriptObj_ = scriptObj;

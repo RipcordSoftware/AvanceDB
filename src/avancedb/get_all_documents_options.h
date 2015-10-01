@@ -27,7 +27,7 @@
 
 #include "types.h"
 
-class GetAllDocumentsOptions final {
+class GetAllDocumentsOptions {
 public:
     GetAllDocumentsOptions(const rs::httpserver::QueryString& qs);
     
@@ -48,18 +48,13 @@ public:
     uint64_t Skip() const;
     uint64_t Limit() const;
     
-private:
-    std::string GetString(const char* name, const char* altName = nullptr) const;
-    bool GetBoolean(const char* name, bool defaultValue) const;
-    uint64_t GetUnsigned(const char* name, uint64_t defaultValue) const;
-    
+private:        
     mutable std::string key_;
     mutable std::string startKey_;
     mutable std::string startKeyDocId_;
     mutable std::string endKey_;
     mutable std::string endKeyDocId_;
         
-    mutable boost::optional<bool> conflicts_;
     mutable boost::optional<bool> descending_;
     mutable boost::optional<bool> includeDocs_;
     mutable boost::optional<bool> inclusiveEnd_;
@@ -67,6 +62,11 @@ private:
     
     mutable boost::optional<uint64_t> skip_;
     mutable boost::optional<uint64_t> limit_;
+    
+protected:
+    std::string GetString(const char* name, const char* altName = nullptr) const;
+    bool GetBoolean(const char* name, bool defaultValue) const;
+    uint64_t GetUnsigned(const char* name, uint64_t defaultValue) const;
     
     const rs::httpserver::QueryString& qs_;
 };

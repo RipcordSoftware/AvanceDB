@@ -13,6 +13,7 @@
       <itemPath>document_revision.h</itemPath>
       <itemPath>documents.h</itemPath>
       <itemPath>get_all_documents_options.h</itemPath>
+      <itemPath>get_view_options.h</itemPath>
       <itemPath>http_server.h</itemPath>
       <itemPath>http_server_exception.h</itemPath>
       <itemPath>http_server_log.h</itemPath>
@@ -46,6 +47,7 @@
       <itemPath>document_revision.cpp</itemPath>
       <itemPath>documents.cpp</itemPath>
       <itemPath>get_all_documents_options.cpp</itemPath>
+      <itemPath>get_view_options.cpp</itemPath>
       <itemPath>http_server.cpp</itemPath>
       <itemPath>http_server_log.cpp</itemPath>
       <itemPath>json_stream.cpp</itemPath>
@@ -94,6 +96,7 @@
             <pElem>../../externals/libscriptobject/externals/gason/src</pElem>
             <pElem>../../externals/cityhash/src</pElem>
             <pElem>../../externals/libjsapi/externals/installed/include/mozjs-</pElem>
+            <pElem>../../externals/thread-pool-cpp/thread_pool</pElem>
           </incDir>
           <commandLine>--coverage</commandLine>
         </ccTool>
@@ -202,6 +205,10 @@
       </item>
       <item path="get_all_documents_options.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="get_view_options.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="get_view_options.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="http_server.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="http_server.h" ex="false" tool="3" flavor2="0">
@@ -295,6 +302,7 @@
             <pElem>../../externals/libscriptobject/externals/gason/src</pElem>
             <pElem>../../externals/cityhash/src</pElem>
             <pElem>../../externals/libjsapi/externals/installed/include/mozjs-</pElem>
+            <pElem>../../externals/thread-pool-cpp/thread_pool</pElem>
           </incDir>
         </ccTool>
         <fortranCompilerTool>
@@ -407,6 +415,10 @@
       <item path="get_all_documents_options.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="get_all_documents_options.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="get_view_options.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="get_view_options.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="http_server.cpp" ex="false" tool="1" flavor2="0">
       </item>

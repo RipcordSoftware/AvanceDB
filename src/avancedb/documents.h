@@ -27,7 +27,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/atomic.hpp>
 #include <boost/thread.hpp>
-#include <boost/make_shared.hpp>
 
 #include "../../externals/lazyflatset/lazyflatset.hpp"
 
@@ -37,6 +36,8 @@
 #include "post_all_documents_options.h"
 #include "bulk_documents_result.h"
 #include "json_stream.h"
+#include "get_view_options.h"
+#include "map_reduce.h"
 
 class Database;
 
@@ -64,7 +65,7 @@ public:
     
     BulkDocumentsResults PostBulkDocuments(script_array_ptr docs, bool newEdits);
     
-    map_reduce_result_array_ptr PostTempView(rs::scriptobject::ScriptObjectPtr obj, Documents::collection::size_type& totalDocs);
+    map_reduce_result_array_ptr PostTempView(const GetViewOptions& options, rs::scriptobject::ScriptObjectPtr obj, Documents::collection::size_type& totalDocs);
     
     collection::size_type getCount();
     sequence_type getUpdateSequence();
@@ -92,7 +93,8 @@ private:
     
     Documents(database_ptr db);
     
-    document_array_ptr GetAllDocuments(sequence_type& sequenceNumber);    
+    document_array_ptr GetDocuments(sequence_type& updateSequence);
+    document_collections_ptr GetDocumentCollections(sequence_type& updateSequence);
     collection::size_type FindDocument(const document_array& docs, const std::string& id, bool descending);
     unsigned GetCollectionCount() const;
     unsigned GetDocumentCollectionIndex(const char* id) const;
@@ -110,8 +112,9 @@ private:
     
     boost::mutex allDocsCacheMtx_;
     boost::atomic<sequence_type> allDocsCacheUpdateSequence_;
-    document_array_ptr allDocsCacheDocs_;    
+    document_array_ptr allDocsCacheDocs_;
 
+    MapReduce mapReduce_;
 };
 
 #endif	/* DOCUMENTS_H */

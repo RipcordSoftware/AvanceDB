@@ -34,6 +34,7 @@
 #include "rest_config.h"
 #include "document_revision.h"
 #include "map_reduce_result.h"
+#include "get_view_options.h"
 
 #include "libscriptobject_gason.h"
 
@@ -765,13 +766,15 @@ bool RestServer::PostTempView(rs::httpserver::request_ptr request, const rs::htt
     
     auto db = GetDatabase(args);
     if (!!db) {
+        GetViewOptions options{request->getQueryString()};
+        
         auto obj = GetJsonBody(request);
         if (!obj || obj->getType("map") != rs::scriptobject::ScriptObjectType::String) {
             throw InvalidJson();
         }
         
         Documents::collection::size_type totalDocs = 0;
-        auto results = db->PostTempView(obj, totalDocs);
+        auto results = db->PostTempView(options, obj, totalDocs);
         
         auto& stream = response->setContentType("application/json").getResponseStream();
         ScriptObjectResponseStream<> objStream{stream};

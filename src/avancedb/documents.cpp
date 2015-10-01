@@ -147,7 +147,7 @@ document_ptr Documents::SetDesignDocument(const char* id, script_object_ptr obj)
     return SetDocument(designId.c_str(), obj);
 }
 
-document_array_ptr Documents::GetAllDocuments(sequence_type& updateSequence) {
+document_array_ptr Documents::GetDocuments(sequence_type& updateSequence) {
     boost::unique_lock<decltype(allDocsCacheMtx_)> guard(allDocsCacheMtx_);
     updateSequence = allDocsCacheUpdateSequence_;
     
@@ -180,8 +180,26 @@ document_array_ptr Documents::GetAllDocuments(sequence_type& updateSequence) {
     }
 }
 
+document_collections_ptr Documents::GetDocumentCollections(sequence_type& updateSequence) {
+    auto colls = boost::make_shared<document_collections_ptr::element_type>();
+    colls->resize(collections_);
+    
+    std::vector<boost::unique_lock<DocumentsMutex>> locks{docsMtx_.begin(), docsMtx_.end()};
+        
+    updateSequence = updateSeq_;
+
+    for (unsigned i = 0; i < collections_; ++i) {
+        auto& coll = (*colls)[i];
+        coll.reserve(docs_[i].size());
+        coll.insert(coll.end(), docs_[i].cbegin(), docs_[i].cend());
+        locks[i].unlock();
+    }
+    
+    return colls;
+}
+
 document_array_ptr Documents::GetDocuments(const GetAllDocumentsOptions& options, collection::size_type& offset, collection::size_type& totalDocs, sequence_type& updateSequence) {       
-    auto docs = GetAllDocuments(updateSequence);
+    auto docs = GetDocuments(updateSequence);
     
     if (options.Descending()) {
         docs = boost::make_shared<document_array>(docs->begin(), docs->end());        
@@ -238,7 +256,7 @@ document_array_ptr Documents::GetDocuments(const GetAllDocumentsOptions& options
 }
 
 document_array_ptr Documents::PostDocuments(const PostAllDocumentsOptions& options, Documents::collection::size_type& totalDocs, sequence_type& updateSequence) {
-    auto docs = GetAllDocuments(updateSequence);
+    auto docs = GetDocuments(updateSequence);
     
     const auto& keys = options.Keys();
     
@@ -395,19 +413,19 @@ document_ptr Documents::DeleteLocalDocument(const char* id, const char* rev) {
     localDocs_.erase(doc);
     
     return doc;
-}   
+}
 
-map_reduce_result_array_ptr Documents::PostTempView(rs::scriptobject::ScriptObjectPtr obj, Documents::collection::size_type& totalDocs) {
+map_reduce_result_array_ptr Documents::PostTempView(const GetViewOptions& options, rs::scriptobject::ScriptObjectPtr obj, Documents::collection::size_type& totalDocs) {        
     // TODO: views should handle document collection shards, not the entire set of collections
     sequence_type updateSequence = 0;
-    auto docs = GetAllDocuments(updateSequence);
-    
-    totalDocs = docs->size();
+    auto colls = GetDocumentCollections(updateSequence);
     
     // TODO: add better error checking on the incoming doc
     auto map = obj->getString("map");
     
-    auto results = MapReduce::Execute(map, nullptr, docs);    
+    auto results = mapReduce_.Execute(map, nullptr, colls);
+    totalDocs = results->size();
+    
     return results;
 }
 

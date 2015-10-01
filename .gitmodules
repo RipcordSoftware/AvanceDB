@@ -22,3 +22,6 @@
 [submodule "externals/cityhash"]
 	path = externals/cityhash
 	url = https://github.com/google/cityhash.git
+[submodule "externals/thread-pool-cpp"]
+	path = externals/thread-pool-cpp
+	url = https://github.com/RipcordSoftware/thread-pool-cpp.git
