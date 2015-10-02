@@ -58,6 +58,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/script_array_jsapi_source.o \
 	${OBJECTDIR}/script_object_jsapi_source.o \
 	${OBJECTDIR}/script_object_response_stream.o \
+	${OBJECTDIR}/set_thread_name.o \
 	${OBJECTDIR}/uuid_helper.o
 
 
@@ -209,6 +210,11 @@ ${OBJECTDIR}/script_object_response_stream.o: script_object_response_stream.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- -I../../externals/thread-pool-cpp/thread_pool `pkg-config --cflags zlib` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/script_object_response_stream.o script_object_response_stream.cpp
+
+${OBJECTDIR}/set_thread_name.o: set_thread_name.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- -I../../externals/thread-pool-cpp/thread_pool `pkg-config --cflags zlib` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/set_thread_name.o set_thread_name.cpp
 
 ${OBJECTDIR}/uuid_helper.o: uuid_helper.cpp 
 	${MKDIR} -p ${OBJECTDIR}

@@ -16,29 +16,26 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CONFIG_H
-#define CONFIG_H
+#include "set_thread_name.h"
 
-#include <cstdint>
+#if __GNUG__
+#include <pthread.h>
 
-class Config final {
-public:
-    
-    static unsigned GetCPUCount();
-    
-    struct SpiderMonkey final {
-        static std::uint32_t GetHeapSize();
-        static bool GetEnableBaselineCompiler();
-        static bool GetEnableIonCompiler();
-    };
-    
-    struct MapReduce final {
-        static double GetCPUMultiplier();
-    };
-    
-private:
+bool SetThreadName::Set(std::thread& thread, const char* name) {
+    auto status = ::pthread_setname_np(thread.native_handle(), name) == 0;
+    return status;
+}
 
-};
+bool SetThreadName::Set(const char* name) {
+    auto status = pthread_setname_np(::pthread_self(), name) == 0;
+    return status;
+}
+#else
+bool SetThreadName::Set(std::thread& thread, const char* name) {
+    return false;
+}
 
-#endif	/* CONFIG_H */
-
+bool SetThreadName::Set(const char* name) {
+    return false;
+}
+#endif

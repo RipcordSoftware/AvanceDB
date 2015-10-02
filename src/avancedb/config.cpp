@@ -38,3 +38,7 @@ bool Config::SpiderMonkey::GetEnableBaselineCompiler() {
 bool Config::SpiderMonkey::GetEnableIonCompiler() {
     return true;
 }
+
+double Config::MapReduce::GetCPUMultiplier() {
+    return 0.5;
+}

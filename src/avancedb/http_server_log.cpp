@@ -28,6 +28,8 @@
 
 #include "termcolor/termcolor.hpp"
 
+#include "set_thread_name.h"
+
 static const unsigned cumulativeSecsPerMonth[12] = { 2678400, 5097600, 7776000, 10368000, 13046400, 15638400, 18316800, 20995200, 23587200, 26265600, 28857600, 31536000 };
 static const unsigned cumulativeSecsPerMonthLeap[12] = { 2678400, 5184000, 7862400, 10454400, 13132800, 15724800, 18403200, 21081600, 23673600, 26352000, 28944000, 31622400 };
 
@@ -46,6 +48,8 @@ static boost::atomic<unsigned> writeRowIndex;
 static unsigned readRowIndex = 0;
 
 static void streamWriterThread() {
+    SetThreadName::Set("HttpServerLog");
+    
     try {
         while (true) {
             boost::this_thread::sleep_for(boost::chrono::seconds(2));

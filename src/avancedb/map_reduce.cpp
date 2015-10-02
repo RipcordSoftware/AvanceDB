@@ -28,16 +28,20 @@
 #include "map_reduce_script_object_state.h"
 #include "documents.h"
 #include "config.h"
+#include "set_thread_name.h"
 
 #include "script_object_factory.h"
 #include "script_array_factory.h"
 
 MapReduce::MapReduce() {
     ThreadPoolOptions threadPoolOptions;
+    threadPoolOptions.threads_count = Config::GetCPUCount() * Config::MapReduce::GetCPUMultiplier();
     
     threadPoolRuntimes_.resize(threadPoolOptions.threads_count);
     
-    threadPoolOptions.onStart = [&](){ 
+    threadPoolOptions.onStart = [&](){
+        SetThreadName::Set("MapReduceWorker");
+
         auto id = Worker::getWorkerIdForCurrentThread();
         auto rt = new rs::jsapi::Runtime(Config::SpiderMonkey::GetHeapSize(), Config::SpiderMonkey::GetEnableBaselineCompiler(), Config::SpiderMonkey::GetEnableIonCompiler());
         threadPoolRuntimes_[id].reset(rt);
@@ -148,26 +152,27 @@ map_reduce_result_array_ptr MapReduce::Execute(rs::jsapi::Runtime& rt, const cha
 }
 
 void MapReduce::GetFieldValue(script_object_ptr scriptObj, const char* name, rs::jsapi::Value& value) {
-    switch (scriptObj->getType(name)) {
+    int index = 0;
+    switch (scriptObj->getType(name, index)) {
         case rs::scriptobject::ScriptObjectType::Boolean:
-            value = scriptObj->getBoolean(name);
+            value = scriptObj->getBoolean(index);
             return;
         case rs::scriptobject::ScriptObjectType::Int32:
-            value = scriptObj->getInt32(name);
+            value = scriptObj->getInt32(index);
             return;
         case rs::scriptobject::ScriptObjectType::String:
-            value = scriptObj->getString(name);
+            value = scriptObj->getString(index);
             return;
         case rs::scriptobject::ScriptObjectType::Double:
-            value = scriptObj->getDouble(name);
+            value = scriptObj->getDouble(index);
             return;
         case rs::scriptobject::ScriptObjectType::Object: {
-            auto childObj = scriptObj->getObject(name);
+            auto childObj = scriptObj->getObject(index);
             MapReduce::CreateValueObject(childObj, value);
             return;
         }
         case rs::scriptobject::ScriptObjectType::Array: {
-            auto childArr = scriptObj->getArray(name);
+            auto childArr = scriptObj->getArray(index);
             MapReduce::CreateValueArray(childArr, value);
             return;
         }
