@@ -19,10 +19,18 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-class Config {
+#include <cstdint>
+
+class Config final {
 public:
     
     static unsigned GetCPUCount();
+    
+    struct SpiderMonkey final {
+        static std::uint32_t GetHeapSize();
+        static bool GetEnableBaselineCompiler();
+        static bool GetEnableIonCompiler();
+    };        
     
 private:
 

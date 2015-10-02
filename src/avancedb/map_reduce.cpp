@@ -27,6 +27,7 @@
 #include "script_array_jsapi_source.h"
 #include "map_reduce_script_object_state.h"
 #include "documents.h"
+#include "config.h"
 
 #include "script_object_factory.h"
 #include "script_array_factory.h"
@@ -38,7 +39,7 @@ MapReduce::MapReduce() {
     
     threadPoolOptions.onStart = [&](){ 
         auto id = Worker::getWorkerIdForCurrentThread();
-        auto rt = new rs::jsapi::Runtime();
+        auto rt = new rs::jsapi::Runtime(Config::SpiderMonkey::GetHeapSize(), Config::SpiderMonkey::GetEnableBaselineCompiler(), Config::SpiderMonkey::GetEnableIonCompiler());
         threadPoolRuntimes_[id].reset(rt);
     };
     

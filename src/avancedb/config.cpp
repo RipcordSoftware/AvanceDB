@@ -26,3 +26,15 @@ unsigned Config::GetCPUCount() {
     auto cores = std::max(2u, boost::thread::hardware_concurrency());
     return cores;
 }
+
+std::uint32_t Config::SpiderMonkey::GetHeapSize() {
+    return 64 * 1024 * 1024;
+}
+
+bool Config::SpiderMonkey::GetEnableBaselineCompiler() {
+    return true;
+}
+
+bool Config::SpiderMonkey::GetEnableIonCompiler() {
+    return true;
+}

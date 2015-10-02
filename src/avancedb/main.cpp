@@ -22,6 +22,7 @@
 #include <boost/program_options.hpp>
 
 #include "http_server.h"
+#include "config.h"
 
 #include "libjsapi.h"
 
@@ -44,8 +45,7 @@ int main(int argc, char** argv) {
         std::cout << desc << std::endl;
         return 1;
     } else {
-        // create the runtime which hosts spidermonkey
-        rs::jsapi::Runtime rt;
+        rs::jsapi::Runtime rt(Config::SpiderMonkey::GetHeapSize(), Config::SpiderMonkey::GetEnableBaselineCompiler(), Config::SpiderMonkey::GetEnableIonCompiler());
 
         HttpServer server(addr.c_str(), port);
         server.Start();
