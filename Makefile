@@ -12,7 +12,7 @@ all: force_true
 
 .NOTPARALLEL: test
 test: build
-	cd src/avancedb/test/scripts/javascript && ./test.sh
+	cd src/avancedb/test/scripts/javascript/unit && ./test.sh
 	cd src/avancedb/test/scripts/python && ./test.sh
 	cd src/avancedb/test/scripts/ruby && ./test.sh
 

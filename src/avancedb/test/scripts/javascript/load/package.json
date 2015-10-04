@@ -1,0 +1,9 @@
+{
+    "name": "avancedb-loadtest",
+    "version": "0.0.1",
+    "dependencies": {
+        "cradle": "*",
+        "underscore": "*",
+        "promise": "*"
+    }
+}
