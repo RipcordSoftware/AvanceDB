@@ -26,10 +26,8 @@
 #include "thread_pool.hpp"
 
 class MapReduceThreadPool final {    
-public:
-    typedef FixedFunction<void(), 64> Task;
-    
-    MapReduceThreadPool();
+public:  
+    MapReduceThreadPool(std::uint32_t jsapiHeapSize, bool enableBaselineCompiler, bool enableIonCompiler);
     MapReduceThreadPool(const MapReduceThreadPool&) = delete;
     MapReduceThreadPool& operator=(const MapReduceThreadPool&) = delete;    
     
@@ -43,9 +41,12 @@ public:
     rs::jsapi::Runtime& GetThreadRuntime();
     
 private:
-    rs::jsapi::Runtime defaultRuntime_;
+    const std::uint32_t jsapiHeapSize_;
+    const bool enableBaselineCompiler_;
+    const bool enableIonCompiler_;
     
-    boost::once_flag initFlag_{BOOST_ONCE_INIT};
+    rs::jsapi::Runtime defaultRuntime_;
+
     std::vector<std::unique_ptr<rs::jsapi::Runtime>> threadPoolRuntimes_;
     std::unique_ptr<ThreadPool> threadPool_;
 };
