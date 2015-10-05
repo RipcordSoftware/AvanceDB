@@ -24,8 +24,6 @@
 #include "http_server.h"
 #include "config.h"
 
-#include "libjsapi.h"
-
 int main(int argc, char** argv) {
     std::string addr = "0.0.0.0";
     unsigned port = 5994;
@@ -45,8 +43,6 @@ int main(int argc, char** argv) {
         std::cout << desc << std::endl;
         return 1;
     } else {
-        rs::jsapi::Runtime rt(Config::SpiderMonkey::GetHeapSize(), Config::SpiderMonkey::GetEnableBaselineCompiler(), Config::SpiderMonkey::GetEnableIonCompiler());
-
         HttpServer server(addr.c_str(), port);
         server.Start();
         return 0;

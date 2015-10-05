@@ -23,8 +23,6 @@
 
 #include <memory>
 
-#include "thread_pool.hpp"
-
 #include "libjsapi.h"
 
 class MapReduce final {
@@ -45,12 +43,7 @@ private:
     static void GetFieldValue(script_array_ptr scriptObj, int index, rs::jsapi::Value& value);
     
     static void CreateValueObject(script_object_ptr obj, rs::jsapi::Value& value);
-    static void CreateValueArray(script_array_ptr arr, rs::jsapi::Value& value);
-        
-    // TODO: there should be a single thread pool for all map/reduce
-    std::vector<std::unique_ptr<rs::jsapi::Runtime>> threadPoolRuntimes_;
-    std::unique_ptr<ThreadPool> threadPool_;
-
+    static void CreateValueArray(script_array_ptr arr, rs::jsapi::Value& value);        
 };
 
 #endif	/* MAP_REDUCE_H */

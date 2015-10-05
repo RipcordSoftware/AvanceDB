@@ -21,6 +21,7 @@
       <itemPath>map_reduce.h</itemPath>
       <itemPath>map_reduce_result.h</itemPath>
       <itemPath>map_reduce_script_object_state.h</itemPath>
+      <itemPath>map_reduce_thread_pool.h</itemPath>
       <itemPath>post_all_documents_options.h</itemPath>
       <itemPath>rest_config.h</itemPath>
       <itemPath>rest_exceptions.h</itemPath>
@@ -55,6 +56,7 @@
       <itemPath>main.cpp</itemPath>
       <itemPath>map_reduce.cpp</itemPath>
       <itemPath>map_reduce_result.cpp</itemPath>
+      <itemPath>map_reduce_thread_pool.cpp</itemPath>
       <itemPath>post_all_documents_options.cpp</itemPath>
       <itemPath>rest_config.cpp</itemPath>
       <itemPath>rest_exceptions.cpp</itemPath>
@@ -177,6 +179,11 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../../externals/thread-pool-cpp/thread_pool/worker.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
       <item path="bulk_documents_result.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="config.cpp" ex="false" tool="1" flavor2="0">
@@ -236,6 +243,10 @@
       <item path="map_reduce_result.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="map_reduce_script_object_state.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="map_reduce_thread_pool.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="map_reduce_thread_pool.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="post_all_documents_options.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -392,6 +403,11 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../../externals/thread-pool-cpp/thread_pool/worker.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
       <item path="bulk_documents_result.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="config.cpp" ex="false" tool="1" flavor2="0">
@@ -451,6 +467,10 @@
       <item path="map_reduce_result.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="map_reduce_script_object_state.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="map_reduce_thread_pool.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="map_reduce_thread_pool.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="post_all_documents_options.cpp" ex="false" tool="1" flavor2="0">
       </item>

@@ -33,30 +33,18 @@
 #include "script_object_factory.h"
 #include "script_array_factory.h"
 
-MapReduce::MapReduce() {
-    ThreadPoolOptions threadPoolOptions;
-    threadPoolOptions.threads_count = Config::GetCPUCount() * Config::MapReduce::GetCPUMultiplier();
-    
-    threadPoolRuntimes_.resize(threadPoolOptions.threads_count);
-    
-    threadPoolOptions.onStart = [&](){
-        SetThreadName::Set("MapReduceWorker");
+#include "map_reduce_thread_pool.h"
 
-        auto id = Worker::getWorkerIdForCurrentThread();
-        auto rt = new rs::jsapi::Runtime(Config::SpiderMonkey::GetHeapSize(), Config::SpiderMonkey::GetEnableBaselineCompiler(), Config::SpiderMonkey::GetEnableIonCompiler());
-        threadPoolRuntimes_[id].reset(rt);
-    };
+MapReduceThreadPool mapReduceThreadPool;
+
+MapReduce::MapReduce() {
     
-    threadPoolOptions.onStop = [&]() {
-        auto id = Worker::getWorkerIdForCurrentThread();
-        threadPoolRuntimes_[id].release();
-    };
-    
-    threadPool_.reset(new ThreadPool(threadPoolOptions));
 }
 
 // TODO: this is still very basic
 map_reduce_result_array_ptr MapReduce::Execute(const char* map, const char* reduce, document_collections_ptr colls) {
+    mapReduceThreadPool.Start();
+
     auto results = boost::make_shared<map_reduce_result_array_ptr::element_type>();
     
     auto totalDocs = 0;
@@ -70,12 +58,11 @@ map_reduce_result_array_ptr MapReduce::Execute(const char* map, const char* redu
     std::atomic<unsigned> threads(colls->size());
     
     for (auto& docs : *colls) {
-        threadPool_->post([&]() {
+        mapReduceThreadPool.Post([&]() {
             BOOST_SCOPE_EXIT(&threads) { --threads; } BOOST_SCOPE_EXIT_END
-            auto id = Worker::getWorkerIdForCurrentThread();
-            auto& rt = threadPoolRuntimes_[id];
+            auto& rt = mapReduceThreadPool.GetThreadRuntime();
                         
-            auto result = Execute(*rt, map, nullptr, docs);
+            auto result = Execute(rt, map, nullptr, docs);
             std::unique_lock<std::mutex> l(m);
             results->insert(results->end(), result->cbegin(), result->cend());
         });

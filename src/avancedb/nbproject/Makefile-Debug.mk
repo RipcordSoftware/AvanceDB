@@ -36,6 +36,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/_ext/1383664149/city.o \
+	${OBJECTDIR}/_ext/1845599792/worker.o \
 	${OBJECTDIR}/config.o \
 	${OBJECTDIR}/database.o \
 	${OBJECTDIR}/databases.o \
@@ -50,6 +51,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/main.o \
 	${OBJECTDIR}/map_reduce.o \
 	${OBJECTDIR}/map_reduce_result.o \
+	${OBJECTDIR}/map_reduce_thread_pool.o \
 	${OBJECTDIR}/post_all_documents_options.o \
 	${OBJECTDIR}/rest_config.o \
 	${OBJECTDIR}/rest_exceptions.o \
@@ -100,6 +102,11 @@ ${OBJECTDIR}/_ext/1383664149/city.o: ../../externals/cityhash/src/city.cc
 	${MKDIR} -p ${OBJECTDIR}/_ext/1383664149
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- -I../../externals/thread-pool-cpp/thread_pool `pkg-config --cflags zlib` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/1383664149/city.o ../../externals/cityhash/src/city.cc
+
+${OBJECTDIR}/_ext/1845599792/worker.o: ../../externals/thread-pool-cpp/thread_pool/worker.cpp 
+	${MKDIR} -p ${OBJECTDIR}/_ext/1845599792
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- -I../../externals/thread-pool-cpp/thread_pool `pkg-config --cflags zlib` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/1845599792/worker.o ../../externals/thread-pool-cpp/thread_pool/worker.cpp
 
 ${OBJECTDIR}/config.o: config.cpp 
 	${MKDIR} -p ${OBJECTDIR}
@@ -170,6 +177,11 @@ ${OBJECTDIR}/map_reduce_result.o: map_reduce_result.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- -I../../externals/thread-pool-cpp/thread_pool `pkg-config --cflags zlib` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/map_reduce_result.o map_reduce_result.cpp
+
+${OBJECTDIR}/map_reduce_thread_pool.o: map_reduce_thread_pool.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- -I../../externals/thread-pool-cpp/thread_pool `pkg-config --cflags zlib` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/map_reduce_thread_pool.o map_reduce_thread_pool.cpp
 
 ${OBJECTDIR}/post_all_documents_options.o: post_all_documents_options.cpp 
 	${MKDIR} -p ${OBJECTDIR}
