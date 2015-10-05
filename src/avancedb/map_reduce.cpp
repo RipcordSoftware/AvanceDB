@@ -55,7 +55,7 @@ map_reduce_result_array_ptr MapReduce::Execute(const char* map, const char* redu
     auto results = boost::make_shared<map_reduce_result_array_ptr::element_type>();
     
     auto totalDocs = 0;
-    for (auto docs : *colls) {
+    for (const auto& docs : *colls) {
         totalDocs += docs.size();
     }
     
