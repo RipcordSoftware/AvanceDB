@@ -20,6 +20,7 @@
 #define MAP_REDUCE_H
 
 #include "types.h"
+#include "map_reduce_thread_pool.h"
 
 #include <memory>
 
@@ -43,7 +44,9 @@ private:
     static void GetFieldValue(script_array_ptr scriptObj, int index, rs::jsapi::Value& value);
     
     static void CreateValueObject(script_object_ptr obj, rs::jsapi::Value& value);
-    static void CreateValueArray(script_array_ptr arr, rs::jsapi::Value& value);        
+    static void CreateValueArray(script_array_ptr arr, rs::jsapi::Value& value);
+    
+    MapReduceThreadPool::map_reduce_thread_pool_ptr mapReduceThreadPool_;
 };
 
 #endif	/* MAP_REDUCE_H */

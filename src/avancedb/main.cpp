@@ -22,6 +22,7 @@
 #include <boost/program_options.hpp>
 
 #include "http_server.h"
+#include "map_reduce_thread_pool.h"
 #include "config.h"
 
 int main(int argc, char** argv) {
@@ -43,6 +44,8 @@ int main(int argc, char** argv) {
         std::cout << desc << std::endl;
         return 1;
     } else {
+        MapReduceThreadPoolScope threadPool{Config::SpiderMonkey::GetHeapSize(), Config::SpiderMonkey::GetEnableBaselineCompiler(), Config::SpiderMonkey::GetEnableIonCompiler()};
+
         HttpServer server(addr.c_str(), port);
         server.Start();
         return 0;

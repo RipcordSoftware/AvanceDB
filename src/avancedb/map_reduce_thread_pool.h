@@ -20,18 +20,25 @@
 #define MAP_REDUCE_THREAD_POOL_H
 
 #include <boost/thread.hpp>
+#include <boost/enable_shared_from_this.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 
 #include "libjsapi.h"
 
 #include "thread_pool.hpp"
 
-class MapReduceThreadPool final {    
-public:  
-    MapReduceThreadPool(std::uint32_t jsapiHeapSize, bool enableBaselineCompiler, bool enableIonCompiler);
+class MapReduceThreadPool final : public boost::enable_shared_from_this<MapReduceThreadPool> {    
+public:
+    using map_reduce_thread_pool_ptr = boost::shared_ptr<MapReduceThreadPool>;
+    
     MapReduceThreadPool(const MapReduceThreadPool&) = delete;
     MapReduceThreadPool& operator=(const MapReduceThreadPool&) = delete;    
     
-    void Start();
+    static map_reduce_thread_pool_ptr Start(std::uint32_t jsapiHeapSize, bool enableBaselineCompiler, bool enableIonCompiler);
+    static map_reduce_thread_pool_ptr Get();
+
+    static void Stop();
     
     template <typename Handler>
     void Post(Handler&& handler) {
@@ -41,15 +48,30 @@ public:
     rs::jsapi::Runtime& GetThreadRuntime();
     
 private:
-    const std::uint32_t jsapiHeapSize_;
-    const bool enableBaselineCompiler_;
-    const bool enableIonCompiler_;
+    friend map_reduce_thread_pool_ptr boost::make_shared<map_reduce_thread_pool_ptr::element_type>(std::uint32_t&, bool&, bool&);
     
-    rs::jsapi::Runtime defaultRuntime_;
+    MapReduceThreadPool(std::uint32_t jsapiHeapSize, bool enableBaselineCompiler, bool enableIonCompiler);
 
+    rs::jsapi::Runtime defaultRuntime_;
     std::vector<std::unique_ptr<rs::jsapi::Runtime>> threadPoolRuntimes_;
     std::unique_ptr<ThreadPool> threadPool_;
 };
 
-#endif	/* MAP_REDUCE_THREAD_POOL_H */
+class MapReduceThreadPoolScope final {
+public:
+    MapReduceThreadPoolScope(std::uint32_t jsapiHeapSize, bool enableBaselineCompiler, bool enableIonCompiler) {
+        MapReduceThreadPool::Start(jsapiHeapSize, enableBaselineCompiler, enableIonCompiler);
+        started = true;
+    }
+    
+    ~MapReduceThreadPoolScope() {
+        if (started) {
+            MapReduceThreadPool::Stop();
+        }
+    }
+    
+private:
+    bool started{false};
+};
 
+#endif	/* MAP_REDUCE_THREAD_POOL_H */

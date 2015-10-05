@@ -21,30 +21,45 @@
 #include "config.h"
 #include "set_thread_name.h"
 
-MapReduceThreadPool::MapReduceThreadPool(std::uint32_t jsapiHeapSize, bool enableBaselineCompiler, bool enableIonCompiler) : 
-        jsapiHeapSize_(jsapiHeapSize), enableBaselineCompiler_(enableBaselineCompiler), enableIonCompiler_(enableIonCompiler),
+MapReduceThreadPool::map_reduce_thread_pool_ptr mapReduceThreadPool_;
+
+MapReduceThreadPool::MapReduceThreadPool(std::uint32_t jsapiHeapSize, bool enableBaselineCompiler, bool enableIonCompiler) :
         defaultRuntime_(jsapiHeapSize, enableBaselineCompiler, enableIonCompiler) {
     
 }
 
-void MapReduceThreadPool::Start() {
+MapReduceThreadPool::map_reduce_thread_pool_ptr MapReduceThreadPool::Start(std::uint32_t jsapiHeapSize, bool enableBaselineCompiler, bool enableIonCompiler) {
+    auto threadPool = boost::make_shared<map_reduce_thread_pool_ptr::element_type>(jsapiHeapSize, enableBaselineCompiler, enableIonCompiler);
+
     ThreadPoolOptions threadPoolOptions;
     threadPoolOptions.threads_count = Config::GetCPUCount() * Config::MapReduce::GetCPUMultiplier();
 
-    threadPoolRuntimes_.resize(threadPoolOptions.threads_count);
+    threadPool->threadPoolRuntimes_.resize(threadPoolOptions.threads_count);
 
-    threadPoolOptions.onStart = [&](size_t id){
+    threadPoolOptions.onStart = [=](size_t id){
         SetThreadName::Set("MapReduceWorker");
 
-        auto rt = new rs::jsapi::Runtime(jsapiHeapSize_, enableBaselineCompiler_, enableIonCompiler_);
-        threadPoolRuntimes_[id].reset(rt);
+        auto rt = new rs::jsapi::Runtime(jsapiHeapSize, enableBaselineCompiler, enableIonCompiler);
+        threadPool->threadPoolRuntimes_[id].reset(rt);
     };
 
-    threadPoolOptions.onStop = [&](size_t id) {
-        threadPoolRuntimes_[id].release();
+    threadPoolOptions.onStop = [=](size_t id) {
+        threadPool->threadPoolRuntimes_[id].release();
     };
+    
+    threadPool->threadPool_.reset(new ThreadPool(threadPoolOptions));
+    
+    mapReduceThreadPool_ = threadPool;
 
-    threadPool_.reset(new ThreadPool(threadPoolOptions));
+    return mapReduceThreadPool_;
+}
+
+MapReduceThreadPool::map_reduce_thread_pool_ptr MapReduceThreadPool::Get() {
+    return mapReduceThreadPool_;
+}
+
+void MapReduceThreadPool::Stop() {
+    mapReduceThreadPool_.reset();
 }
 
 rs::jsapi::Runtime& MapReduceThreadPool::GetThreadRuntime() {

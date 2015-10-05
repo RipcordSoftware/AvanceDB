@@ -31,27 +31,17 @@
 #include "documents.h"
 #include "config.h"
 #include "set_thread_name.h"
+#include "map_reduce_thread_pool.h"
 
 #include "script_object_factory.h"
 #include "script_array_factory.h"
 
-#include "map_reduce_thread_pool.h"
-
-boost::once_flag mapReduceThreadPoolInitFlag = BOOST_ONCE_INIT;
-std::unique_ptr<MapReduceThreadPool> mapReduceThreadPool;
-
-MapReduce::MapReduce() {
+MapReduce::MapReduce() : mapReduceThreadPool_(MapReduceThreadPool::Get()) {
     
 }
 
 // TODO: this is still very basic
 map_reduce_result_array_ptr MapReduce::Execute(const char* map, const char* reduce, document_collections_ptr colls) {
-    boost::call_once(mapReduceThreadPoolInitFlag, [&]() {
-        auto ptr = new MapReduceThreadPool(Config::SpiderMonkey::GetHeapSize(), Config::SpiderMonkey::GetEnableBaselineCompiler(), Config::SpiderMonkey::GetEnableIonCompiler());
-        mapReduceThreadPool.reset(ptr);
-        mapReduceThreadPool->Start();
-    });
-
     auto results = boost::make_shared<map_reduce_result_array_ptr::element_type>();
     
     auto totalDocs = 0;
@@ -65,9 +55,9 @@ map_reduce_result_array_ptr MapReduce::Execute(const char* map, const char* redu
     std::atomic<unsigned> threads(colls->size());
     
     for (auto& docs : *colls) {
-        mapReduceThreadPool->Post([&]() {
+        mapReduceThreadPool_->Post([&]() {
             BOOST_SCOPE_EXIT(&threads) { --threads; } BOOST_SCOPE_EXIT_END
-            auto& rt = mapReduceThreadPool->GetThreadRuntime();
+            auto& rt = mapReduceThreadPool_->GetThreadRuntime();
                         
             auto result = Execute(rt, map, nullptr, docs);
             std::unique_lock<std::mutex> l(m);
