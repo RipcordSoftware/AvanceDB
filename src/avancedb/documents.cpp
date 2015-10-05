@@ -33,7 +33,8 @@
 #include "map_reduce_result.h"
 #include "map_reduce.h"
 
-Documents::Documents(database_ptr db) : db_(db), updateSeq_(0), localUpdateSeq_(0),
+Documents::Documents(database_ptr db) : db_(db), docCount_(0),
+        updateSeq_(0), localUpdateSeq_(0),
         collections_(GetCollectionCount()), docsMtx_(collections_),
         allDocsCacheDocs_(boost::make_shared<document_array>()),
         allDocsCacheUpdateSequence_(0) {
@@ -48,13 +49,7 @@ documents_ptr Documents::Create(database_ptr db) {
 }
 
 Documents::collection::size_type Documents::getCount() {
-    collection::size_type size = 0;
-    
-    for (auto coll : docs_) {
-        size += coll.size();
-    }
-    
-    return size;
+    return docCount_.load(boost::memory_order_relaxed);
 }
 
 sequence_type Documents::getUpdateSequence() {
@@ -98,6 +93,7 @@ document_ptr Documents::DeleteDocument(const char* id, const char* rev) {
     docs_[coll].erase(doc);
     
     ++updateSeq_;
+    docCount_.fetch_sub(1, boost::memory_order_relaxed);
     
     return doc;
 }
@@ -108,12 +104,12 @@ document_ptr Documents::SetDocument(const char* id, script_object_ptr obj) {
     boost::lock_guard<DocumentsMutex> guard{docsMtx_[coll]};
     
     Document::Compare compare{id};
-    auto doc = docs_[coll].find_fn(compare);
+    auto oldDoc = docs_[coll].find_fn(compare);
     
     auto objRev = obj->getString("_rev", false);
 
-    if (!!doc) {
-        auto docRev = doc->getRev();
+    if (!!oldDoc) {
+        auto docRev = oldDoc->getRev();
         
         if (objRev == nullptr || std::strcmp(objRev, docRev) != 0) {
             throw DocumentConflict();
@@ -122,11 +118,15 @@ document_ptr Documents::SetDocument(const char* id, script_object_ptr obj) {
         DocumentRevision::Validate(objRev, true);
     }
 
-    doc = Document::Create(id, obj, ++updateSeq_);
+    auto newDoc = Document::Create(id, obj, ++updateSeq_);
 
-    docs_[coll].insert(doc);
+    docs_[coll].insert(newDoc);
+    
+    if (!oldDoc) {
+        docCount_.fetch_add(1, boost::memory_order_relaxed);
+    }
 
-    return doc;
+    return newDoc;
 }
 
 document_ptr Documents::GetDesignDocument(const char* id, bool throwOnFail) {
@@ -346,7 +346,11 @@ BulkDocumentsResults Documents::PostBulkDocuments(script_array_ptr docs, bool ne
             docs_[coll].insert(doc);
 
             auto newRev = doc->getRev();
-            results.emplace_back(id, newRev); 
+            results.emplace_back(id, newRev);
+
+            if (!oldDoc) {
+                docCount_.fetch_add(1, boost::memory_order_relaxed);
+            }
         } else {
             results.emplace_back(id, error, reason);
         }     

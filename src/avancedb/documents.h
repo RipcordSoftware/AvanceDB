@@ -104,6 +104,7 @@ private:
     const unsigned collections_;
     std::vector<DocumentsMutex> docsMtx_;
     std::vector<collection> docs_;
+    boost::atomic<collection::size_type> docCount_;
     boost::atomic<sequence_type> updateSeq_;
     
     boost::mutex localDocsMtx_;
