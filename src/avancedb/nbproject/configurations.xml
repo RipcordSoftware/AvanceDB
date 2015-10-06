@@ -67,6 +67,7 @@
       <itemPath>script_object_response_stream.cpp</itemPath>
       <itemPath>set_thread_name.cpp</itemPath>
       <itemPath>uuid_helper.cpp</itemPath>
+      <itemPath>../../externals/thread-pool-cpp/thread_pool/worker.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
