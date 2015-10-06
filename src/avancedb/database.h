@@ -39,8 +39,8 @@ public:
     unsigned long CommitedUpdateSequence() { return docs_->getUpdateSequence(); }
     unsigned long UpdateSequence() { return docs_->getUpdateSequence(); }
     unsigned long PurgeSequence() { return 0; }
-    unsigned long DataSize() { return dataSize_; }
-    unsigned long DiskSize() { return diskSize_; }
+    unsigned long DataSize();
+    unsigned long DiskSize();
     unsigned long DocCount();
     unsigned long DocDelCount() { return docDelCount_; }
     unsigned long InstanceStartTime() { return instanceStartTime_; }
@@ -75,8 +75,6 @@ private:
     
     const unsigned long instanceStartTime_;
     boost::atomic<unsigned long> docDelCount_;
-    boost::atomic<unsigned long> dataSize_;
-    boost::atomic<unsigned long> diskSize_;
     
     documents_ptr docs_;
 };

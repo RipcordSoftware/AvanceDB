@@ -34,7 +34,7 @@
 #include "map_reduce.h"
 
 Documents::Documents(database_ptr db) : db_(db), docCount_(0),
-        updateSeq_(0), localUpdateSeq_(0),
+        dataSize_(0), updateSeq_(0), localUpdateSeq_(0),
         collections_(GetCollectionCount()), docsMtx_(collections_),
         allDocsCacheDocs_(boost::make_shared<document_array>()),
         allDocsCacheUpdateSequence_(0) {
@@ -50,6 +50,10 @@ documents_ptr Documents::Create(database_ptr db) {
 
 Documents::collection::size_type Documents::getCount() {
     return docCount_.load(boost::memory_order_relaxed);
+}
+
+std::uint64_t Documents::getDataSize() {
+    return dataSize_.load(boost::memory_order_relaxed);
 }
 
 sequence_type Documents::getUpdateSequence() {
@@ -94,6 +98,7 @@ document_ptr Documents::DeleteDocument(const char* id, const char* rev) {
     
     ++updateSeq_;
     docCount_.fetch_sub(1, boost::memory_order_relaxed);
+    dataSize_.fetch_sub(doc->getObject()->getSize(true), boost::memory_order_relaxed);
     
     return doc;
 }
@@ -124,7 +129,11 @@ document_ptr Documents::SetDocument(const char* id, script_object_ptr obj) {
     
     if (!oldDoc) {
         docCount_.fetch_add(1, boost::memory_order_relaxed);
+    } else {
+        dataSize_.fetch_sub(oldDoc->getObject()->getSize(true), boost::memory_order_relaxed);
     }
+    
+    dataSize_.fetch_add(newDoc->getObject()->getSize(true), boost::memory_order_relaxed);
 
     return newDoc;
 }
@@ -341,16 +350,20 @@ BulkDocumentsResults Documents::PostBulkDocuments(script_array_ptr docs, bool ne
         }
         
         if (!error) {
-            auto doc = Document::Create(id, obj, ++updateSeq_, newEdits);
+            auto newDoc = Document::Create(id, obj, ++updateSeq_, newEdits);
 
-            docs_[coll].insert(doc);
+            docs_[coll].insert(newDoc);
 
-            auto newRev = doc->getRev();
+            auto newRev = newDoc->getRev();
             results.emplace_back(id, newRev);
 
             if (!oldDoc) {
                 docCount_.fetch_add(1, boost::memory_order_relaxed);
+            } else {
+                dataSize_.fetch_sub(oldDoc->getObject()->getSize(true), boost::memory_order_relaxed);
             }
+            
+            dataSize_.fetch_add(newDoc->getObject()->getSize(true), boost::memory_order_relaxed);
         } else {
             results.emplace_back(id, error, reason);
         }     

@@ -68,6 +68,7 @@ public:
     map_reduce_result_array_ptr PostTempView(const GetViewOptions& options, rs::scriptobject::ScriptObjectPtr obj, Documents::collection::size_type& totalDocs);
     
     collection::size_type getCount();
+    std::uint64_t getDataSize();
     sequence_type getUpdateSequence();
     
 private:
@@ -105,6 +106,7 @@ private:
     std::vector<DocumentsMutex> docsMtx_;
     std::vector<collection> docs_;
     boost::atomic<collection::size_type> docCount_;
+    boost::atomic<std::uint64_t> dataSize_;
     boost::atomic<sequence_type> updateSeq_;
     
     boost::mutex localDocsMtx_;

@@ -23,8 +23,8 @@
 
 #include "documents.h"
 
-Database::Database(const char* name) : name_(name), instanceStartTime_(Now()),
-    dataSize_(0), diskSize_(0), docDelCount_(0) {
+Database::Database(const char* name) : 
+    name_(name), instanceStartTime_(Now()), docDelCount_(0) {
 }
 
 database_ptr Database::Create(const char* name) {
@@ -42,6 +42,14 @@ unsigned long Database::Now() {
 
 unsigned long Database::DocCount() { 
     return docs_->getCount(); 
+}
+
+unsigned long Database::DataSize() {
+    return docs_->getDataSize();
+}
+
+unsigned long Database::DiskSize() { 
+    return DataSize(); 
 }
 
 document_ptr Database::GetDocument(const char* id, bool throwOnFail) {
