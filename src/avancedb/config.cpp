@@ -42,3 +42,7 @@ bool Config::SpiderMonkey::GetEnableIonCompiler() {
 double Config::MapReduce::GetCPUMultiplier() {
     return 0.5;
 }
+
+unsigned Config::Data::GetDatabaseDeleteDelay() {
+    return 5;
+}

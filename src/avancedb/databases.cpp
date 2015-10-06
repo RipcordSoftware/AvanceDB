@@ -19,8 +19,11 @@
 #include "databases.h"
 
 #include <algorithm>
+#include <thread>
+#include <chrono>
 
 #include "database.h"
+#include "config.h"
 
 bool Databases::AddDatabase(const char* name) {
     std::lock_guard<std::mutex> lock(databasesMutex_);
@@ -35,8 +38,26 @@ bool Databases::AddDatabase(const char* name) {
 }
 
 bool Databases::RemoveDatabase(const char* name) {
+    auto removed = false;
+    
     std::lock_guard<std::mutex> lock(databasesMutex_);
-    return databases_.erase(name) == 1;
+    auto iter = databases_.find(name);
+    if (iter != databases_.end()) {
+        // capture the db in a lambda and launch it on a background thread
+        auto db = iter->second;
+        std::thread removeThread{[db]() mutable {
+            auto delay = Config::Data::GetDatabaseDeleteDelay();
+            std::this_thread::sleep_for(std::chrono::seconds(delay));
+            db.reset();
+        }};
+        removeThread.detach();
+        
+        // remove the db from the collection now
+        databases_.erase(iter);
+        removed = true;
+    }
+    
+    return removed;
 }
 
 bool Databases::IsDatabase(const char* name) {

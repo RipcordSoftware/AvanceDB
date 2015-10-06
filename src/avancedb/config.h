@@ -36,6 +36,12 @@ public:
         static double GetCPUMultiplier();
     };
     
+    struct Data final {
+        /// The amount of time, in seconds, to wait after a database has been removed
+        /// before the database destructor is called
+        static unsigned GetDatabaseDeleteDelay();
+    };
+    
 private:
 
 };
