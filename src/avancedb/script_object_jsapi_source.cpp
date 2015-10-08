@@ -78,7 +78,7 @@ ScriptObjectJsapiSource::ScriptObjectJsapiSource() {
 
 ScriptObjectJsapiSource::ScriptObjectJsapiSource(ScriptObjectJsapiSource&& rhs) :
         keys_(std::move(rhs.keys_)), values_(std::move(rhs.values_)), 
-        types_(std::move(rhs.types_)), stringValues_(std::move(stringValues_)) {
+        types_(std::move(rhs.types_)), stringValues_(std::move(rhs.stringValues_)) {
     
 }
 

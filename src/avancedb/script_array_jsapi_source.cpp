@@ -71,7 +71,7 @@ ScriptArrayJsapiSource::ScriptArrayJsapiSource() {
 
 ScriptArrayJsapiSource::ScriptArrayJsapiSource(ScriptArrayJsapiSource&& rhs) :
         values_(std::move(rhs.values_)), 
-        types_(std::move(rhs.types_)), stringValues_(std::move(stringValues_)) {    
+        types_(std::move(rhs.types_)), stringValues_(std::move(rhs.stringValues_)) {    
 }
 
 ScriptArrayJsapiSource& ScriptArrayJsapiSource::operator=(ScriptArrayJsapiSource&& rhs) {

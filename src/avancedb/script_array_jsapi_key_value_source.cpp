@@ -63,7 +63,7 @@ ScriptArrayJsapiKeyValueSource::ScriptArrayJsapiKeyValueSource() {
 
 ScriptArrayJsapiKeyValueSource::ScriptArrayJsapiKeyValueSource(ScriptArrayJsapiKeyValueSource&& rhs) :
         values_(std::move(rhs.values_)),
-        types_(std::move(rhs.types_)), stringValues_(std::move(stringValues_)) {
+        types_(std::move(rhs.types_)), stringValues_(std::move(rhs.stringValues_)) {
     
 }
 
