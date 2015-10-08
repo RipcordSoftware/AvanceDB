@@ -39,7 +39,7 @@ std::string JsonStream::Flush() {
     auto str = stream_.str();
     stream_.str("");
     fieldCount_ = 0;
-    return std::move(str);
+    return str;
 }
 
 void JsonStream::PushContext(ContextType contextType, const char* name) {

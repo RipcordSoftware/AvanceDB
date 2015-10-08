@@ -83,5 +83,5 @@ std::vector<std::string> Databases::GetDatabases() {
         });
     }
     
-    return std::move(databases);
+    return databases;
 }

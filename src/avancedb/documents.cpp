@@ -369,7 +369,7 @@ BulkDocumentsResults Documents::PostBulkDocuments(script_array_ptr docs, bool ne
         }     
     }
     
-    return std::move(results);
+    return results;
 }
 
 document_ptr Documents::GetLocalDocument(const char* id) {
