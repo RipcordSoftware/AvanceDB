@@ -252,7 +252,7 @@ private:
             for (; index < len; ++index) {
                 switch (value[index]) {
                     case '\\': dynBuffer += "\\\\"; break;
-                    case '"': dynBuffer += "\""; break;
+                    case '"': dynBuffer += "\\\""; break;
                     case '/': dynBuffer += "\\/"; break;
                     case '\b': dynBuffer += "\\b"; break;
                     case '\f': dynBuffer += "\\f"; break;
