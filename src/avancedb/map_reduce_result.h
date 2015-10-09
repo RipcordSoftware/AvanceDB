@@ -47,7 +47,6 @@ public:
     bool getKeyBoolean() const;
     const script_object_ptr getKeyObject() const;
     const script_array_ptr getKeyArray() const;
-    unsigned getKeyStringFieldLength() const;
     
     const char* getValueString() const;
     std::int32_t getValueInt32() const;
@@ -55,7 +54,10 @@ public:
     bool getValueBoolean() const;
     const script_object_ptr getValueObject() const;
     const script_array_ptr getValueArray() const;
-    unsigned getValueStringFieldLength() const;
+    
+    static bool Compare(const map_reduce_result_ptr& a, const map_reduce_result_ptr& b);
+    static bool Compare(const script_object_ptr& a, const script_object_ptr& b);
+    static bool Compare(const script_array_ptr& a, const script_array_ptr& b);
     
 private:
     

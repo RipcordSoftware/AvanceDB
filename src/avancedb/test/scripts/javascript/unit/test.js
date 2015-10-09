@@ -2857,17 +2857,17 @@ describe('avancedb -- temp views --', function() {
     
     it('execute a simple temp view - ([{_id, null}, {1, 10} {[1,2,3,4], {"hello":"world"}}])', function(done) {
         db.temporaryView(
-            { map: function(doc) { emit(doc._id, null); emit(1, 10); emit([1,2,3,4], {'hello':'world'}); } },
+            { map: function(doc) { emit([1,2,3,4], {'hello':'world'}); emit(doc._id, null); emit(1, 10); } },
             function(err, doc) {
                 assert.equal(null, err);
                 assert.notEqual(null, doc);
                 assert.equal(3, doc.length);
                 assert.equal(testId, doc[0].id);
-                assert.equal(testId, doc[0].key);
-                assert.equal(null, doc[0].value);
+                assert.equal(1, doc[0].key);
+                assert.equal(10, doc[0].value);
                 assert.equal(testId, doc[1].id);
-                assert.equal(1, doc[1].key);
-                assert.equal(10, doc[1].value);
+                assert.equal(testId, doc[1].key);
+                assert.equal(null, doc[1].value);
                 assert.equal(testId, doc[2].id);
                 assert.equal(4, doc[2].key.length);
                 assert.deepEqual([1,2,3,4], doc[2].key);

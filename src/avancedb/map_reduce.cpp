@@ -22,6 +22,7 @@
 #include <boost/scope_exit.hpp>
 
 #include <memory>
+#include <algorithm>
 
 #include "script_array_jsapi_key_value_source.h"
 #include "map_reduce_result.h"
@@ -69,6 +70,9 @@ map_reduce_result_array_ptr MapReduce::Execute(const char* map, const char* redu
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
     
+    // TODO: this should be an inplace merge
+    SortResultArray(results);
+    
     return results;
 }
 
@@ -90,7 +94,7 @@ map_reduce_result_array_ptr MapReduce::Execute(rs::jsapi::Runtime& rt, const cha
             
             auto resultArr = rs::scriptobject::ScriptArrayFactory::CreateArray(source);
             auto result = MapReduceResult::Create(resultArr, doc);
-            results->push_back(result);
+            results->emplace_back(result);
     });
 
     // TODO: elegantly handle JS syntax errors
@@ -131,6 +135,10 @@ map_reduce_result_array_ptr MapReduce::Execute(rs::jsapi::Runtime& rt, const cha
         // TODO: handle exception cases here
         func.CallFunction(args);
     }
+    
+    SortResultArray(results);
+    
+    // TODO: apply the keys and other such bits here
     
     return results;
 }
@@ -262,4 +270,10 @@ script_array_ptr MapReduce::GetValueScriptArray(const rs::jsapi::Value& arr) {
         auto source = ScriptArrayJsapiSource::Create(arr);
         return rs::scriptobject::ScriptArrayFactory::CreateArray(source);
     }
+}
+
+void MapReduce::SortResultArray(map_reduce_result_array_ptr results) {
+    std::sort(results->begin(), results->end(), [](const map_reduce_result_ptr& a, const map_reduce_result_ptr& b) {
+        return MapReduceResult::Compare(a, b);
+    });
 }

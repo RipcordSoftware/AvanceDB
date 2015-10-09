@@ -46,6 +46,8 @@ private:
     static void CreateValueObject(script_object_ptr obj, rs::jsapi::Value& value);
     static void CreateValueArray(script_array_ptr arr, rs::jsapi::Value& value);
     
+    static void SortResultArray(map_reduce_result_array_ptr results);
+    
     MapReduceThreadPool::map_reduce_thread_pool_ptr mapReduceThreadPool_;
 };
 

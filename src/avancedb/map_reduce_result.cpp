@@ -18,7 +18,10 @@
 
 #include "map_reduce_result.h"
 
+#include <cstring>
+
 #include "document.h"
+#include "map_reduce_result_comparers.h"
 
 const unsigned MapReduceResult::KeyIndex = 0;
 const unsigned MapReduceResult::ValueIndex = 1;
@@ -97,4 +100,23 @@ const script_object_ptr MapReduceResult::getValueObject() const {
 
 const script_array_ptr MapReduceResult::getValueArray() const {
     return result_->getArray(ValueIndex);
+}
+
+bool MapReduceResult::Compare(const map_reduce_result_ptr& a, const map_reduce_result_ptr& b) {
+    MapReduceResultComparers::MapReduceResultKeyAdapter tempA{a}, tempB{b};
+    
+    auto compare = MapReduceResultComparers::Compare(&tempA, &tempB);
+    if (!compare) {
+        compare = std::strcmp(a->getId(), b->getId()) < 0;
+    }
+    
+    return compare;
+}
+
+bool MapReduceResult::Compare(const script_object_ptr& a, const script_object_ptr& b) {
+    return MapReduceResultComparers::Compare(a, b);
+}
+
+bool MapReduceResult::Compare(const script_array_ptr& a, const script_array_ptr& b) {
+    return MapReduceResultComparers::Compare(a, b);
 }
