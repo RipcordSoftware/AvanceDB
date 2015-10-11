@@ -70,8 +70,8 @@ public:
                     case ScriptObjectType::Int32: compare = a->getInt32(i) < b->getInt32(i); break;
                     case ScriptObjectType::Double: compare = a->getDouble(i) < b->getDouble(i); break;
                     case ScriptObjectType::String: compare = std::strcmp(a->getString(i), b->getString(i)) < 0; break;
-                    case ScriptObjectType::Object: compare = Compare(a->getObject(i), b->getObject(i)) < 0; break;
-                    case ScriptObjectType::Array: compare = Compare(a->getArray(i), b->getArray(i)) < 0; break;
+                    case ScriptObjectType::Object: compare = Compare(a->getObject(i), b->getObject(i)); break;
+                    case ScriptObjectType::Array: compare = Compare(a->getArray(i), b->getArray(i)); break;
                 }
             }
         }

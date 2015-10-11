@@ -2996,6 +2996,101 @@ describe('avancedb -- temp views --', function() {
                 done();
             });
     });
+
+    it('execute a simple temp view - ([(3, "3"), (2, "2"), (1, "1")])', function(done) {
+        db.temporaryView(
+            { map: function(doc) { emit(3, '3'); emit(2, '2'); emit(1, '1'); } },
+            function(err, doc) {
+                assert.equal(null, err);
+                assert.notEqual(null, doc);
+                assert.equal(3, doc.length);
+                assert.equal(testId, doc[0].id);
+                assert.equal(1, doc[0].key);
+                assert.equal('1', doc[0].value);
+                assert.equal(2, doc[1].key);
+                assert.equal('2', doc[1].value);
+                assert.equal(3, doc[2].key);
+                assert.equal('3', doc[2].value);
+                done();
+            });
+    });
+
+    it('execute a simple temp view - ([("xyz", null), ("pqr", null), ("abc", null)])', function(done) {
+        db.temporaryView(
+            { map: function(doc) { emit('xyz', null); emit('pqr', null); emit('abc', null); } },
+            function(err, doc) {
+                assert.equal(null, err);
+                assert.notEqual(null, doc);
+                assert.equal(3, doc.length);
+                assert.equal(testId, doc[0].id);
+                assert.equal('abc', doc[0].key);
+                assert.equal(null, doc[0].value);
+                assert.equal(testId, doc[1].id);
+                assert.equal('pqr', doc[1].key);
+                assert.equal(null, doc[1].value);
+                assert.equal(testId, doc[2].id);
+                assert.equal('xyz', doc[2].key);
+                assert.equal(null, doc[2].value);
+                done();
+            });
+    });
+
+    it('execute a simple temp view - ([(true, null), (false, null)])', function(done) {
+        db.temporaryView(
+            { map: function(doc) { emit(true, null); emit(false, null); } },
+            function(err, doc) {
+                assert.equal(null, err);
+                assert.notEqual(null, doc);
+                assert.equal(2, doc.length);
+                assert.equal(testId, doc[0].id);
+                assert.equal(false, doc[0].key);
+                assert.equal(null, doc[0].value);
+                assert.equal(testId, doc[1].id);
+                assert.equal(true, doc[1].key);
+                assert.equal(null, doc[1].value);
+                done();
+            });
+    });
+
+    it('execute a simple temp view - ([([3], null), ([7], null), ([1], null)])', function(done) {
+        db.temporaryView(
+            { map: function(doc) { emit([3], null); emit([7], null); emit([1], null); } },
+            function(err, doc) {
+                assert.equal(null, err);
+                assert.notEqual(null, doc);
+                assert.equal(3, doc.length);
+                assert.equal(testId, doc[0].id);
+                assert.deepEqual([1], doc[0].key);
+                assert.equal(null, doc[0].value);
+                assert.equal(testId, doc[1].id);
+                assert.deepEqual([3], doc[1].key);
+                assert.equal(null, doc[1].value);
+                assert.equal(testId, doc[2].id);
+                assert.deepEqual([7], doc[2].key);
+                assert.equal(null, doc[2].value);
+                done();
+            });
+    });
+
+    it('execute a simple temp view - ([({num:3}, null), ({num:7}, null), ({num:1}, null)])', function(done) {
+        db.temporaryView(
+            { map: function(doc) { emit({num:3}, null); emit({num:7}, null); emit({num:1}, null); } },
+            function(err, doc) {
+                assert.equal(null, err);
+                assert.notEqual(null, doc);
+                assert.equal(3, doc.length);
+                assert.equal(testId, doc[0].id);
+                assert.deepEqual(1, doc[0].key.num);
+                assert.equal(null, doc[0].value);
+                assert.equal(testId, doc[1].id);
+                assert.deepEqual(3, doc[1].key.num);
+                assert.equal(null, doc[1].value);
+                assert.equal(testId, doc[2].id);
+                assert.deepEqual(7, doc[2].key.num);
+                assert.equal(null, doc[2].value);
+                done();
+            });
+    });
     
     it('execute a simple temp view - (xyz, pqr)', function(done) {
         db.temporaryView(
