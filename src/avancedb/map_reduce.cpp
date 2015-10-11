@@ -59,7 +59,7 @@ map_reduce_result_array_ptr MapReduce::Execute(const char* map, const char* redu
         mapReduceThreadPool_->Post([&]() {
             BOOST_SCOPE_EXIT(&threads) { --threads; } BOOST_SCOPE_EXIT_END
             auto& rt = mapReduceThreadPool_->GetThreadRuntime();
-                        
+
             auto result = Execute(rt, map, nullptr, docs);
             std::unique_lock<std::mutex> l(m);
             results->insert(results->end(), result->cbegin(), result->cend());
@@ -192,13 +192,13 @@ void MapReduce::GetFieldValue(script_array_ptr scriptArr, int index, rs::jsapi::
             value = scriptArr->getDouble(index);
             return;
         case rs::scriptobject::ScriptObjectType::Object: {
-            auto childObj = scriptArr->getObject(index);           
+            auto childObj = scriptArr->getObject(index);
             MapReduce::CreateValueObject(childObj, value);
             return;
         }
         case rs::scriptobject::ScriptObjectType::Array: {
             auto childArr = scriptArr->getArray(index);
-            MapReduce::CreateValueArray(childArr, value);            
+            MapReduce::CreateValueArray(childArr, value);
             return;
         }
         case rs::scriptobject::ScriptObjectType::Null:
@@ -214,7 +214,7 @@ void MapReduce::CreateValueObject(script_object_ptr obj, rs::jsapi::Value& value
             
     auto cx = value.getContext();
     rs::jsapi::DynamicObject::Create(cx, 
-        [state](const char* name, rs::jsapi::Value& value) {                    
+        [state](const char* name, rs::jsapi::Value& value) {
             return MapReduce::GetFieldValue(state->scriptObj_, name, value);
         }, 
         nullptr, 
@@ -236,7 +236,7 @@ void MapReduce::CreateValueArray(script_array_ptr arr, rs::jsapi::Value& value) 
     
     auto cx = value.getContext();
     rs::jsapi::DynamicArray::Create(cx, 
-        [state](int index, rs::jsapi::Value& value) {                    
+        [state](int index, rs::jsapi::Value& value) {
             return MapReduce::GetFieldValue(state->scriptArray_, index, value);
         }, 
         nullptr, 
@@ -247,8 +247,8 @@ void MapReduce::CreateValueArray(script_array_ptr arr, rs::jsapi::Value& value) 
     rs::jsapi::DynamicArray::SetPrivate(value, 0, state);
 }
 
-script_object_ptr MapReduce::GetValueScriptObject(const rs::jsapi::Value& obj) {   
-    if (rs::jsapi::DynamicObject::IsDynamicObject(obj)) {        
+script_object_ptr MapReduce::GetValueScriptObject(const rs::jsapi::Value& obj) {
+    if (rs::jsapi::DynamicObject::IsDynamicObject(obj)) {
         uint64_t value = 0;
         void* ptr = nullptr;
         rs::jsapi::DynamicObject::GetPrivate(obj, value, ptr);
@@ -261,7 +261,7 @@ script_object_ptr MapReduce::GetValueScriptObject(const rs::jsapi::Value& obj) {
 }
 
 script_array_ptr MapReduce::GetValueScriptArray(const rs::jsapi::Value& arr) {
-    if (rs::jsapi::DynamicArray::IsDynamicArray(arr)) {        
+    if (rs::jsapi::DynamicArray::IsDynamicArray(arr)) {
         uint64_t value = 0;
         void* ptr = nullptr;
         rs::jsapi::DynamicArray::GetPrivate(arr, value, ptr);

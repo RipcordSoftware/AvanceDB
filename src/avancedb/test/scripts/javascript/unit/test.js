@@ -27,11 +27,12 @@ var longStringData =
 var significantCharData = 'abc \r pqr \n xyz \t mno \f 123 \b 456 \\ 789 / -*+ " ::: \' cda';
 
 var testDocument = { 'lorem' : 'ipsum', pi: 3.14159, sunny: true, free_lunch: false, the_answer: 42, 
-    taxRate: null, fibonnaci: [0, 1, 1, 2, 3, 5, 8, 13 ], child: { 'hello': 'world' }, 
-    events: [ null, 1969, 'avance', true, {}, [] ], //minNUm: Number.MIN_VALUE , maxNum: Number.MAX_VALUE,
+    taxRate: null, fibonacci: [0, 1, 1, 2, 3, 5, 8, 13 ], child: { hello: 'world' }, 
+    events: [ { test: true } , [ 1812 ], 'avance', 1969, true, null ], //minNum: Number.MIN_VALUE , maxNum: Number.MAX_VALUE,
+    literature: { tragedy: 'Hamlet', history: 'Henry V', comedy: 'A Midsummer Night\'s Dream' },
     data: longStringData, formatting1: significantCharData, formatting2:  + significantCharData + longStringData + significantCharData };
     
-for (var i = 0; i < 8; ++i) {
+for (var i = 0; i < 4; ++i) {
     testDocument.data += testDocument.data;
 }
 
@@ -2779,7 +2780,7 @@ describe('avancedb -- temp views --', function() {
                 done();
             });
     });
-    
+
     it('execute a simple temp view - (doc, doc)', function(done) {
         db.temporaryView(
             { map: function(doc) { emit(doc, doc); } },
@@ -2794,6 +2795,111 @@ describe('avancedb -- temp views --', function() {
                 delete doc[0].value._rev;
                 assert.deepEqual(testDocument, doc[0].key);
                 assert.deepEqual(testDocument, doc[0].value);
+                done();
+            });
+    });
+    
+    it('execute a simple temp view - (fibonacci, the_answer)', function(done) {
+        db.temporaryView(
+            { map: function(doc) { emit(doc.fibonacci, doc.the_answer); } },
+            function(err, doc) {
+                assert.equal(null, err);
+                assert.notEqual(null, doc);
+                assert.equal(1, doc.length);
+                assert.deepEqual(testDocument.fibonacci, doc[0].key);
+                assert.equal(testId, doc[0].id);
+                assert.equal(testDocument.the_answer, doc[0].value);
+                done();
+            });
+    });
+    
+    it('execute a simple temp view - (fibonacci[0], sunny)', function(done) {
+        db.temporaryView(
+            { map: function(doc) { emit(doc.fibonacci[0], doc.sunny); } },
+            function(err, doc) {
+                assert.equal(null, err);
+                assert.notEqual(null, doc);
+                assert.equal(1, doc.length);
+                assert.equal(testDocument.fibonacci[0], doc[0].key);
+                assert.equal(testId, doc[0].id);
+                assert.equal(testDocument.sunny, doc[0].value);
+                done();
+            });
+    });
+    
+    it('execute a simple temp view - (child, nil)', function(done) {
+        db.temporaryView(
+            { map: function(doc) { emit(doc.child, doc.nil); } },
+            function(err, doc) {
+                assert.equal(null, err);
+                assert.notEqual(null, doc);
+                assert.equal(1, doc.length);
+                assert.deepEqual(testDocument.child, doc[0].key);
+                assert.equal(testId, doc[0].id);
+                assert.equal(testDocument.nil, doc[0].value);
+                done();
+            });
+    });
+
+    it('execute a simple temp view - (child.hello, free_lunch)', function(done) {
+        db.temporaryView(
+            { map: function(doc) { emit(doc.child.hello, doc.free_lunch); } },
+            function(err, doc) {
+                assert.equal(null, err);
+                assert.notEqual(null, doc);
+                assert.equal(1, doc.length);
+                assert.equal(testDocument.child.hello, doc[0].key);
+                assert.equal(testId, doc[0].id);
+                assert.equal(testDocument.free_lunch, doc[0].value);
+                done();
+            });
+    });
+    
+    it('execute a simple temp view - (events[N], events[N])', function(done) {
+        db.temporaryView(
+            { map: function(doc) { for (var i = 0; i < doc.events.length; ++i) emit(doc.events[i], doc.events[i]); } },
+            function(err, doc) {
+                assert.equal(null, err);
+                assert.notEqual(null, doc);
+                assert.equal(testDocument.events.length, doc.length);
+                for (var i = 0, length = testDocument.events.length, r = length - 1; i < length; ++i, --r) {
+                    assert.deepEqual(testDocument.events[r], doc[i].key);
+                    assert.equal(testId, doc[i].id);
+                    assert.deepEqual(testDocument.events[r], doc[i].value);
+                }
+                done();
+            });
+    });
+
+    it('execute a simple temp view - (literature[N], literature[N])', function(done) {
+        db.temporaryView(
+            { map: function(doc) { for (var n in doc.literature) emit(doc.literature[n], doc.literature[n]); } },
+            function(err, doc) {
+                assert.equal(null, err);
+                assert.notEqual(null, doc);
+                assert.equal(Object.keys(testDocument.literature).length, doc.length);
+                for (var i = 0, length = testDocument.literature.length, r = length - 1; i < length; ++i, --r) {
+                    assert.deepEqual(testDocument.literature[r], doc[i].key);
+                    assert.equal(testId, doc[i].id);
+                    assert.deepEqual(testDocument.literature[r], doc[i].value);
+                }
+                done();
+            });
+    });
+
+    it('execute a simple temp view - (doc.keys, doc.keys)', function(done) {
+        db.temporaryView(
+            { map: function(doc) { for (var n in doc) if (n[0] != '_') emit(n, n); } },
+            function(err, doc) {
+                assert.equal(null, err);
+                assert.notEqual(null, doc);
+                var keys = Object.keys(testDocument);
+                assert.equal(keys.length, doc.length);
+                for (var i = 0, length = keys.length; i < length; ++i) {
+                    var index = _.indexOf(keys, doc[i].key);
+                    assert(index >= 0);
+                    assert.equal(doc[i].key, doc[i].value);
+                }
                 done();
             });
     });
@@ -2872,6 +2978,21 @@ describe('avancedb -- temp views --', function() {
                 assert.equal(4, doc[2].key.length);
                 assert.deepEqual([1,2,3,4], doc[2].key);
                 assert.deepEqual({'hello':'world'}, doc[2].value);
+                done();
+            });
+    });
+    
+    it('execute a simple temp view - ({child:[1,2,3,4,{...}]}, {child:{hello:"world",...}})', function(done) {
+        db.temporaryView(
+            { map: function(doc) { emit({arr:[1,2,3,4,{ten:10,lorem:'ipsum',sunny:true}]}, {child:{hello:'world',pi:3.14159,nil:null}}); } },
+            function(err, doc) {
+                assert.equal(null, err);
+                assert.notEqual(null, doc);
+                assert.equal(1, doc.length);
+                assert.equal(testId, doc[0].id);
+                assert.equal(5, doc[0].key.arr.length);
+                assert.deepEqual({arr:[1,2,3,4,{ten:10,lorem:'ipsum',sunny:true}]}, doc[0].key);
+                assert.deepEqual({child:{hello:'world',pi:3.14159,nil:null}}, doc[0].value);
                 done();
             });
     });
