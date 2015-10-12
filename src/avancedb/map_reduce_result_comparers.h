@@ -27,7 +27,7 @@
 #include "map_reduce_result.h"
 
 class MapReduceResultComparers final {
-public:    
+public:
     class MapReduceResultKeyAdapter final {
     public:
         MapReduceResultKeyAdapter(const map_reduce_result_ptr&);
@@ -50,40 +50,82 @@ public:
     
     template <typename T, typename std::enable_if<std::is_same<T, script_object_ptr>::value || std::is_same<T, script_array_ptr>::value || std::is_same<T, MapReduceResultKeyAdapter*>::value>::type* = nullptr>
     static bool Compare(const T& a, const T& b) {
+        return CompareImpl(a, b) < 0;
+    }
+    
+    static int GetScriptObjectTypePrecedence(const rs::scriptobject::ScriptObjectType& type);
+    
+private:
+    template <typename T, typename std::enable_if<std::is_same<T, script_array_ptr>::value || std::is_same<T, MapReduceResultKeyAdapter*>::value>::type* = nullptr>
+    static int CompareImpl(const T& a, const T& b) {        
         using ScriptObjectType = rs::scriptobject::ScriptObjectType;
-        auto compare = false;
-
+        
+        int compare = 0;
         auto countA = a->getCount();
         auto countB = a->getCount();
         auto count = std::min(countA, countB);
 
-        for (decltype(count) i = 0; i < count; ++i) {
-            auto typeA = a->getType(i);
-            auto typeB = b->getType(i);
-
-            if (typeA != typeB) {
-                return GetScriptObjectTypePrecedence(typeA) < GetScriptObjectTypePrecedence(typeB);
-            } else {
-                switch (typeA) {
-                    case ScriptObjectType::Null: compare = false; break;
-                    case ScriptObjectType::Boolean: compare = a->getBoolean(i) < b->getBoolean(i); break;
-                    case ScriptObjectType::Int32: compare = a->getInt32(i) < b->getInt32(i); break;
-                    case ScriptObjectType::Double: compare = a->getDouble(i) < b->getDouble(i); break;
-                    case ScriptObjectType::String: compare = std::strcmp(a->getString(i), b->getString(i)) < 0; break;
-                    case ScriptObjectType::Object: compare = Compare(a->getObject(i), b->getObject(i)); break;
-                    case ScriptObjectType::Array: compare = Compare(a->getArray(i), b->getArray(i)); break;
-                }
-            }
+        for (decltype(count) i = 0; compare == 0 && i < count; ++i) {
+            compare = CompareValueImpl(i, a, b);
         }
 
-        if (!compare) {
+        if (compare == 0) {
             compare = countA - countB;
         }
 
         return compare;
     }
     
-    static int GetScriptObjectTypePrecedence(const rs::scriptobject::ScriptObjectType& type);
+    template <typename T, typename std::enable_if<std::is_same<T, script_object_ptr>::value>::type* = nullptr>
+    static int CompareImpl(const T& a, const T& b) {        
+        using ScriptObjectType = rs::scriptobject::ScriptObjectType;
+        
+        int compare = 0;
+        auto countA = a->getCount();
+        auto countB = a->getCount();
+        auto count = std::min(countA, countB);
+
+        for (decltype(count) i = 0; compare == 0 && i < count; ++i) {
+            auto nameA = a->getName(i);
+            auto nameB = b->getName(i);
+            compare = std::strcmp(nameA, nameB);
+            
+            if (compare == 0) {
+                compare = CompareValueImpl(i, a, b);
+            }
+        }
+
+        if (compare == 0) {
+            compare = countA - countB;
+        }
+
+        return compare;
+    }
+    
+    template <typename T>
+    static int CompareValueImpl(unsigned index, const T& a, const T& b) {
+        using ScriptObjectType = rs::scriptobject::ScriptObjectType;
+
+        int compare = 0;
+        auto typeA = a->getType(index);
+        auto typeB = b->getType(index);
+
+        if (typeA != typeB) {
+            compare = GetScriptObjectTypePrecedence(typeA) - GetScriptObjectTypePrecedence(typeB);
+        } else {
+            switch (typeA) {
+                case ScriptObjectType::Null: compare = -1; break;
+                case ScriptObjectType::Boolean: compare = a->getBoolean(index) < b->getBoolean(index) ? -1 : 0; break;
+                case ScriptObjectType::Int32: compare = a->getInt32(index) - b->getInt32(index); break;
+                case ScriptObjectType::Double: compare = a->getDouble(index) < b->getDouble(index) ? -1 : 0; break;
+                case ScriptObjectType::String: compare = std::strcmp(a->getString(index), b->getString(index)); break;
+                case ScriptObjectType::Object: compare = CompareImpl(a->getObject(index), b->getObject(index)); break;
+                case ScriptObjectType::Array: compare = CompareImpl(a->getArray(index), b->getArray(index)); break;
+            }
+        }
+
+        return compare;
+    }
 };
 
 #endif	/* MAP_REDUCE_RESULT_COMPARERS_H */

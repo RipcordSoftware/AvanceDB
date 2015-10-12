@@ -3091,6 +3091,29 @@ describe('avancedb -- temp views --', function() {
                 done();
             });
     });
+
+    it('execute a simple temp view - ([({xyz:null}), ({abc:{}}), ({pqr:[]}), ({abc:123})}])', function(done) {
+        db.temporaryView(
+            { map: function(doc) { emit({xyz:null}, null); emit({abc:{}}, null); emit({pqr:[]}, null); emit({abc:123}, null); } },
+            function(err, doc) {
+                assert.equal(null, err);
+                assert.notEqual(null, doc);
+                assert.equal(4, doc.length);
+                assert.equal(testId, doc[0].id);
+                assert.deepEqual(123, doc[0].key.abc);
+                assert.equal(null, doc[0].value);
+                assert.equal(testId, doc[1].id);
+                assert.deepEqual({}, doc[1].key.abc);
+                assert.equal(null, doc[1].value);
+                assert.equal(testId, doc[2].id);
+                assert.deepEqual([], doc[2].key.pqr);
+                assert.equal(null, doc[2].value);
+                assert.equal(testId, doc[3].id);
+                assert.equal(null, doc[3].key.xyz);
+                assert.equal(null, doc[3].value);
+                done();
+            });
+    });
     
     it('execute a simple temp view - (xyz, pqr)', function(done) {
         db.temporaryView(
