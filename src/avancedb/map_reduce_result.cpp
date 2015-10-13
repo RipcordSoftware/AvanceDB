@@ -103,14 +103,7 @@ const script_array_ptr MapReduceResult::getValueArray() const {
 }
 
 bool MapReduceResult::Compare(const map_reduce_result_ptr& a, const map_reduce_result_ptr& b) {
-    MapReduceResultComparers::MapReduceResultKeyAdapter tempA{a}, tempB{b};
-    
-    auto compare = MapReduceResultComparers::Compare(&tempA, &tempB);
-    if (!compare) {
-        compare = std::strcmp(a->getId(), b->getId()) < 0;
-    }
-    
-    return compare;
+    return MapReduceResultComparers::Compare(a, b);
 }
 
 bool MapReduceResult::Compare(const script_object_ptr& a, const script_object_ptr& b) {

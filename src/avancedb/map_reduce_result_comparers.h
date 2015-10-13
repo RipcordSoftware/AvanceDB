@@ -28,6 +28,28 @@
 
 class MapReduceResultComparers final {
 public:
+    MapReduceResultComparers() = delete;
+    
+    template <typename T, typename std::enable_if<std::is_same<T, map_reduce_result_ptr>::value>::type* = nullptr>
+    static bool Compare(const T& a, const T& b) {
+        MapReduceResultKeyAdapter tempA{a}, tempB{b};
+        
+        auto diff = CompareImpl(&tempA, &tempB);
+        if (diff == 0) {
+            diff = std::strcmp(a->getId(), b->getId());
+        }
+        
+        return diff < 0;
+    }
+    
+    template <typename T, typename std::enable_if<std::is_same<T, script_object_ptr>::value || std::is_same<T, script_array_ptr>::value>::type* = nullptr>
+    static bool Compare(const T& a, const T& b) {
+        return CompareImpl(a, b) < 0;
+    }
+    
+    static int GetScriptObjectTypePrecedence(const rs::scriptobject::ScriptObjectType& type);
+    
+private:
     class MapReduceResultKeyAdapter final {
     public:
         MapReduceResultKeyAdapter(const map_reduce_result_ptr&);
@@ -46,16 +68,6 @@ public:
         const map_reduce_result_ptr& result_;
     };
     
-    MapReduceResultComparers() = delete;
-    
-    template <typename T, typename std::enable_if<std::is_same<T, script_object_ptr>::value || std::is_same<T, script_array_ptr>::value || std::is_same<T, MapReduceResultKeyAdapter*>::value>::type* = nullptr>
-    static bool Compare(const T& a, const T& b) {
-        return CompareImpl(a, b) < 0;
-    }
-    
-    static int GetScriptObjectTypePrecedence(const rs::scriptobject::ScriptObjectType& type);
-    
-private:
     template <typename T, typename std::enable_if<std::is_same<T, script_array_ptr>::value || std::is_same<T, MapReduceResultKeyAdapter*>::value>::type* = nullptr>
     static int CompareImpl(const T& a, const T& b) {        
         using ScriptObjectType = rs::scriptobject::ScriptObjectType;
@@ -114,7 +126,7 @@ private:
             compare = GetScriptObjectTypePrecedence(typeA) - GetScriptObjectTypePrecedence(typeB);
         } else {
             switch (typeA) {
-                case ScriptObjectType::Null: compare = -1; break;
+                case ScriptObjectType::Null: compare = 0; break;
                 case ScriptObjectType::Boolean: compare = a->getBoolean(index) < b->getBoolean(index) ? -1 : 0; break;
                 case ScriptObjectType::Int32: compare = a->getInt32(index) - b->getInt32(index); break;
                 case ScriptObjectType::Double: compare = a->getDouble(index) < b->getDouble(index) ? -1 : 0; break;

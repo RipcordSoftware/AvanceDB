@@ -95,7 +95,7 @@ private:
     Documents(database_ptr db);
     
     document_array_ptr GetDocuments(sequence_type& updateSequence);
-    document_collections_ptr GetDocumentCollections(sequence_type& updateSequence);
+    document_collections_ptr GetDocumentCollections(sequence_type& updateSequence, bool sort = true);
     collection::size_type FindDocument(const document_array& docs, const std::string& id, bool descending);
     unsigned GetCollectionCount() const;
     unsigned GetDocumentCollectionIndex(const char* id) const;

@@ -189,7 +189,7 @@ document_array_ptr Documents::GetDocuments(sequence_type& updateSequence) {
     }
 }
 
-document_collections_ptr Documents::GetDocumentCollections(sequence_type& updateSequence) {
+document_collections_ptr Documents::GetDocumentCollections(sequence_type& updateSequence, bool sort) {
     auto colls = boost::make_shared<document_collections_ptr::element_type>();
     colls->resize(collections_);
     
@@ -199,8 +199,7 @@ document_collections_ptr Documents::GetDocumentCollections(sequence_type& update
 
     for (unsigned i = 0; i < collections_; ++i) {
         auto& coll = (*colls)[i];
-        coll.reserve(docs_[i].size());
-        coll.insert(coll.end(), docs_[i].cbegin(), docs_[i].cend());
+        docs_[i].copy(coll, sort);
         locks[i].unlock();
     }
     
@@ -433,9 +432,8 @@ document_ptr Documents::DeleteLocalDocument(const char* id, const char* rev) {
 }
 
 map_reduce_result_array_ptr Documents::PostTempView(const GetViewOptions& options, rs::scriptobject::ScriptObjectPtr obj, Documents::collection::size_type& totalDocs) {        
-    // TODO: views should handle document collection shards, not the entire set of collections
     sequence_type updateSequence = 0;
-    auto colls = GetDocumentCollections(updateSequence);
+    auto colls = GetDocumentCollections(updateSequence, false);
     
     // TODO: add better error checking on the incoming doc
     auto map = obj->getString("map");
