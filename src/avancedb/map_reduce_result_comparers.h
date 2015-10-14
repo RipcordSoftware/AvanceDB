@@ -127,9 +127,9 @@ private:
         } else {
             switch (typeA) {
                 case ScriptObjectType::Null: compare = 0; break;
-                case ScriptObjectType::Boolean: compare = a->getBoolean(index) < b->getBoolean(index) ? -1 : 0; break;
+                case ScriptObjectType::Boolean: compare = CompareBoolean(a->getBoolean(index), b->getBoolean(index)); break;
                 case ScriptObjectType::Int32: compare = a->getInt32(index) - b->getInt32(index); break;
-                case ScriptObjectType::Double: compare = a->getDouble(index) < b->getDouble(index) ? -1 : 0; break;
+                case ScriptObjectType::Double: compare = CompareDouble(a->getDouble(index), b->getDouble(index)); break;
                 case ScriptObjectType::String: compare = std::strcmp(a->getString(index), b->getString(index)); break;
                 case ScriptObjectType::Object: compare = CompareImpl(a->getObject(index), b->getObject(index)); break;
                 case ScriptObjectType::Array: compare = CompareImpl(a->getArray(index), b->getArray(index)); break;
@@ -138,6 +138,9 @@ private:
 
         return compare;
     }
+    
+    static int CompareDouble(double a, double b);
+    static int CompareBoolean(bool a, bool b);
 };
 
 #endif	/* MAP_REDUCE_RESULT_COMPARERS_H */

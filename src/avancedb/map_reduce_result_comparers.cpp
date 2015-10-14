@@ -68,3 +68,11 @@ int MapReduceResultComparers::GetScriptObjectTypePrecedence(const rs::scriptobje
         default: return 0;
     }
 }
+
+int MapReduceResultComparers::CompareDouble(double a, double b) {
+    return a < b ? -1 : (a > b ? 1 : 0);
+}
+
+int MapReduceResultComparers::CompareBoolean(bool a, bool b) {
+    return a == b ? 0 : (a == false ? -1 : 1);
+}
