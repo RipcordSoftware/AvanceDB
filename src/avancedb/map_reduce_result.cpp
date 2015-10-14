@@ -23,9 +23,6 @@
 #include "document.h"
 #include "map_reduce_result_comparers.h"
 
-const unsigned MapReduceResult::KeyIndex = 0;
-const unsigned MapReduceResult::ValueIndex = 1;
-
 MapReduceResult::MapReduceResult(script_array_ptr result, document_ptr doc) :
         result_(result), doc_(doc) {
 }

@@ -29,8 +29,8 @@
 class MapReduceResult final : public boost::enable_shared_from_this<MapReduceResult>, private boost::noncopyable {
 public:
     
-    const static unsigned KeyIndex /* = 0*/;
-    const static unsigned ValueIndex /* = 1*/;
+    static constexpr unsigned KeyIndex{0};
+    static constexpr unsigned ValueIndex{1};
     
     static map_reduce_result_ptr Create(script_array_ptr result, document_ptr doc);
     
