@@ -20,6 +20,7 @@
 #define MAP_REDUCE_H
 
 #include "types.h"
+#include "map_reduce_results.h"
 #include "map_reduce_thread_pool.h"
 
 #include <memory>
@@ -31,7 +32,7 @@ public:
     
     MapReduce();
     
-    map_reduce_result_array_ptr Execute(const char* map, const char* reduce, document_collections_ptr colls);
+    map_reduce_results_ptr Execute(const char* map, const char* reduce, document_collections_ptr colls);
     
     static script_object_ptr GetValueScriptObject(const rs::jsapi::Value& value);
     static script_array_ptr GetValueScriptArray(const rs::jsapi::Value& value);

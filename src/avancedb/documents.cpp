@@ -431,7 +431,7 @@ document_ptr Documents::DeleteLocalDocument(const char* id, const char* rev) {
     return doc;
 }
 
-map_reduce_result_array_ptr Documents::PostTempView(const GetViewOptions& options, rs::scriptobject::ScriptObjectPtr obj, Documents::collection::size_type& totalDocs) {        
+map_reduce_results_ptr Documents::PostTempView(const GetViewOptions& options, rs::scriptobject::ScriptObjectPtr obj, Documents::collection::size_type& totalDocs) {        
     sequence_type updateSequence = 0;
     auto colls = GetDocumentCollections(updateSequence, false);
     

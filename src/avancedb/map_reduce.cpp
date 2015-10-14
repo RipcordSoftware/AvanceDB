@@ -42,7 +42,7 @@ MapReduce::MapReduce() : mapReduceThreadPool_(MapReduceThreadPool::Get()) {
 }
 
 // TODO: this is still very basic
-map_reduce_result_array_ptr MapReduce::Execute(const char* map, const char* reduce, document_collections_ptr colls) {
+map_reduce_results_ptr MapReduce::Execute(const char* map, const char* reduce, document_collections_ptr colls) {
     auto results = boost::make_shared<map_reduce_result_array_ptr::element_type>();
     
     auto totalDocs = 0;
@@ -73,7 +73,7 @@ map_reduce_result_array_ptr MapReduce::Execute(const char* map, const char* redu
     // TODO: this should be an inplace merge
     SortResultArray(results);
     
-    return results;
+    return boost::make_shared<map_reduce_results_ptr::element_type>(results);
 }
 
 // TODO: this is still very basic

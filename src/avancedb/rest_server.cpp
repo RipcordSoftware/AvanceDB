@@ -776,12 +776,16 @@ bool RestServer::PostTempView(rs::httpserver::request_ptr request, const rs::htt
         Documents::collection::size_type totalDocs = 0;
         auto results = db->PostTempView(options, obj, totalDocs);
         
+        results->Limit(options.Limit());
+        results->Skip(options.Skip());
+        
         auto& stream = response->setContentType("application/json").getResponseStream();
         ScriptObjectResponseStream<> objStream{stream};
         objStream << R"({"offset":0,"total_rows":)" << totalDocs << R"(,"rows":[)";
         
         auto prefixComma = false;
-        for (auto result : *results) {
+        for (auto iter = results->cbegin(), end = results->cend(); iter != end; ++iter) {
+            auto result = *iter;
             auto resultObj = result->getResultArray();
             
             objStream << (prefixComma ? ',' : ' ');

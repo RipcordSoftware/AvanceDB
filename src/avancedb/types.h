@@ -42,7 +42,9 @@ class MapReduceResult;
 using map_reduce_result_ptr = boost::shared_ptr<MapReduceResult>;
 using map_reduce_result_array = std::vector<map_reduce_result_ptr>;
 using map_reduce_result_array_ptr = boost::shared_ptr<map_reduce_result_array>;
-using map_reduce_result_collections_ptr = boost::shared_ptr<std::vector<map_reduce_result_array>>;
+
+class MapReduceResults;
+using map_reduce_results_ptr = boost::shared_ptr<MapReduceResults>;
 
 using script_object_ptr = rs::scriptobject::ScriptObjectPtr;
 using script_array_ptr = rs::scriptobject::ScriptArrayPtr;
