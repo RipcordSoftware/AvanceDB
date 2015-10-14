@@ -41,7 +41,7 @@ public:
         
         return diff < 0;
     }
-    
+
     template <typename T, typename std::enable_if<std::is_same<T, script_object_ptr>::value || std::is_same<T, script_array_ptr>::value>::type* = nullptr>
     static bool Compare(const T& a, const T& b) {
         return CompareImpl(a, b) < 0;
@@ -74,7 +74,7 @@ private:
         
         int compare = 0;
         auto countA = a->getCount();
-        auto countB = a->getCount();
+        auto countB = b->getCount();
         auto count = std::min(countA, countB);
 
         for (decltype(count) i = 0; compare == 0 && i < count; ++i) {
@@ -94,7 +94,7 @@ private:
         
         int compare = 0;
         auto countA = a->getCount();
-        auto countB = a->getCount();
+        auto countB = b->getCount();
         auto count = std::min(countA, countB);
 
         for (decltype(count) i = 0; compare == 0 && i < count; ++i) {
