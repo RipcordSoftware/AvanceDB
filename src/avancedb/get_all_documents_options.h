@@ -32,6 +32,8 @@ public:
     GetAllDocumentsOptions(const rs::httpserver::QueryString& qs);
     
     bool HasKey() const;
+    bool HasStartKey() const;
+    bool HasEndKey() const;
     bool HasKeys() const;
     
     const std::string& Key() const;

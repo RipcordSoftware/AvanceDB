@@ -21,18 +21,24 @@
 
 #include "types.h"
 
+#include <limits>
+
 class MapReduceResults {
 public:
     
     MapReduceResults(map_reduce_result_array_ptr);
+    
+    void StartKey(map_reduce_query_key_ptr key);
+    void EndKey(map_reduce_query_key_ptr key, bool inclusiveEnd);
     
     void Limit(size_t);
     size_t Limit() const;
     
     void Skip(size_t);
     size_t Skip() const;
-    
-    size_t size() const;   
+
+    size_t Offset() const;
+    size_t TotalRows() const;
     
     map_reduce_result_array_ptr::element_type::const_iterator cbegin() const;
     map_reduce_result_array_ptr::element_type::const_iterator cend() const;
@@ -40,9 +46,10 @@ public:
 private:
     
     const map_reduce_result_array_ptr results_;
-    size_t limit_{0};
-    size_t skip_{0};
-
+    size_t startIndex_;
+    size_t endIndex_;
+    size_t limit_;
+    size_t skip_;
 };
 
 #endif	/* MAP_REDUCE_RESULTS_H */

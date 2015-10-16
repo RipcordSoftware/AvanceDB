@@ -19,27 +19,55 @@
 #ifndef MAP_REDUCE_H
 #define MAP_REDUCE_H
 
+#include <string>
+
 #include "types.h"
 #include "map_reduce_results.h"
 #include "map_reduce_thread_pool.h"
 
-#include <memory>
-
 #include "libjsapi.h"
+
+class GetViewOptions;
 
 class MapReduce final {
 public:
     
+    class MapReduceTask final {
+    public:
+        static inline MapReduceTask Create(script_object_ptr optionsObj) {
+            auto lang = optionsObj->getString("language", false);
+            auto map = optionsObj->getString("map", false);
+            auto reduce = optionsObj->getString("reduce", false);
+            
+            MapReduceTask options{lang, map, reduce};
+            return options;            
+        }
+        
+        const char* Map() const { return map_.c_str(); }
+        const char* Reduce() const { return reduce_.c_str(); }
+        const char* Language() const { return language_.c_str(); }
+        
+    private:
+        MapReduceTask(const char* language, const char* map, const char* reduce) :
+                language_(language ? language : "javascript"), 
+                map_(map ? map : ""), 
+                reduce_(reduce ? reduce : "") {}
+        
+        const std::string map_;
+        const std::string reduce_;
+        const std::string language_;
+    };
+    
     MapReduce();
     
-    map_reduce_results_ptr Execute(const char* map, const char* reduce, document_collections_ptr colls);
+    map_reduce_results_ptr Execute(const GetViewOptions& options, const MapReduceTask& task, document_collections_ptr colls);
     
     static script_object_ptr GetValueScriptObject(const rs::jsapi::Value& value);
     static script_array_ptr GetValueScriptArray(const rs::jsapi::Value& value);
     
 private:
     
-    map_reduce_result_array_ptr Execute(rs::jsapi::Runtime& rt, const char* map, const char* reduce, const document_array& docs);
+    map_reduce_result_array_ptr Execute(rs::jsapi::Runtime& rt, const MapReduceTask& task, const document_array& docs);
     
     static void GetFieldValue(script_object_ptr scriptObj, const char* name, rs::jsapi::Value& value);
     static void GetFieldValue(script_array_ptr scriptObj, int index, rs::jsapi::Value& value);

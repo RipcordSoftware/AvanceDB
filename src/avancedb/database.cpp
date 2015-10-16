@@ -100,6 +100,6 @@ BulkDocumentsResults Database::PostBulkDocuments(script_array_ptr docs, bool new
     return docs_->PostBulkDocuments(docs, newEdits);
 }
 
-map_reduce_results_ptr Database::PostTempView(const GetViewOptions& options, rs::scriptobject::ScriptObjectPtr obj, Documents::collection::size_type& totalDocs) {
-    return docs_->PostTempView(options, obj, totalDocs);
+map_reduce_results_ptr Database::PostTempView(const GetViewOptions& options, rs::scriptobject::ScriptObjectPtr obj) {
+    return docs_->PostTempView(options, obj);
 }

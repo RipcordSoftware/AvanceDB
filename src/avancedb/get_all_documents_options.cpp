@@ -32,7 +32,15 @@ bool GetAllDocumentsOptions::HasKey() const {
 }
 
 bool GetAllDocumentsOptions::HasKeys() const {
-    return StartKey().size() > 0 || EndKey().size() > 0;
+    return HasStartKey() || HasEndKey();
+}
+
+bool GetAllDocumentsOptions::HasStartKey() const {
+    return StartKey().size() > 0;
+}
+
+bool GetAllDocumentsOptions::HasEndKey() const {
+    return EndKey().size() > 0;
 }
 
 const std::string& GetAllDocumentsOptions::Key() const {
@@ -58,7 +66,7 @@ const std::string& GetAllDocumentsOptions::StartKeyDocId() const {
 
 const std::string& GetAllDocumentsOptions::EndKey() const {
     if (endKey_.size() == 0) {
-        endKey_ = GetString("endkey", "end_key" );
+        endKey_ = GetString("endkey", "end_key");
     }
     return endKey_;
 }
@@ -161,10 +169,5 @@ std::string GetAllDocumentsOptions::GetString(const char* name, const char* altN
         name = qs_.IsKey(altName) ? altName : name;
     }
     
-    auto value = qs_.getValue(name);
-    if (value.size() > 1 && value.front() == '"' && value.back() == '"') {
-        value = std::string{value.cbegin() + 1, value.cend() - 1};
-    }
-    
-    return value;
+    return qs_.getValue(name);
 }

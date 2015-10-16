@@ -431,25 +431,29 @@ document_ptr Documents::DeleteLocalDocument(const char* id, const char* rev) {
     return doc;
 }
 
-map_reduce_results_ptr Documents::PostTempView(const GetViewOptions& options, rs::scriptobject::ScriptObjectPtr obj, Documents::collection::size_type& totalDocs) {        
+map_reduce_results_ptr Documents::PostTempView(const GetViewOptions& options, rs::scriptobject::ScriptObjectPtr obj) {        
     sequence_type updateSequence = 0;
     auto colls = GetDocumentCollections(updateSequence, false);
     
-    // TODO: add better error checking on the incoming doc
-    auto map = obj->getString("map");
+    auto task = MapReduce::MapReduceTask::Create(obj);
     
-    auto results = mapReduce_.Execute(map, nullptr, colls);
-    totalDocs = results->size();
-    
+    auto results = mapReduce_.Execute(options, task, colls);    
     return results;
 }
 
-Documents::collection::size_type Documents::FindDocument(const document_array& docs, const std::string& id, bool descending) {
+Documents::collection::size_type Documents::FindDocument(const document_array& docs, const std::string& key, bool descending) {
     const auto size = docs.size();
     
     if (size == 0) {
         return ~0;
     } else {
+        const char* keyId = key.c_str();
+        auto keyIdLength = key.size();
+        if (keyId[0] == '"' && keyId[keyIdLength - 1] == '"') {
+            keyId++;
+            keyIdLength -= 2;
+        }
+        
         collection::size_type min = 0;
         collection::size_type mid = 0;
         collection::size_type max = size - 1;
@@ -457,7 +461,12 @@ Documents::collection::size_type Documents::FindDocument(const document_array& d
         while (min <= max) {
             mid = ((max - min) / 2) + min;
 
-            auto diff = std::strcmp(id.c_str(), docs[mid]->getId());
+            auto docId = docs[mid]->getId();
+            auto diff = std::strncmp(keyId, docId, keyIdLength);
+            if (diff == 0 && docId[keyIdLength] != '\0') {
+                diff = -1;
+            }
+
             diff = descending ? -diff : diff;
             if (diff == 0) {
                 return mid;

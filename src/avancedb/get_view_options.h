@@ -20,6 +20,7 @@
 #define GET_VIEW_OPTIONS_H
 
 #include "get_all_documents_options.h"
+#include "map_reduce_query_key.h"
 
 class GetViewOptions final : public GetAllDocumentsOptions  {
 public:
@@ -28,6 +29,9 @@ public:
     bool Reduce() const;
     bool Group() const;    
     uint64_t GroupLevel() const;
+    
+    map_reduce_query_key_ptr StartKeyObj() const;
+    map_reduce_query_key_ptr EndKeyObj() const;
     
 private:
 

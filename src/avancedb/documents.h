@@ -65,7 +65,7 @@ public:
     
     BulkDocumentsResults PostBulkDocuments(script_array_ptr docs, bool newEdits);
     
-    map_reduce_results_ptr PostTempView(const GetViewOptions& options, rs::scriptobject::ScriptObjectPtr obj, Documents::collection::size_type& totalDocs);
+    map_reduce_results_ptr PostTempView(const GetViewOptions& options, rs::scriptobject::ScriptObjectPtr obj);
     
     collection::size_type getCount();
     std::uint64_t getDataSize();
@@ -96,7 +96,7 @@ private:
     
     document_array_ptr GetDocuments(sequence_type& updateSequence);
     document_collections_ptr GetDocumentCollections(sequence_type& updateSequence, bool sort = true);
-    collection::size_type FindDocument(const document_array& docs, const std::string& id, bool descending);
+    collection::size_type FindDocument(const document_array& docs, const std::string& key, bool descending);
     unsigned GetCollectionCount() const;
     unsigned GetDocumentCollectionIndex(const char* id) const;
     

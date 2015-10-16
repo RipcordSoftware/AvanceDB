@@ -55,9 +55,9 @@ public:
     const script_object_ptr getValueObject() const;
     const script_array_ptr getValueArray() const;
     
-    static bool Compare(const map_reduce_result_ptr& a, const map_reduce_result_ptr& b);
-    static bool Compare(const script_object_ptr& a, const script_object_ptr& b);
-    static bool Compare(const script_array_ptr& a, const script_array_ptr& b);
+    static bool Less(const map_reduce_result_ptr& a, const map_reduce_result_ptr& b);
+    static bool Less(const script_object_ptr& a, const script_object_ptr& b);
+    static bool Less(const script_array_ptr& a, const script_array_ptr& b);
     
 private:
     

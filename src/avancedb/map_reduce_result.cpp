@@ -99,14 +99,14 @@ const script_array_ptr MapReduceResult::getValueArray() const {
     return result_->getArray(ValueIndex);
 }
 
-bool MapReduceResult::Compare(const map_reduce_result_ptr& a, const map_reduce_result_ptr& b) {
-    return MapReduceResultComparers::Compare(a, b);
+bool MapReduceResult::Less(const map_reduce_result_ptr& a, const map_reduce_result_ptr& b) {
+    return MapReduceResultComparers::Less(a, b);
 }
 
-bool MapReduceResult::Compare(const script_object_ptr& a, const script_object_ptr& b) {
-    return MapReduceResultComparers::Compare(a, b);
+bool MapReduceResult::Less(const script_object_ptr& a, const script_object_ptr& b) {
+    return MapReduceResultComparers::Less(a, b);
 }
 
-bool MapReduceResult::Compare(const script_array_ptr& a, const script_array_ptr& b) {
-    return MapReduceResultComparers::Compare(a, b);
+bool MapReduceResult::Less(const script_array_ptr& a, const script_array_ptr& b) {
+    return MapReduceResultComparers::Less(a, b);
 }

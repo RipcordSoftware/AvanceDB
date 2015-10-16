@@ -62,7 +62,7 @@ public:
     
     BulkDocumentsResults PostBulkDocuments(script_array_ptr docs, bool newEdits);
     
-    map_reduce_results_ptr PostTempView(const GetViewOptions& options, rs::scriptobject::ScriptObjectPtr obj, Documents::collection::size_type&);
+    map_reduce_results_ptr PostTempView(const GetViewOptions& options, rs::scriptobject::ScriptObjectPtr obj);
     
 private:
     friend database_ptr boost::make_shared<database_ptr::element_type>(const char*&);

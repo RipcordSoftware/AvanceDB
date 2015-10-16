@@ -41,3 +41,27 @@ uint64_t GetViewOptions::GroupLevel() const {
     }
     return groupLevel_.get();
 }
+
+map_reduce_query_key_ptr GetViewOptions::StartKeyObj() const {
+    map_reduce_query_key_ptr ptr{nullptr};
+    
+    if (HasStartKey()) {
+        auto key = StartKey();
+        auto id = StartKeyDocId();
+        ptr = MapReduceQueryKey::Create(key.c_str(), id.c_str());
+    }
+    
+    return ptr;
+}
+
+map_reduce_query_key_ptr GetViewOptions::EndKeyObj() const {
+    map_reduce_query_key_ptr ptr{nullptr};
+    
+    if (HasEndKey()) {
+        auto key = EndKey();
+        auto id = EndKeyDocId();
+        return MapReduceQueryKey::Create(key.c_str(), id.c_str());
+    }
+    
+    return ptr;
+}

@@ -773,15 +773,14 @@ bool RestServer::PostTempView(rs::httpserver::request_ptr request, const rs::htt
             throw InvalidJson();
         }
         
-        Documents::collection::size_type totalDocs = 0;
-        auto results = db->PostTempView(options, obj, totalDocs);
+        auto results = db->PostTempView(options, obj);
         
         results->Limit(options.Limit());
         results->Skip(options.Skip());
         
         auto& stream = response->setContentType("application/json").getResponseStream();
         ScriptObjectResponseStream<> objStream{stream};
-        objStream << R"({"offset":0,"total_rows":)" << totalDocs << R"(,"rows":[)";
+        objStream << R"({"offset":)" << results->Offset() << R"(,"total_rows":)" << results->TotalRows() << R"(,"rows":[)";
         
         auto prefixComma = false;
         for (auto iter = results->cbegin(), end = results->cend(); iter != end; ++iter) {

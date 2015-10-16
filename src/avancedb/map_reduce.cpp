@@ -41,16 +41,8 @@ MapReduce::MapReduce() : mapReduceThreadPool_(MapReduceThreadPool::Get()) {
     
 }
 
-// TODO: this is still very basic
-map_reduce_results_ptr MapReduce::Execute(const char* map, const char* reduce, document_collections_ptr colls) {
-    auto results = boost::make_shared<map_reduce_result_array_ptr::element_type>();
-    
-    auto totalDocs = 0;
-    for (const auto& docs : *colls) {
-        totalDocs += docs.size();
-    }
-    
-    results->reserve(totalDocs);
+map_reduce_results_ptr MapReduce::Execute(const GetViewOptions& options, const MapReduceTask& task, document_collections_ptr colls) {
+    auto resultArray = boost::make_shared<map_reduce_result_array_ptr::element_type>();    
     
     std::mutex m;
     std::atomic<unsigned> threads(colls->size());
@@ -60,9 +52,9 @@ map_reduce_results_ptr MapReduce::Execute(const char* map, const char* reduce, d
             BOOST_SCOPE_EXIT(&threads) { --threads; } BOOST_SCOPE_EXIT_END
             auto& rt = mapReduceThreadPool_->GetThreadRuntime();
 
-            auto result = Execute(rt, map, nullptr, docs);
+            auto result = Execute(rt, task, docs);
             std::unique_lock<std::mutex> l(m);
-            results->insert(results->end(), result->cbegin(), result->cend());
+            resultArray->insert(resultArray->end(), result->cbegin(), result->cend());
         });
     }
     
@@ -71,18 +63,23 @@ map_reduce_results_ptr MapReduce::Execute(const char* map, const char* reduce, d
     }
     
     // TODO: this should be an inplace merge
-    SortResultArray(results);
+    SortResultArray(resultArray);
     
-    return boost::make_shared<map_reduce_results_ptr::element_type>(results);
+    auto results = boost::make_shared<map_reduce_results_ptr::element_type>(resultArray);
+    
+    results->StartKey(options.StartKeyObj());
+    results->EndKey(options.EndKeyObj(), options.InclusiveEnd());
+    
+    return results;
 }
 
 // TODO: this is still very basic
-map_reduce_result_array_ptr MapReduce::Execute(rs::jsapi::Runtime& rt, const char* map, const char* reduce, const document_array& docs) {
+map_reduce_result_array_ptr MapReduce::Execute(rs::jsapi::Runtime& rt, const MapReduceTask& task, const document_array& docs) {
     map_reduce_result_array_ptr results = boost::make_shared<map_reduce_result_array_ptr::element_type>();
     
     // create the function script
     std::string mapScript = "(function() { return ";
-    mapScript += map;
+    mapScript += task.Map();
     mapScript += "; })();";
     
     document_ptr doc = nullptr;
@@ -274,6 +271,6 @@ script_array_ptr MapReduce::GetValueScriptArray(const rs::jsapi::Value& arr) {
 
 void MapReduce::SortResultArray(map_reduce_result_array_ptr results) {
     std::sort(results->begin(), results->end(), [](const map_reduce_result_ptr& a, const map_reduce_result_ptr& b) {
-        return MapReduceResult::Compare(a, b);
+        return MapReduceResult::Less(a, b);
     });
 }

@@ -17,23 +17,47 @@
  */
 
 #include "map_reduce_results.h"
+#include "map_reduce_result_comparers.h"
+#include "map_reduce_query_key.h"
+
+#include <algorithm>
+#include <cstring>
 
 MapReduceResults::MapReduceResults(map_reduce_result_array_ptr results) :
-        results_(results) {
+        results_(results), startIndex_(0), endIndex_(results->size()),
+        limit_(results->size()), skip_(0) {
     
 }
 
-size_t MapReduceResults::size() const {
+size_t MapReduceResults::Offset() const {
+    return startIndex_ + skip_;
+}
+
+size_t MapReduceResults::TotalRows() const {
     return results_->size();
 }
 
 map_reduce_result_array_ptr::element_type::const_iterator MapReduceResults::cbegin() const {
-    auto begin = results_->cbegin();
-    return skip_ == 0 ? begin : (skip_ < size() ? begin + skip_ : results_->cend());
+    auto startIndex = 0;
+    if (startIndex_ > 0) {
+        startIndex = std::min(startIndex_, TotalRows());
+    }
+    
+    if (skip_ > 0) {
+        startIndex = std::min(startIndex + skip_, TotalRows());
+    }
+    
+    return results_->cbegin() + startIndex;
 }
 
 map_reduce_result_array_ptr::element_type::const_iterator MapReduceResults::cend() const {
-    return (limit_ == 0 || (skip_ + limit_) >= size()) ? results_->cend() : (cbegin() + skip_ + limit_);
+    auto endIndex = endIndex_;
+    
+    if ((startIndex_ + skip_ + limit_) < endIndex) {
+        endIndex = startIndex_ + skip_ + limit_;
+    }
+    
+    return cbegin() + endIndex;
 }
 
 void MapReduceResults::Limit(size_t limit) {
@@ -50,4 +74,48 @@ void MapReduceResults::Skip(size_t skip) {
 
 size_t MapReduceResults::Skip() const {
     return skip_;
+}
+
+void MapReduceResults::StartKey(map_reduce_query_key_ptr key) {
+    startIndex_ = 0;
+    
+    if (!!key) {        
+        auto compare = [](map_reduce_result_ptr result, map_reduce_query_key_ptr startKey) {
+            auto diff = MapReduceResultComparers::CompareField(0, result->getResultArray(), startKey->GetKeyArray());
+            if (diff == 0) {
+                auto startKeyId = startKey->getId();
+                if (startKeyId && startKeyId[0] != '\0') {
+                    diff = std::strcmp(result->getId(), startKeyId);
+                }
+            }
+            return diff < 0;
+        };
+
+        auto iter = std::lower_bound(results_->cbegin(), results_->cend(), key, compare);
+        startIndex_ = std::distance(results_->cbegin(), iter);
+    }
+}
+
+void MapReduceResults::EndKey(map_reduce_query_key_ptr key, bool inclusiveEnd) {
+    endIndex_ = TotalRows();
+    
+    if (!!key) {        
+        auto compare = [](map_reduce_result_ptr result, map_reduce_query_key_ptr endKey) {
+            auto diff = MapReduceResultComparers::CompareField(0, result->getResultArray(), endKey->GetKeyArray());
+            if (diff == 0) {
+                auto startKeyId = endKey->getId();
+                if (startKeyId && startKeyId[0] != '\0') {
+                    diff = std::strcmp(result->getId(), startKeyId);
+                }
+            }
+            return diff < 0;
+        };
+
+        auto iter = std::lower_bound(results_->cbegin(), results_->cend(), key, compare);
+        endIndex_ = std::distance(results_->cbegin(), iter);
+        
+        if (inclusiveEnd && endIndex_ < TotalRows()) {
+            ++endIndex_;
+        }
+    }
 }

@@ -31,7 +31,7 @@ public:
     MapReduceResultComparers() = delete;
     
     template <typename T, typename std::enable_if<std::is_same<T, map_reduce_result_ptr>::value>::type* = nullptr>
-    static bool Compare(const T& a, const T& b) {
+    static int Compare(const T& a, const T& b) {
         MapReduceResultKeyAdapter tempA{a}, tempB{b};
         
         auto diff = CompareImpl(&tempA, &tempB);
@@ -39,12 +39,27 @@ public:
             diff = std::strcmp(a->getId(), b->getId());
         }
         
-        return diff < 0;
+        return diff;
+    }
+    
+    template <typename T, typename std::enable_if<std::is_same<T, map_reduce_result_ptr>::value>::type* = nullptr>
+    static bool Less(const T& a, const T& b) {
+        return Compare(a, b) < 0;
     }
 
     template <typename T, typename std::enable_if<std::is_same<T, script_object_ptr>::value || std::is_same<T, script_array_ptr>::value>::type* = nullptr>
-    static bool Compare(const T& a, const T& b) {
-        return CompareImpl(a, b) < 0;
+    static int Compare(const T& a, const T& b) {
+        return CompareImpl(a, b);
+    }
+    
+    template <typename T, typename std::enable_if<std::is_same<T, script_object_ptr>::value || std::is_same<T, script_array_ptr>::value>::type* = nullptr>
+    static bool Less(const T& a, const T& b) {
+        return Compare(a, b) < 0;
+    }
+    
+    template <typename T, typename std::enable_if<std::is_same<T, script_object_ptr>::value || std::is_same<T, script_array_ptr>::value>::type* = nullptr>
+    static int CompareField(unsigned index, const T& a, const T& b) {
+        return CompareValueImpl(index, a, b);
     }
     
     static int GetScriptObjectTypePrecedence(const rs::scriptobject::ScriptObjectType& type);
