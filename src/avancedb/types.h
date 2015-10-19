@@ -45,6 +45,7 @@ using map_reduce_result_array_ptr = boost::shared_ptr<map_reduce_result_array>;
 
 class MapReduceResults;
 using map_reduce_results_ptr = boost::shared_ptr<MapReduceResults>;
+class MapReduceResultsIterator;
 
 class MapReduceQueryKey;
 using map_reduce_query_key_ptr = boost::shared_ptr<MapReduceQueryKey>;

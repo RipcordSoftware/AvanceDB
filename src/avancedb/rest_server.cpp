@@ -660,7 +660,7 @@ bool RestServer::GetDatabaseAllDocs(rs::httpserver::request_ptr request, const r
         const auto includeDocs = options.IncludeDocs();
         const auto updateSequence = options.UpdateSequence();
         
-        Documents::collection::size_type offset = 0, totalDocs = 0;
+        DocumentsCollection::size_type offset = 0, totalDocs = 0;
         sequence_type updateSequenceNumber = 0;
         auto docs = db->GetDocuments(options, offset, totalDocs, updateSequenceNumber);
         
@@ -715,7 +715,7 @@ bool RestServer::PostDatabaseAllDocs(rs::httpserver::request_ptr request, const 
         const auto includeDocs = options.IncludeDocs();
         const auto updateSequence = options.UpdateSequence();
         
-        Documents::collection::size_type totalDocs = 0;
+        DocumentsCollection::size_type totalDocs = 0;
         sequence_type updateSequenceNumber = 0;
         auto docs = db->PostDocuments(options, totalDocs, updateSequenceNumber);
         
@@ -773,18 +773,15 @@ bool RestServer::PostTempView(rs::httpserver::request_ptr request, const rs::htt
             throw InvalidJson();
         }
         
-        auto results = db->PostTempView(options, obj);
-        
-        results->Limit(options.Limit());
-        results->Skip(options.Skip());
+        auto results = db->PostTempView(options, obj);        
         
         auto& stream = response->setContentType("application/json").getResponseStream();
         ScriptObjectResponseStream<> objStream{stream};
         objStream << R"({"offset":)" << results->Offset() << R"(,"total_rows":)" << results->TotalRows() << R"(,"rows":[)";
         
         auto prefixComma = false;
-        for (auto iter = results->cbegin(), end = results->cend(); iter != end; ++iter) {
-            auto result = *iter;
+        auto iter = results->Iterator();
+        for (auto result = *iter; !!result; result = ++iter) {
             auto resultObj = result->getResultArray();
             
             objStream << (prefixComma ? ',' : ' ');

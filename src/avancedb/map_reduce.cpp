@@ -65,11 +65,7 @@ map_reduce_results_ptr MapReduce::Execute(const GetViewOptions& options, const M
     // TODO: this should be an inplace merge
     SortResultArray(resultArray);
     
-    auto results = boost::make_shared<map_reduce_results_ptr::element_type>(resultArray);
-    
-    results->StartKey(options.StartKeyObj());
-    results->EndKey(options.EndKeyObj(), options.InclusiveEnd());
-    
+    auto results = boost::make_shared<map_reduce_results_ptr::element_type>(options, resultArray);    
     return results;
 }
 
@@ -123,7 +119,7 @@ map_reduce_result_array_ptr MapReduce::Execute(rs::jsapi::Runtime& rt, const Map
     rs::jsapi::FunctionArguments args(rt);
     args.Append(object);
 
-    for (Documents::collection::size_type i = 0, size = docs.size(); i < size; ++i) {
+    for (DocumentsCollection::size_type i = 0, size = docs.size(); i < size; ++i) {
         doc = docs[i];
         scriptObj = doc->getObject();
 
@@ -133,9 +129,7 @@ map_reduce_result_array_ptr MapReduce::Execute(rs::jsapi::Runtime& rt, const Map
         func.CallFunction(args);
     }
     
-    SortResultArray(results);
-    
-    // TODO: apply the keys and other such bits here
+    SortResultArray(results);   
     
     return results;
 }

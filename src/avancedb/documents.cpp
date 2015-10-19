@@ -31,7 +31,6 @@
 #include "config.h"
 #include "uuid_helper.h"
 #include "map_reduce_result.h"
-#include "map_reduce.h"
 
 Documents::Documents(database_ptr db) : db_(db), docCount_(0),
         dataSize_(0), updateSeq_(0), localUpdateSeq_(0),
@@ -48,7 +47,7 @@ documents_ptr Documents::Create(database_ptr db) {
     return boost::make_shared<documents_ptr::element_type>(db);
 }
 
-Documents::collection::size_type Documents::getCount() {
+DocumentsCollection::size_type Documents::getCount() {
     return docCount_.load(boost::memory_order_relaxed);
 }
 
@@ -206,7 +205,7 @@ document_collections_ptr Documents::GetDocumentCollections(sequence_type& update
     return colls;
 }
 
-document_array_ptr Documents::GetDocuments(const GetAllDocumentsOptions& options, collection::size_type& offset, collection::size_type& totalDocs, sequence_type& updateSequence) {       
+document_array_ptr Documents::GetDocuments(const GetAllDocumentsOptions& options, DocumentsCollection::size_type& offset, DocumentsCollection::size_type& totalDocs, sequence_type& updateSequence) {       
     auto docs = GetDocuments(updateSequence);
     
     if (options.Descending()) {
@@ -214,14 +213,14 @@ document_array_ptr Documents::GetDocuments(const GetAllDocumentsOptions& options
         std::reverse(docs->begin(), docs->end());
     }
 
-    collection::size_type startIndex = 0;
-    collection::size_type endIndex = docs->size();
-    collection::size_type indexSkip = options.Skip();
-    collection::size_type indexLimit = options.Limit();
+    DocumentsCollection::size_type startIndex = 0;
+    DocumentsCollection::size_type endIndex = docs->size();
+    DocumentsCollection::size_type indexSkip = options.Skip();
+    DocumentsCollection::size_type indexLimit = options.Limit();
 
     if (options.HasKey()) {
         startIndex = FindDocument(*docs, options.Key(), options.Descending());
-        if ((startIndex & findMissedFlag) == findMissedFlag) {
+        if ((startIndex & FindMissedFlag) == FindMissedFlag) {
             startIndex = ~startIndex;
             endIndex = startIndex;
         } else {
@@ -231,14 +230,14 @@ document_array_ptr Documents::GetDocuments(const GetAllDocumentsOptions& options
     else if (options.HasKeys()) {
         if (options.StartKey().size() > 0) {
             startIndex = FindDocument(*docs, options.StartKey(), options.Descending());
-            if ((startIndex & findMissedFlag) == findMissedFlag) {
+            if ((startIndex & FindMissedFlag) == FindMissedFlag) {
                 startIndex = ~startIndex;
             }
         }
 
         if (options.EndKey().size() > 0) {
             endIndex = FindDocument(*docs, options.EndKey(), options.Descending());
-            if ((endIndex & findMissedFlag) == findMissedFlag) {
+            if ((endIndex & FindMissedFlag) == FindMissedFlag) {
                 endIndex = ~endIndex;
             } else if (options.InclusiveEnd()) {
                 endIndex++;
@@ -263,7 +262,7 @@ document_array_ptr Documents::GetDocuments(const GetAllDocumentsOptions& options
     return docs;
 }
 
-document_array_ptr Documents::PostDocuments(const PostAllDocumentsOptions& options, Documents::collection::size_type& totalDocs, sequence_type& updateSequence) {
+document_array_ptr Documents::PostDocuments(const PostAllDocumentsOptions& options, DocumentsCollection::size_type& totalDocs, sequence_type& updateSequence) {
     auto docs = GetDocuments(updateSequence);
     
     const auto& keys = options.Keys();
@@ -272,8 +271,8 @@ document_array_ptr Documents::PostDocuments(const PostAllDocumentsOptions& optio
     results->reserve(keys.size());
     
     for (auto key : keys) {
-        auto index = key.size() > 0 ? FindDocument(*docs, key, false) : findMissedFlag;
-        if ((index & findMissedFlag) == 0) {
+        auto index = key.size() > 0 ? FindDocument(*docs, key, false) : FindMissedFlag;
+        if ((index & FindMissedFlag) == 0) {
             auto doc = (*docs)[index];
             results->emplace_back(doc);
         } else {
@@ -283,9 +282,9 @@ document_array_ptr Documents::PostDocuments(const PostAllDocumentsOptions& optio
     
     totalDocs = docs->size();
     
-    collection::size_type startIndex = options.Skip();
-    collection::size_type endIndex = results->size();
-    collection::size_type indexLimit = options.Limit();
+    DocumentsCollection::size_type startIndex = options.Skip();
+    DocumentsCollection::size_type endIndex = results->size();
+    DocumentsCollection::size_type indexLimit = options.Limit();
     
     if (startIndex < endIndex) {
         endIndex = std::min(startIndex + indexLimit, endIndex);
@@ -441,7 +440,7 @@ map_reduce_results_ptr Documents::PostTempView(const GetViewOptions& options, rs
     return results;
 }
 
-Documents::collection::size_type Documents::FindDocument(const document_array& docs, const std::string& key, bool descending) {
+DocumentsCollection::size_type Documents::FindDocument(const document_array& docs, const std::string& key, bool descending) {
     const auto size = docs.size();
     
     if (size == 0) {
@@ -454,9 +453,9 @@ Documents::collection::size_type Documents::FindDocument(const document_array& d
             keyIdLength -= 2;
         }
         
-        collection::size_type min = 0;
-        collection::size_type mid = 0;
-        collection::size_type max = size - 1;
+        DocumentsCollection::size_type min = 0;
+        DocumentsCollection::size_type mid = 0;
+        DocumentsCollection::size_type max = size - 1;
 
         while (min <= max) {
             mid = ((max - min) / 2) + min;

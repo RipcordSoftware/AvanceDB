@@ -12,6 +12,7 @@
       <itemPath>document.h</itemPath>
       <itemPath>document_revision.h</itemPath>
       <itemPath>documents.h</itemPath>
+      <itemPath>documents_collection.h</itemPath>
       <itemPath>get_all_documents_options.h</itemPath>
       <itemPath>get_view_options.h</itemPath>
       <itemPath>http_server.h</itemPath>
@@ -23,6 +24,7 @@
       <itemPath>map_reduce_result.h</itemPath>
       <itemPath>map_reduce_result_comparers.h</itemPath>
       <itemPath>map_reduce_results.h</itemPath>
+      <itemPath>map_reduce_results_iterator.h</itemPath>
       <itemPath>map_reduce_script_object_state.h</itemPath>
       <itemPath>map_reduce_thread_pool.h</itemPath>
       <itemPath>post_all_documents_options.h</itemPath>
@@ -62,6 +64,7 @@
       <itemPath>map_reduce_result.cpp</itemPath>
       <itemPath>map_reduce_result_comparers.cpp</itemPath>
       <itemPath>map_reduce_results.cpp</itemPath>
+      <itemPath>map_reduce_results_iterator.cpp</itemPath>
       <itemPath>map_reduce_thread_pool.cpp</itemPath>
       <itemPath>post_all_documents_options.cpp</itemPath>
       <itemPath>rest_config.cpp</itemPath>
@@ -217,6 +220,8 @@
       </item>
       <item path="documents.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="documents_collection.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="get_all_documents_options.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="get_all_documents_options.h" ex="false" tool="3" flavor2="0">
@@ -260,6 +265,10 @@
       <item path="map_reduce_results.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="map_reduce_results.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="map_reduce_results_iterator.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="map_reduce_results_iterator.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="map_reduce_script_object_state.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -453,6 +462,8 @@
       </item>
       <item path="documents.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="documents_collection.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="get_all_documents_options.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="get_all_documents_options.h" ex="false" tool="3" flavor2="0">
@@ -496,6 +507,10 @@
       <item path="map_reduce_results.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="map_reduce_results.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="map_reduce_results_iterator.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="map_reduce_results_iterator.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="map_reduce_script_object_state.h" ex="false" tool="3" flavor2="0">
       </item>

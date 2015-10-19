@@ -19,37 +19,44 @@
 #ifndef MAP_REDUCE_RESULTS_H
 #define MAP_REDUCE_RESULTS_H
 
-#include "types.h"
-
 #include <limits>
 
-class MapReduceResults {
+#include "types.h"
+#include "documents_collection.h"
+#include "get_view_options.h"
+#include "map_reduce_results_iterator.h"
+
+class MapReduceResults final {
 public:
     
-    MapReduceResults(map_reduce_result_array_ptr);
+    MapReduceResults(map_reduce_result_array_ptr results);
+    MapReduceResults(const GetViewOptions& options, map_reduce_result_array_ptr results);
     
     void StartKey(map_reduce_query_key_ptr key);
     void EndKey(map_reduce_query_key_ptr key, bool inclusiveEnd);
     
-    void Limit(size_t);
-    size_t Limit() const;
+    DocumentsCollection::size_type Limit() const;
+    DocumentsCollection::size_type Skip() const;
+    DocumentsCollection::size_type Offset() const;
+    DocumentsCollection::size_type TotalRows() const;
     
-    void Skip(size_t);
-    size_t Skip() const;
-
-    size_t Offset() const;
-    size_t TotalRows() const;
-    
-    map_reduce_result_array_ptr::element_type::const_iterator cbegin() const;
-    map_reduce_result_array_ptr::element_type::const_iterator cend() const;
+    MapReduceResultsIterator Iterator() const;
     
 private:
     
+    const DocumentsCollection::size_type FindMissedFlag = ~(std::numeric_limits<DocumentsCollection::size_type>::max() / 2);
+    
+    static DocumentsCollection::size_type FindResult(const map_reduce_result_array& results, const map_reduce_query_key_ptr key);
+    
+    static DocumentsCollection::size_type Subtract(DocumentsCollection::size_type, DocumentsCollection::size_type);
+    
     const map_reduce_result_array_ptr results_;
-    size_t startIndex_;
-    size_t endIndex_;
-    size_t limit_;
-    size_t skip_;
+    bool inclusiveEnd_;
+    bool descending_;
+    DocumentsCollection::size_type startIndex_;
+    DocumentsCollection::size_type endIndex_;
+    DocumentsCollection::size_type limit_;
+    DocumentsCollection::size_type skip_;
 };
 
 #endif	/* MAP_REDUCE_RESULTS_H */
