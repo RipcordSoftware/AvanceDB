@@ -41,11 +41,12 @@ MapReduce::MapReduce() : mapReduceThreadPool_(MapReduceThreadPool::Get()) {
     
 }
 
-map_reduce_results_ptr MapReduce::Execute(const GetViewOptions& options, const MapReduceTask& task, document_collections_ptr colls) {
-    auto resultArray = boost::make_shared<map_reduce_result_array_ptr::element_type>();    
-    
+map_reduce_results_ptr MapReduce::Execute(const GetViewOptions& options, const MapReduceTask& task, document_collections_ptr colls) {        
     std::mutex m;
-    std::atomic<unsigned> threads(colls->size());
+    auto collsSize = colls->size();
+    std::vector<map_reduce_result_array_ptr> resultStack;
+    resultStack.reserve(collsSize);
+    std::atomic<unsigned> threads(collsSize);
     
     for (auto& docs : *colls) {
         mapReduceThreadPool_->Post([&]() {
@@ -53,20 +54,50 @@ map_reduce_results_ptr MapReduce::Execute(const GetViewOptions& options, const M
             auto& rt = mapReduceThreadPool_->GetThreadRuntime();
 
             auto result = Execute(rt, task, docs);
+            
             std::unique_lock<std::mutex> l(m);
-            resultArray->insert(resultArray->end(), result->cbegin(), result->cend());
+            resultStack.emplace_back(result);
         });
     }
     
+    auto results = boost::make_shared<map_reduce_result_array_ptr::element_type>();
+    
+    auto mergeResultsWorker = [&](map_reduce_result_array_ptr result) {
+        auto oldSize = results->size();
+        if (oldSize == 0) {
+            // the first shard result is a guess for the amount of memory we will
+            // need to hold all the results
+            results->reserve(result->size() * collsSize);
+        }
+        results->insert(results->end(), result->cbegin(), result->cend());
+        if (oldSize > 0) {
+            std::inplace_merge(results->begin(), results->begin() + oldSize, results->end(),
+                [](const map_reduce_result_ptr& a, const map_reduce_result_ptr& b) {
+                    return MapReduceResult::Less(a, b);
+            });
+        }
+    };       
+    
     while (threads.load() > 0) {
+        while (resultStack.size() > 0) {
+            std::unique_lock<std::mutex> l(m);
+            if (resultStack.size() > 0) {
+                auto result = resultStack.back();
+                resultStack.pop_back();
+                l.unlock();
+                
+                mergeResultsWorker(result);
+            }
+        }
+        
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
     
-    // TODO: this should be an inplace merge
-    SortResultArray(resultArray);
+    for (auto result : resultStack) {
+        mergeResultsWorker(result);
+    }
     
-    auto results = boost::make_shared<map_reduce_results_ptr::element_type>(options, resultArray);    
-    return results;
+    return boost::make_shared<map_reduce_results_ptr::element_type>(options, results);
 }
 
 // TODO: this is still very basic
