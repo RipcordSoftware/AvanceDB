@@ -44,10 +44,10 @@ MapReduce::MapReduce() : mapReduceThreadPool_(MapReduceThreadPool::Get()) {
 map_reduce_results_ptr MapReduce::Execute(const GetViewOptions& options, const MapReduceTask& task, document_collections_ptr colls) {        
     std::mutex m;
     auto collsSize = colls->size();
-    std::vector<map_reduce_result_array_ptr> resultStack;
-    resultStack.reserve(collsSize);
-    std::atomic<unsigned> threads(collsSize);
+    std::vector<map_reduce_result_array_ptr> resultArray;
+    std::atomic<int> threads(collsSize);
     
+    // run the map
     for (auto& docs : *colls) {
         mapReduceThreadPool_->Post([&]() {
             BOOST_SCOPE_EXIT(&threads) { --threads; } BOOST_SCOPE_EXIT_END
@@ -56,51 +56,76 @@ map_reduce_results_ptr MapReduce::Execute(const GetViewOptions& options, const M
             auto result = Execute(rt, task, docs);
             
             std::unique_lock<std::mutex> l(m);
-            resultStack.emplace_back(result);
+            resultArray.emplace_back(result);
         });
     }
     
-    auto results = boost::make_shared<map_reduce_result_array_ptr::element_type>();
-    
-    auto mergeResultsWorker = [&](map_reduce_result_array_ptr result) {
-        auto oldSize = results->size();
-        if (oldSize == 0) {
-            // the first shard result is a guess for the amount of memory we will
-            // need to hold all the results
-            results->reserve(result->size() * collsSize);
-        }
-        results->insert(results->end(), result->cbegin(), result->cend());
-        if (oldSize > 0) {
-            std::inplace_merge(results->begin(), results->begin() + oldSize, results->end(),
-                [](const map_reduce_result_ptr& a, const map_reduce_result_ptr& b) {
-                    return MapReduceResult::Less(a, b);
-            });
-        }
-    };       
-    
-    while (threads.load() > 0) {
-        while (resultStack.size() > 0) {
-            std::unique_lock<std::mutex> l(m);
-            if (resultStack.size() > 0) {
-                auto result = resultStack.back();
-                resultStack.pop_back();
-                l.unlock();
-                
-                mergeResultsWorker(result);
-            }
-        }
-        
+    // wait for the map threads to finish
+    while (threads.load() > 0) {        
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
     
-    for (auto result : resultStack) {
-        mergeResultsWorker(result);
+    // calculate the number of map rows and offsets
+    decltype(resultArray.size()) totalRows = 0;
+    std::vector<decltype(totalRows)> rowOffsets;
+    for (const auto& result : resultArray) {
+        rowOffsets.emplace_back(totalRows);
+        totalRows += result->size();        
+    }
+    rowOffsets.emplace_back(totalRows);
+    
+    // allocate the results collection
+    auto results = boost::make_shared<map_reduce_result_array_ptr::element_type>();
+    results->reserve(totalRows);
+    
+    // copy the shard results into the main results collection
+    for (const auto& result : resultArray) {
+        results->insert(results->end(), result->cbegin(), result->cend());
+    }
+    
+    auto less = [](const map_reduce_result_ptr& a, const map_reduce_result_ptr& b) {
+        return MapReduceResult::Less(a, b);
+    };
+    
+    auto mergeResultsWorker = [&](decltype(collsSize) startIndex, decltype(collsSize) step) {
+        BOOST_SCOPE_EXIT(&threads) { --threads; } BOOST_SCOPE_EXIT_END
+        
+        auto midStep = step / 2;
+        auto midIndex = startIndex + midStep;
+        auto endIndex = std::min(startIndex + step, collsSize);
+
+        auto startOffset = rowOffsets[startIndex];
+        auto midOffset = rowOffsets[midIndex];
+        auto endOffset = rowOffsets[endIndex];
+
+        const auto& begin = results->begin();
+        std::inplace_merge(begin + startOffset, begin + midOffset, begin + endOffset, less);
+    };
+
+    // merge the result shards on the main results collection
+    decltype(collsSize) step = 2;
+    while ((threads = collsSize / step) > 0) {
+        
+        for (decltype(collsSize) i = 0; i <= collsSize - step; i += step) {
+            mapReduceThreadPool_->Post([=]() { mergeResultsWorker(i, step); });
+        }
+        
+        // wait for the merge threads to finish
+        while (threads.load() > 0) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+
+        step *= 2;
+    }
+    
+    // if we had an odd number of collections then there is one left to merge
+    if ((collsSize % step) > 0) {
+        mergeResultsWorker(0, step);
     }
     
     return boost::make_shared<map_reduce_results_ptr::element_type>(options, results);
 }
 
-// TODO: this is still very basic
 map_reduce_result_array_ptr MapReduce::Execute(rs::jsapi::Runtime& rt, const MapReduceTask& task, const document_array& docs) {
     map_reduce_result_array_ptr results = boost::make_shared<map_reduce_result_array_ptr::element_type>();
     
