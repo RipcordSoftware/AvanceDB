@@ -30,10 +30,7 @@ class MapReduceResults final {
 public:
     
     MapReduceResults(map_reduce_result_array_ptr results);
-    MapReduceResults(const GetViewOptions& options, map_reduce_result_array_ptr results);
-    
-    void StartKey(map_reduce_query_key_ptr key);
-    void EndKey(map_reduce_query_key_ptr key, bool inclusiveEnd);
+    MapReduceResults(const GetViewOptions& options, map_reduce_result_array_ptr results);    
     
     DocumentsCollection::size_type Limit() const;
     DocumentsCollection::size_type Skip() const;
