@@ -24,6 +24,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 
+#include <cstring>
+
 #include "types.h"
 
 class MapReduceResult final : public boost::enable_shared_from_this<MapReduceResult>, private boost::noncopyable {
@@ -55,6 +57,10 @@ public:
     const script_object_ptr getValueObject() const;
     const script_array_ptr getValueArray() const;
     
+    inline int CompareId(const MapReduceResult& other) {
+        return std::strcmp(id_, other.id_);
+    }
+    
     static bool Less(const map_reduce_result_ptr& a, const map_reduce_result_ptr& b);
     static bool Less(const script_object_ptr& a, const script_object_ptr& b);
     static bool Less(const script_array_ptr& a, const script_array_ptr& b);
@@ -65,6 +71,7 @@ private:
     
     MapReduceResult(script_array_ptr, document_ptr);
     
+    const char* id_;
     document_ptr doc_;
     script_array_ptr result_;
 

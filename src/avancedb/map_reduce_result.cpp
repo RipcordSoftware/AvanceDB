@@ -24,7 +24,7 @@
 #include "map_reduce_result_comparers.h"
 
 MapReduceResult::MapReduceResult(script_array_ptr result, document_ptr doc) :
-        result_(result), doc_(doc) {
+        result_(result), doc_(doc), id_(doc->getId()) {
 }
 
 map_reduce_result_ptr MapReduceResult::Create(script_array_ptr result, document_ptr doc) {    
@@ -32,7 +32,7 @@ map_reduce_result_ptr MapReduceResult::Create(script_array_ptr result, document_
 }
 
 const char* MapReduceResult::MapReduceResult::getId() const {
-    return doc_->getId();
+    return id_;
 }
 
 rs::scriptobject::ScriptObjectType MapReduceResult::getKeyType() const {

@@ -36,7 +36,7 @@ public:
         
         auto diff = CompareImpl(&tempA, &tempB);
         if (diff == 0) {
-            diff = std::strcmp(a->getId(), b->getId());
+            diff = a->CompareId(*b);
         }
         
         return diff;
@@ -62,7 +62,20 @@ public:
         return CompareValueImpl(index, a, b);
     }
     
-    static int GetScriptObjectTypePrecedence(const rs::scriptobject::ScriptObjectType& type);
+    static inline int GetScriptObjectTypePrecedence(const rs::scriptobject::ScriptObjectType& type) {
+        using ScriptObjectType = rs::scriptobject::ScriptObjectType;
+
+        switch (type) {
+            case ScriptObjectType::Null: return 0;
+            case ScriptObjectType::Boolean: return 1;
+            case ScriptObjectType::Int32: return 2;
+            case ScriptObjectType::Double: return 2;
+            case ScriptObjectType::String: return 3;
+            case ScriptObjectType::Array: return 4;
+            case ScriptObjectType::Object: return 5;
+            default: return 0;
+        }
+    }
     
 private:
     class MapReduceResultKeyAdapter final {
@@ -70,7 +83,7 @@ private:
         MapReduceResultKeyAdapter(const map_reduce_result_ptr&);
         
         rs::scriptobject::ScriptObjectType getType(int) const;
-        unsigned getCount() const;
+        inline unsigned getCount() const { return 1; }
 
         const char* getString(int) const;
         std::int32_t getInt32(int) const;
@@ -154,8 +167,13 @@ private:
         return compare;
     }
     
-    static int CompareDouble(double a, double b);
-    static int CompareBoolean(bool a, bool b);
+    static inline  int CompareDouble(double a, double b) {
+        return a < b ? -1 : (a > b ? 1 : 0);
+    }
+    
+    static inline int CompareBoolean(bool a, bool b) {
+        return a == b ? 0 : (a == false ? -1 : 1);
+    }
 };
 
 #endif	/* MAP_REDUCE_RESULT_COMPARERS_H */

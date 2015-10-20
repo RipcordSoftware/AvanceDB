@@ -26,10 +26,6 @@ rs::scriptobject::ScriptObjectType MapReduceResultComparers::MapReduceResultKeyA
     return result_->getKeyType();
 }
 
-unsigned MapReduceResultComparers::MapReduceResultKeyAdapter::getCount() const {
-    return 1;
-}
-
 const char* MapReduceResultComparers::MapReduceResultKeyAdapter::getString(int) const {
     return result_->getKeyString();
 }
@@ -52,27 +48,4 @@ const script_object_ptr MapReduceResultComparers::MapReduceResultKeyAdapter::get
 
 const script_array_ptr MapReduceResultComparers::MapReduceResultKeyAdapter::getArray(int) const {
     return result_->getKeyArray();
-}
-
-int MapReduceResultComparers::GetScriptObjectTypePrecedence(const rs::scriptobject::ScriptObjectType& type) {
-    using ScriptObjectType = rs::scriptobject::ScriptObjectType;
-
-    switch (type) {
-        case ScriptObjectType::Null: return 0;
-        case ScriptObjectType::Boolean: return 1;
-        case ScriptObjectType::Int32: return 2;
-        case ScriptObjectType::Double: return 2;
-        case ScriptObjectType::String: return 3;
-        case ScriptObjectType::Array: return 4;
-        case ScriptObjectType::Object: return 5;
-        default: return 0;
-    }
-}
-
-int MapReduceResultComparers::CompareDouble(double a, double b) {
-    return a < b ? -1 : (a > b ? 1 : 0);
-}
-
-int MapReduceResultComparers::CompareBoolean(bool a, bool b) {
-    return a == b ? 0 : (a == false ? -1 : 1);
 }
