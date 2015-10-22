@@ -200,6 +200,8 @@
       </item>
       <item path="config.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="content_types.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="database.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="database.h" ex="false" tool="3" flavor2="0">
@@ -441,6 +443,8 @@
       <item path="config.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="config.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="content_types.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="database.cpp" ex="false" tool="1" flavor2="0">
       </item>

@@ -24,6 +24,7 @@
 #include <vector>
 #include <algorithm>
 
+#include "content_types.h"
 #include "json_stream.h"
 #include "rest_exceptions.h"
 #include "database.h"
@@ -97,17 +98,17 @@ void RestServer::RouteRequest(rs::httpserver::socket_ptr, rs::httpserver::reques
     router_.Match(request, response);
     
     if (!response->HasResponded()) {
-        response->setContentType("text/plain").setStatusCode(404).setStatusDescription("Not Found").Send(R"({"error":"not_found","reason":"no_db_file"})");
+        response->setContentType(ContentTypes::textPlain).setStatusCode(404).setStatusDescription("Not Found").Send(R"({"error":"not_found","reason":"no_db_file"})");
     }
 }
 
 bool RestServer::GetActiveTasks(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response) {
-    response->setContentType("application/json").Send("[]");
+    response->setContentType(ContentTypes::applicationJson).Send("[]");
     return true;
 }
 
 bool RestServer::GetSession(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response) {
-    response->setContentType("application/json").Send(R"({"ok":true,"userCtx":{"name":null,"roles":["_admin"]},"info":{"authentication_db":"_users","authentication_handlers":["oauth","cookie","default"],"authenticated":"default"}})");
+    response->setContentType(ContentTypes::applicationJson).Send(R"({"ok":true,"userCtx":{"name":null,"roles":["_admin"]},"info":{"authentication_db":"_users","authentication_handlers":["oauth","cookie","default"],"authenticated":"default"}})");
     return true;
 }
 
@@ -119,12 +120,12 @@ bool RestServer::GetAllDbs(rs::httpserver::request_ptr request, const rs::httpse
         stream.Append(dbs[i]);
     }
     
-    response->setContentType("application/json").Send(stream.Flush());
+    response->setContentType(ContentTypes::applicationJson).Send(stream.Flush());
     return true;
 }
 
 bool RestServer::GetSignature(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response) {
-    response->setContentType("application/json").Send(R"({"couchdb":"Welcome","avancedb":"Welcome","uuid":"a2db86472466bcd02e84ac05a6c86185","version":"1.6.1","vendor":{"version":"0.0.1","name":"Ripcord Software"}})");
+    response->setContentType(ContentTypes::applicationJson).Send(R"({"couchdb":"Welcome","avancedb":"Welcome","uuid":"a2db86472466bcd02e84ac05a6c86185","version":"1.6.1","vendor":{"version":"0.0.1","name":"Ripcord Software"}})");
     return true;
 }
 
@@ -153,7 +154,7 @@ bool RestServer::GetUuids(rs::httpserver::request_ptr request, const rs::httpser
         stream.Append(uuidString);
     }
     
-    response->setContentType("application/json").Send(stream.Flush());    
+    response->setContentType(ContentTypes::applicationJson).Send(stream.Flush());    
     return true;
 }
 
@@ -162,7 +163,7 @@ bool RestServer::HeadDatabase(rs::httpserver::request_ptr request, const rs::htt
     
     auto name = GetDatabaseName(args);
     if (name != nullptr && databases_.IsDatabase(name)) {
-        response->setContentType("application/json").Send();            
+        response->setContentType(ContentTypes::applicationJson).Send();            
         found = true;
     }
     
@@ -191,7 +192,7 @@ bool RestServer::GetDatabase(rs::httpserver::request_ptr request, const rs::http
             stream.Append("purge_seq", db->PurgeSequence());
             stream.Append("update_seq", db->UpdateSequence());
             
-            response->setContentType("application/json").Send(stream.Flush());
+            response->setContentType(ContentTypes::applicationJson).Send(stream.Flush());
         } else {
             throw MissingDatabase();
         }
@@ -216,7 +217,7 @@ bool RestServer::PutDatabase(rs::httpserver::request_ptr request, const rs::http
         created = databases_.AddDatabase(name);
         
         if (created) {
-            response->setStatusCode(201).setContentType("application/json").Send(R"({"ok":true})");
+            response->setStatusCode(201).setContentType(ContentTypes::applicationJson).Send(R"({"ok":true})");
         }
     }
     
@@ -247,7 +248,7 @@ bool RestServer::PostDatabase(rs::httpserver::request_ptr request, const rs::htt
             stream.Append("id", doc->getId());
             stream.Append("rev", rev);
 
-            response->setStatusCode(201).setContentType("application/json").setETag(rev).Send(stream.Flush());
+            response->setStatusCode(201).setContentType(ContentTypes::Utf8::applicationJson).setETag(rev).Send(stream.Flush());
 
             created = true;
         }
@@ -268,7 +269,7 @@ bool RestServer::DeleteDatabase(rs::httpserver::request_ptr request, const rs::h
         deleted = databases_.RemoveDatabase(name);
         
         if (deleted) {
-            response->setContentType("application/json").Send(R"({"ok":true})");
+            response->setContentType(ContentTypes::applicationJson).Send(R"({"ok":true})");
         } else {
             throw MissingDatabase();
         }
@@ -288,7 +289,7 @@ bool RestServer::GetDocument(rs::httpserver::request_ptr request, const rs::http
         
         auto rev = doc->getRev();
 
-        auto& stream = response->setStatusCode(200).setContentType("application/json").setETag(rev).getResponseStream();
+        auto& stream = response->setStatusCode(200).setContentType(ContentTypes::Utf8::applicationJson).setETag(rev).getResponseStream();
         ScriptObjectResponseStream<> objStream{stream};
         objStream << obj;
         objStream.Flush();
@@ -310,7 +311,7 @@ bool RestServer::GetDesignDocument(rs::httpserver::request_ptr request, const rs
         
         auto rev = doc->getRev();
 
-        auto& stream = response->setStatusCode(200).setContentType("application/json").setETag(rev).getResponseStream();
+        auto& stream = response->setStatusCode(200).setContentType(ContentTypes::Utf8::applicationJson).setETag(rev).getResponseStream();
         ScriptObjectResponseStream<> objStream{stream};
         objStream << obj;
         objStream.Flush();
@@ -325,7 +326,7 @@ bool RestServer::GetDesignDocument(rs::httpserver::request_ptr request, const rs
 bool RestServer::GetDesignDocumentView(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
     auto db = GetDatabase(args);
     if (!!db) {
-        response->setStatusCode(200).setContentType("application/json").Send(R"({"offset":0,"rows":[],"total_rows":0})");
+        response->setStatusCode(200).setContentType(ContentTypes::Utf8::applicationJson).Send(R"({"offset":0,"rows":[],"total_rows":0})");
     }    
 }
 
@@ -346,7 +347,7 @@ bool RestServer::PutDocument(rs::httpserver::request_ptr request, const rs::http
             stream.Append("id", doc->getId());
             stream.Append("rev", rev);
 
-            response->setStatusCode(201).setContentType("application/json").setETag(rev).Send(stream.Flush());
+            response->setStatusCode(201).setContentType(ContentTypes::Utf8::applicationJson).setETag(rev).Send(stream.Flush());
 
             created = true;
         }
@@ -372,7 +373,7 @@ bool RestServer::PutDesignDocument(rs::httpserver::request_ptr request, const rs
             stream.Append("id", doc->getId());
             stream.Append("rev", rev);
 
-            response->setStatusCode(201).setContentType("application/json").setETag(rev).Send(stream.Flush());
+            response->setStatusCode(201).setContentType(ContentTypes::Utf8::applicationJson).setETag(rev).Send(stream.Flush());
 
             created = true;
         }
@@ -418,7 +419,7 @@ bool RestServer::PostDatabaseBulkDocs(rs::httpserver::request_ptr request, const
             }
         }
         
-        response->setStatusCode(201).setContentType("application/json").Send(stream.Flush());
+        response->setStatusCode(201).setContentType(ContentTypes::Utf8::applicationJson).Send(stream.Flush());
         
         created = true;
     }
@@ -468,7 +469,7 @@ bool RestServer::PostDatabaseRevsDiff(rs::httpserver::request_ptr request, const
                 stream.PopContext();
             }
 
-            response->setStatusCode(200).setContentType("application/json").Send(stream.Flush());
+            response->setStatusCode(200).setContentType(ContentTypes::Utf8::applicationJson).Send(stream.Flush());
 
             handled = true;
         } catch (const rs::scriptobject::ScriptObjectException&) {
@@ -488,7 +489,7 @@ bool RestServer::PostEnsureFullCommit(rs::httpserver::request_ptr request, const
         stream.Append("instance_start_time", db->InstanceStartTime());
         stream.Append("ok", true);
         
-        response->setStatusCode(201).setContentType("application/json").Send(stream.Flush());
+        response->setStatusCode(201).setContentType(ContentTypes::applicationJson).Send(stream.Flush());
         
         handled = true;
     }
@@ -507,7 +508,7 @@ bool RestServer::GetLocalDocument(rs::httpserver::request_ptr request, const rs:
         
         auto rev = doc->getRev();
 
-        auto& stream = response->setStatusCode(200).setContentType("application/json").setETag(rev).getResponseStream();
+        auto& stream = response->setStatusCode(200).setContentType(ContentTypes::Utf8::applicationJson).setETag(rev).getResponseStream();
         ScriptObjectResponseStream<> objStream{stream};
         objStream << obj;
         objStream.Flush();
@@ -535,7 +536,7 @@ bool RestServer::PutLocalDocument(rs::httpserver::request_ptr request, const rs:
             stream.Append("id", doc->getId());
             stream.Append("rev", rev);
 
-            response->setStatusCode(201).setContentType("application/json").setETag(rev).Send(stream.Flush());
+            response->setStatusCode(201).setContentType(ContentTypes::Utf8::applicationJson).setETag(rev).Send(stream.Flush());
 
             created = true;
         }
@@ -560,7 +561,7 @@ bool RestServer::DeleteDocument(rs::httpserver::request_ptr request, const rs::h
         stream.Append("id", id);
         stream.Append("rev", newRev.data());
 
-        response->setStatusCode(200).setContentType("application/json").setETag(newRev.data()).Send(stream.Flush());
+        response->setStatusCode(200).setContentType(ContentTypes::Utf8::applicationJson).setETag(newRev.data()).Send(stream.Flush());
         
         deleted = true;        
     }
@@ -585,7 +586,7 @@ bool RestServer::DeleteDesignDocument(rs::httpserver::request_ptr request, const
         stream.Append("id", id);
         stream.Append("rev", newRev.data());
 
-        response->setStatusCode(200).setContentType("application/json").setETag(newRev.data()).Send(stream.Flush());
+        response->setStatusCode(200).setContentType(ContentTypes::Utf8::applicationJson).setETag(newRev.data()).Send(stream.Flush());
         
         deleted = true;        
     }
@@ -610,7 +611,7 @@ bool RestServer::DeleteLocalDocument(rs::httpserver::request_ptr request, const 
         stream.Append("id", id);
         stream.Append("rev", newRev.data());
 
-        response->setStatusCode(200).setContentType("application/json").setETag(newRev.data()).Send(stream.Flush());
+        response->setStatusCode(200).setContentType(ContentTypes::Utf8::applicationJson).setETag(newRev.data()).Send(stream.Flush());
         
         deleted = true;        
     }
@@ -627,7 +628,7 @@ bool RestServer::HeadDocument(rs::httpserver::request_ptr request, const rs::htt
         auto doc = db->GetDocument(id);
         auto rev = doc->getRev();
         
-        response->setStatusCode(200).setContentType("application/json").setETag(rev).Send();
+        response->setStatusCode(200).setContentType(ContentTypes::Utf8::applicationJson).setETag(rev).Send();
         
         gotHead = true;
     }
@@ -644,7 +645,7 @@ bool RestServer::HeadDesignDocument(rs::httpserver::request_ptr request, const r
         auto doc = db->GetDesignDocument(id);
         auto rev = doc->getRev();
         
-        response->setStatusCode(200).setContentType("application/json").setETag(rev).Send();
+        response->setStatusCode(200).setContentType(ContentTypes::applicationJson).setETag(rev).Send();
         
         gotHead = true;
     }
@@ -664,7 +665,7 @@ bool RestServer::GetDatabaseAllDocs(rs::httpserver::request_ptr request, const r
         sequence_type updateSequenceNumber = 0;
         auto docs = db->GetDocuments(options, offset, totalDocs, updateSequenceNumber);
         
-        auto& stream = response->setContentType("application/json").getResponseStream();
+        auto& stream = response->setContentType(ContentTypes::Utf8::applicationJson).getResponseStream();
         ScriptObjectResponseStream<> objStream{stream};
         objStream << R"({"offset":)" << offset << R"(,"total_rows":)" << totalDocs;
         
@@ -719,7 +720,7 @@ bool RestServer::PostDatabaseAllDocs(rs::httpserver::request_ptr request, const 
         sequence_type updateSequenceNumber = 0;
         auto docs = db->PostDocuments(options, totalDocs, updateSequenceNumber);
         
-        auto& stream = response->setContentType("application/json").getResponseStream();
+        auto& stream = response->setContentType(ContentTypes::Utf8::applicationJson).getResponseStream();
         ScriptObjectResponseStream<> objStream{stream};
         objStream << R"({"offset":0,"total_rows":)" << totalDocs;
         
@@ -775,7 +776,7 @@ bool RestServer::PostTempView(rs::httpserver::request_ptr request, const rs::htt
         
         auto results = db->PostTempView(options, obj);        
         
-        auto& stream = response->setContentType("application/json").getResponseStream();
+        auto& stream = response->setContentType(ContentTypes::Utf8::applicationJson).getResponseStream();
         ScriptObjectResponseStream<> objStream{stream};
         objStream << R"({"offset":)" << results->Offset() << R"(,"total_rows":)" << results->TotalRows() << R"(,"rows":[)";
         
@@ -803,17 +804,17 @@ bool RestServer::PostTempView(rs::httpserver::request_ptr request, const rs::htt
 }
 
 bool RestServer::GetConfig(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response) {
-    response->setContentType("application/json").Send(RestConfig::getConfig());
+    response->setContentType(ContentTypes::applicationJson).Send(RestConfig::getConfig());
     return true;
 }
 
 bool RestServer::GetConfigQueryServers(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response) {
-    response->setContentType("application/json").Send(RestConfig::getQueryServers());
+    response->setContentType(ContentTypes::applicationJson).Send(RestConfig::getQueryServers());
     return true;
 }
 
 bool RestServer::GetConfigNativeQueryServers(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response) {
-    response->setContentType("application/json").Send(RestConfig::getNativeQueryServers());
+    response->setContentType(ContentTypes::applicationJson).Send(RestConfig::getNativeQueryServers());
     return true;
 }
 
@@ -855,7 +856,7 @@ const std::string& RestServer::GetParameter(const char* param, const rs::httpser
 
 rs::scriptobject::ScriptObjectPtr RestServer::GetJsonBody(rs::httpserver::request_ptr request, bool useCachedObjectKeys) {
     if (request->HasBody()) {
-        if (request->getContentType().find("application/json") == std::string::npos) {
+        if (request->getContentType().find(ContentTypes::applicationJson) == std::string::npos) {
             throw InvalidJson();
         }
 
