@@ -4617,6 +4617,28 @@ describe('avancedb -- temp views --', function() {
                 done();
             });
     });
+
+    it('execute a bad temp view - syntax error', function(done) {
+        db.temporaryView(
+            { map: 'function(doc) { emit( }' },
+            function(err, doc) {
+                assert.notEqual(null, err);
+                assert.equal('compilation_error', err.error);
+                assert.equal(500, err.headers.status);
+                done();
+            });
+    });
+
+    it('execute a bad temp view - missing reference (no error)', function(done) {
+        db.temporaryView(
+            { map: 'function(doc) { abc(); }' },
+            function(err, doc) {
+                assert.equal(null, err);
+                assert.notEqual(null, doc);
+                assert.equal(0, doc.length);
+                done();
+            });
+    });
     
     it('delete the database', function(done) {
         db.destroy(function(err, res) {

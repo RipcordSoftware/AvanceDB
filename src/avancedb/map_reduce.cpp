@@ -33,6 +33,8 @@
 #include "config.h"
 #include "set_thread_name.h"
 #include "map_reduce_thread_pool.h"
+#include "rest_exceptions.h"
+#include "map_reduce_exception.h"
 
 #include "script_object_factory.h"
 #include "script_array_factory.h"
@@ -45,24 +47,44 @@ map_reduce_results_ptr MapReduce::Execute(const GetViewOptions& options, const M
     std::mutex m;
     auto collsSize = colls->size();
     std::vector<map_reduce_result_array_ptr> resultArray;
+    std::vector<rs::jsapi::ScriptException> scriptExceptions;
     std::atomic<int> threads(collsSize);
     
     // run the map
     for (auto& docs : *colls) {
         mapReduceThreadPool_->Post([&]() {
-            BOOST_SCOPE_EXIT(&threads) { --threads; } BOOST_SCOPE_EXIT_END
-            auto& rt = mapReduceThreadPool_->GetThreadRuntime();
-
-            auto result = Execute(rt, task, docs);
+            std::unique_lock<std::mutex> l{m, std::defer_lock};
             
-            std::unique_lock<std::mutex> l(m);
-            resultArray.emplace_back(result);
+            try {
+                BOOST_SCOPE_EXIT(&threads) { --threads; } BOOST_SCOPE_EXIT_END
+                auto& rt = mapReduceThreadPool_->GetThreadRuntime();
+
+                auto result = Execute(rt, task, docs);
+
+                l.lock();
+                resultArray.emplace_back(result);
+            } catch (const rs::jsapi::ScriptException& ex) {
+                l.lock();
+                scriptExceptions.emplace_back(ex);
+            }
         });
     }
     
     // wait for the map threads to finish
     while (threads.load() > 0) {        
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+    
+    // we need to pass back any script exceptions to the caller
+    if (scriptExceptions.size() > 0) {
+        auto what = scriptExceptions[0].what();
+        throw CompilationError{what};
+    }
+    
+    // if the number of results doesn't match the number of colls then
+    // we've most likely got a non-script exception during the map phase
+    if (resultArray.size() != colls->size()) {
+        throw MapReduceException{};
     }
     
     // calculate the number of map rows and offsets
@@ -181,8 +203,7 @@ map_reduce_result_array_ptr MapReduce::Execute(rs::jsapi::Runtime& rt, const Map
 
         state->scriptObj_ = scriptObj;
 
-        // TODO: handle exception cases here
-        func.CallFunction(args);
+        func.CallFunction(args, false);
     }
     
     SortResultArray(results);   

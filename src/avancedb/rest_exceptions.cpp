@@ -20,13 +20,14 @@
 
 #include <boost/format.hpp>
 
-#include "database.h"
+#include "json_helper.h"
 
 static const char* preconditionFailedDescription = "Precondition Failed";
 static const char* badRequestDescription = "Bad Request";
 static const char* notFoundDescription = "Not Found";
 static const char* conflictDescription = "Conflict";
 static const char* forbiddenDescription = "Forbidden";
+static const char* internalServerErrorDescription = "Internal Server Error";
 
 static const char* databaseAlreadyExistsBody = R"({
     "error": "file_exists",
@@ -73,6 +74,11 @@ static const char* invalidRevisionFormatJsonBody = R"({
     "reason": "Invalid rev format"
 })";
 
+static const char* compilationErrorJsonBody = R"({
+    "error": "compilation_error",
+    "reason": "%s"
+})";
+
 static const char* contentType = "application/json";
 
 DatabaseAlreadyExists::DatabaseAlreadyExists() : 
@@ -117,5 +123,10 @@ QueryParseError::QueryParseError(const char* type, const std::string& value) :
 
 InvalidRevisionFormat::InvalidRevisionFormat() :
     HttpServerException(400, badRequestDescription, invalidRevisionFormatJsonBody, contentType) {
+    
+}
+
+CompilationError::CompilationError(const char* msg) :
+    HttpServerException(500, internalServerErrorDescription, (boost::format(compilationErrorJsonBody) % JsonHelper::EscapeJsonString(msg)).str(), contentType) {
     
 }

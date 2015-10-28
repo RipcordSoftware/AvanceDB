@@ -18,8 +18,10 @@
       <itemPath>http_server.h</itemPath>
       <itemPath>http_server_exception.h</itemPath>
       <itemPath>http_server_log.h</itemPath>
+      <itemPath>json_helper.h</itemPath>
       <itemPath>json_stream.h</itemPath>
       <itemPath>map_reduce.h</itemPath>
+      <itemPath>map_reduce_exception.h</itemPath>
       <itemPath>map_reduce_query_key.h</itemPath>
       <itemPath>map_reduce_result.h</itemPath>
       <itemPath>map_reduce_result_comparers.h</itemPath>
@@ -200,8 +202,6 @@
       </item>
       <item path="config.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="content_types.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="database.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="database.h" ex="false" tool="3" flavor2="0">
@@ -242,6 +242,8 @@
       </item>
       <item path="http_server_log.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="json_helper.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="json_stream.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="json_stream.h" ex="false" tool="3" flavor2="0">
@@ -251,6 +253,8 @@
       <item path="map_reduce.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="map_reduce.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="map_reduce_exception.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="map_reduce_query_key.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -444,8 +448,6 @@
       </item>
       <item path="config.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="content_types.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="database.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="database.h" ex="false" tool="3" flavor2="0">
@@ -486,6 +488,8 @@
       </item>
       <item path="http_server_log.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="json_helper.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="json_stream.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="json_stream.h" ex="false" tool="3" flavor2="0">
@@ -495,6 +499,8 @@
       <item path="map_reduce.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="map_reduce.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="map_reduce_exception.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="map_reduce_query_key.cpp" ex="false" tool="1" flavor2="0">
       </item>

@@ -66,4 +66,9 @@ public:
     InvalidRevisionFormat();    
 };
 
+class CompilationError final : public HttpServerException {
+public:
+    CompilationError(const char* msg);
+};
+
 #endif	/* REST_EXCEPTIONS_H */
