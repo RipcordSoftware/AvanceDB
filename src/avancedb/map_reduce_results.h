@@ -24,10 +24,15 @@
 #include "types.h"
 #include "documents_collection.h"
 #include "get_view_options.h"
-#include "map_reduce_results_iterator.h"
+
+class MapReduceResultsIterator;
 
 class MapReduceResults final {
 public:
+    using value_type = map_reduce_result_array_ptr::element_type::value_type;
+    using const_reference = map_reduce_result_array_ptr::element_type::const_reference;
+    using const_iterator = map_reduce_result_array_ptr::element_type::const_iterator;
+    using const_reverse_iterator = map_reduce_result_array_ptr::element_type::const_reverse_iterator;
     
     MapReduceResults(map_reduce_result_array_ptr results);
     MapReduceResults(const GetViewOptions& options, map_reduce_result_array_ptr results);    
@@ -39,6 +44,12 @@ public:
     
     MapReduceResultsIterator Iterator() const;
     
+    const_iterator cbegin() const;
+    const_iterator cend() const;
+    
+    const_reverse_iterator crbegin() const;
+    const_reverse_iterator crend() const;
+    
 private:
     
     const DocumentsCollection::size_type FindMissedFlag = ~(std::numeric_limits<DocumentsCollection::size_type>::max() / 2);
@@ -46,6 +57,9 @@ private:
     static DocumentsCollection::size_type FindResult(const map_reduce_result_array& results, const map_reduce_query_key_ptr key);
     
     static DocumentsCollection::size_type Subtract(DocumentsCollection::size_type, DocumentsCollection::size_type);
+    
+    std::pair<DocumentsCollection::size_type, DocumentsCollection::size_type> GetAscendingIndexes() const;
+    std::pair<DocumentsCollection::size_type, DocumentsCollection::size_type> GetDescendingIndexes() const;
     
     const map_reduce_result_array_ptr results_;
     bool inclusiveEnd_;

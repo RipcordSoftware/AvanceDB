@@ -18,86 +18,24 @@
 
 #include "map_reduce_results_iterator.h"
 
-MapReduceResultsIterator::MapReduceResultsIterator(map_reduce_result_array_ptr results, 
-        DocumentsCollection::size_type startIndex, DocumentsCollection::size_type endIndex, DocumentsCollection::size_type limit, bool inclusiveEnd, bool descending) :
-                results_(results), startIndex_(std::min(startIndex, results->size())), 
-                endIndex_(std::min(endIndex, results->size())), 
-                inclusiveEnd_(inclusiveEnd), descending_(descending), 
-                index_(CalculateEndIndex(startIndex_, endIndex_, results_->size(), descending)),
-                limit_(limit - 1) {
+MapReduceResultsIterator::MapReduceResultsIterator(const MapReduceResults& results, bool descending) :
+        results_(results),
+        iter_(results.cbegin()),
+        end_(results.cend()),
+        riter_(results.crbegin()),
+        rend_(results.crend()),
+        descending_(descending) {
     
 }
 
-map_reduce_result_array_ptr::element_type::const_reference MapReduceResultsIterator::operator++() const {
-    ptr_ = nullptr;
-            
+MapReduceResultsIterator::const_reference MapReduceResultsIterator::Next() {
     if (!descending_) {
-        ++index_;
-        --limit_;
-        if (CheckIndex(index_)) {
-            ptr_ = (*results_)[index_];            
+        if (iter_ != end_) {
+            return *iter_++;
         }
-    } else {
-        --index_;
-        --limit_;
-        if (CheckIndex(index_)) {
-            ptr_ = (*results_)[index_];            
-        }
+    } else if (riter_ != rend_) {
+        return *riter_++;
     }
     
-    return ptr_; 
-}
-
-map_reduce_result_array_ptr::element_type::const_reference MapReduceResultsIterator::operator++(int) const {
-    ptr_ = nullptr;
-    
-    if (!descending_) {
-        if (CheckIndex(index_)) {
-            ptr_ = (*results_)[index_];
-            ++index_;
-            --limit_;
-        }
-    } else {
-        if (CheckIndex(index_)) {
-            ptr_ = (*results_)[index_];
-            --index_;
-            --limit_;
-        }
-    }
-    
-    return ptr_; 
-}
-
-map_reduce_result_array_ptr::element_type::const_reference MapReduceResultsIterator::operator*() const {
-    if (!ptr_ && CheckIndex(index_)) {
-        ptr_ = (*results_)[index_];
-    }
-    
-    return ptr_;
-}
-
-bool MapReduceResultsIterator::CheckIndex(DocumentsCollection::size_type index) const {
-    bool check = false;
-    
-    if (index >= 0 && index < results_->size() && limit_ >= 0) {
-        if (!descending_) {
-            check = index_ < endIndex_;
-        } else {
-            check = index_ >= startIndex_;
-        }
-    }
-    
-    return check;
-}
-
-DocumentsCollection::size_type MapReduceResultsIterator::CalculateEndIndex(DocumentsCollection::size_type startIndex, DocumentsCollection::size_type endIndex, DocumentsCollection::size_type size, bool descending) {
-    if (descending) {
-        if (size > 0 && endIndex >= size && startIndex < size) {
-            return size - 1;
-        } else {
-            return endIndex;
-        }
-    } else {
-        return startIndex;
-    }
+    return null_;
 }

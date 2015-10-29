@@ -19,36 +19,25 @@
 #ifndef MAP_REDUCE_RESULTS_ITERATOR_H
 #define MAP_REDUCE_RESULTS_ITERATOR_H
 
-#include <type_traits>
-
-#include "types.h"
-#include "documents_collection.h"
+#include "map_reduce_results.h"
 
 class MapReduceResultsIterator final {
 public:
-    MapReduceResultsIterator(map_reduce_result_array_ptr results, 
-            DocumentsCollection::size_type startIndex, 
-            DocumentsCollection::size_type endIndex, 
-            DocumentsCollection::size_type limit, 
-            bool inclusiveEnd, 
-            bool descending);
-
-    map_reduce_result_array_ptr::element_type::const_reference operator++() const;
-    map_reduce_result_array_ptr::element_type::const_reference operator++(int) const;
-    map_reduce_result_array_ptr::element_type::const_reference operator*() const;
-
-private:
-    bool CheckIndex(DocumentsCollection::size_type) const;
-    static DocumentsCollection::size_type CalculateEndIndex(DocumentsCollection::size_type startIndex, DocumentsCollection::size_type endIndex, DocumentsCollection::size_type size, bool descending);
+    using const_reference = MapReduceResults::const_reference;
     
-    const map_reduce_result_array_ptr results_;
-    const bool inclusiveEnd_;
+    MapReduceResultsIterator(const MapReduceResults& results, bool descending);
+    
+    const_reference Next();
+
+private:    
+    
+    const MapReduceResults& results_;
+    MapReduceResults::const_iterator iter_;
+    const MapReduceResults::const_iterator end_;
+    MapReduceResults::const_reverse_iterator riter_;
+    const MapReduceResults::const_reverse_iterator rend_;
     const bool descending_;
-    const DocumentsCollection::size_type startIndex_;
-    const DocumentsCollection::size_type endIndex_;
-    mutable DocumentsCollection::size_type index_;
-    mutable std::make_signed<DocumentsCollection::size_type>::type limit_;
-    mutable map_reduce_result_array_ptr::element_type::value_type ptr_;
+    const MapReduceResults::value_type null_;
 };
 
 #endif	/* MAP_REDUCE_RESULTS_ITERATOR_H */

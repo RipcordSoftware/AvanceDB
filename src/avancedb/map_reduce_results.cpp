@@ -125,26 +125,7 @@ DocumentsCollection::size_type MapReduceResults::FindResult(const map_reduce_res
 }
 
 MapReduceResultsIterator MapReduceResults::Iterator() const {
-    if (!descending_) {
-        auto startIndex = std::min(startIndex_ + skip_, results_->size());
-        auto endIndex = std::min(endIndex_, results_->size());
-        
-        MapReduceResultsIterator iter{results_, startIndex, endIndex, limit_, inclusiveEnd_, descending_};
-        return iter;
-    } else {
-        // to prevent unsigned underflow we have to be careful with the skip calculation
-        auto limit = limit_;
-        auto endIndex = endIndex_;
-        auto diff = endIndex_ - startIndex_ + 1;
-        if (skip_ < diff) {
-            endIndex = Subtract(endIndex_, skip_);
-        } else {
-            limit = 0;
-        }
-        
-        MapReduceResultsIterator iter{results_, startIndex_, endIndex, limit, inclusiveEnd_, descending_};
-        return iter;
-    }
+    return MapReduceResultsIterator{*this, descending_};
 }
 
 DocumentsCollection::size_type MapReduceResults::Subtract(DocumentsCollection::size_type a, DocumentsCollection::size_type b) {
@@ -153,4 +134,54 @@ DocumentsCollection::size_type MapReduceResults::Subtract(DocumentsCollection::s
         v = 0;
     }
     return v;
+}
+
+MapReduceResults::const_iterator MapReduceResults::cbegin() const {
+    auto limits = GetAscendingIndexes();    
+    if (limits.first < limits.second) {
+        return results_->cbegin() + limits.first;
+    } else {
+        return results_->cend();
+    }
+}
+
+MapReduceResults::const_iterator MapReduceResults::cend() const {    
+    auto limits = GetAscendingIndexes();    
+    if (limits.first < limits.second) {
+        return results_->cbegin() + limits.second;
+    } else {
+        return results_->cend();
+    }
+}
+
+MapReduceResults::const_reverse_iterator MapReduceResults::crbegin() const {
+    auto limits = GetDescendingIndexes();    
+    if (limits.first < limits.second) {
+        return results_->crend() - limits.second;
+    } else {
+        return results_->crend();
+    }            
+}
+
+MapReduceResults::const_reverse_iterator MapReduceResults::crend() const {
+    auto limits = GetDescendingIndexes();
+    if (limits.first < limits.second) {
+        return results_->crend() - limits.first;
+    } else {
+        return results_->crend();
+    }
+}
+
+std::pair<DocumentsCollection::size_type, DocumentsCollection::size_type> MapReduceResults::GetAscendingIndexes() const {
+    auto startIndex = std::min(startIndex_ + skip_, results_->size());
+    auto endIndex = std::min(endIndex_, results_->size());
+    endIndex = std::min(endIndex, startIndex_ + skip_ + limit_);
+    return std::make_pair(startIndex, endIndex);
+}
+
+std::pair<DocumentsCollection::size_type, DocumentsCollection::size_type> MapReduceResults::GetDescendingIndexes() const {
+    auto startIndex = inclusiveEnd_ ? startIndex_ : startIndex_ + 1;
+    startIndex = std::max(startIndex, Subtract(endIndex_ + 1, skip_ + limit_));
+    auto endIndex = Subtract(endIndex_ + 1, skip_);
+    return std::make_pair(startIndex, endIndex);
 }

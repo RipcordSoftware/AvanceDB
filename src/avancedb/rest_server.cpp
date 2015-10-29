@@ -35,6 +35,7 @@
 #include "rest_config.h"
 #include "document_revision.h"
 #include "map_reduce_result.h"
+#include "map_reduce_results_iterator.h"
 #include "get_view_options.h"
 
 #include "libscriptobject_gason.h"
@@ -779,10 +780,11 @@ bool RestServer::PostTempView(rs::httpserver::request_ptr request, const rs::htt
         auto& stream = response->setContentType(ContentTypes::Utf8::applicationJson).getResponseStream();
         ScriptObjectResponseStream<> objStream{stream};
         objStream << R"({"offset":)" << results->Offset() << R"(,"total_rows":)" << results->TotalRows() << R"(,"rows":[)";
-        
+
         auto prefixComma = false;
         auto iter = results->Iterator();
-        for (auto result = *iter; !!result; result = ++iter) {
+        auto result = iter.Next();
+        while (result) {
             auto resultObj = result->getResultArray();
             
             objStream << (prefixComma ? ',' : ' ');
@@ -792,6 +794,8 @@ bool RestServer::PostTempView(rs::httpserver::request_ptr request, const rs::htt
             objStream.Serialize(resultObj, MapReduceResult::ValueIndex);
             objStream << '}';
             prefixComma = true;
+            
+            result = iter.Next();
         }
         
         objStream << "]}";
