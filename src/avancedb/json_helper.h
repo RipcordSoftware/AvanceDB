@@ -30,6 +30,10 @@ public:
     template <typename T, std::size_t N>
     static const T* EscapeJsonString(const T* value, std::array<T, N>& buffer, std::basic_string<T>& dynBuffer) {
         std::size_t index = 0;
+        
+        buffer[0] = '\0';
+        dynBuffer.clear();
+        
         auto len = std::strlen(value);
         if (len > 0 && len < N) {
             decltype(index) i = 0;
@@ -55,6 +59,7 @@ public:
         } else {
             if (index > 0) {
                 dynBuffer = buffer.data();
+                buffer[0] = '\0';
             }
             
             for (; index < len; ++index) {
