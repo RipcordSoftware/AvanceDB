@@ -25,9 +25,15 @@
 
 #include "libscriptobject_gason.h"
 #include "script_object_factory.h"
+#include "script_array_factory.h"
+#include "script_array_vector_source.h"
+
+#include "libhttpserver.h"
 
 #include "../databases.h"
 #include "../database.h"
+#include "../rest_exceptions.h"
+#include "../post_all_documents_options.h"
 
 class BasicDatabaseTests : public ::testing::Test {
 protected:
@@ -91,7 +97,7 @@ protected:
         
         if (rev) {
             auto len = std::strlen(rev);
-            if (len > 2) {
+            if (len == 34) {
                 valid = rev[0] == ('0' + num) && rev[1] == '-';
             }
         }
@@ -222,7 +228,46 @@ TEST_F(BasicDatabaseTests, test4) {
     ASSERT_EQ(++updateSequence_, db_->UpdateSequence());
 }
 
-TEST_F(BasicDatabaseTests, test10) {    
+TEST_F(BasicDatabaseTests, test5) {
+    auto obj1 = docs_->getObject(0);
+    auto id1 = obj1->getString("_id");
+    auto doc1 = db_->SetDocument(id1, obj1);
+
+    ASSERT_EQ(1, db_->DocCount());
+    ASSERT_EQ(++updateSequence_, db_->UpdateSequence());
+    ASSERT_NE(nullptr, doc1);
+    ASSERT_STREQ(id1, doc1->getId());
+    ASSERT_TRUE(ValidateRevision(1, doc1));
+    
+    auto doc2 = db_->GetDocument(id1);
+    ASSERT_EQ(1, db_->DocCount());
+    ASSERT_EQ(updateSequence_, db_->UpdateSequence());
+    ASSERT_NE(nullptr, doc2);
+    ASSERT_STREQ(id1, doc2->getId());
+    ASSERT_TRUE(ValidateRevision(1, doc2));
+    
+    auto delDoc2 = db_->DeleteDocument(id1, doc2->getRev());
+    ASSERT_NE(nullptr, delDoc2);
+    ASSERT_STREQ(doc2->getRev(), delDoc2->getRev());
+    
+    ASSERT_EQ(0, db_->DocCount());
+    ASSERT_EQ(++updateSequence_, db_->UpdateSequence());
+}
+
+TEST_F(BasicDatabaseTests, test6) {
+    auto id1 = MakeDocId(0);
+    auto doc1 = db_->GetDocument(id1.c_str(), false);
+
+    ASSERT_EQ(0, db_->DocCount());
+    ASSERT_EQ(updateSequence_, db_->UpdateSequence());
+    ASSERT_EQ(nullptr, doc1);
+    
+    ASSERT_THROW({
+        db_->GetDocument(id1.c_str(), true);
+    }, DocumentMissing);
+}
+
+TEST_F(BasicDatabaseTests, test7) {    
     auto results = db_->PostBulkDocuments(docs_, true);
     ASSERT_EQ(docs_->getCount(), results.size());
     
@@ -245,4 +290,170 @@ TEST_F(BasicDatabaseTests, test10) {
     ASSERT_EQ(0, db_->DocCount());
     ASSERT_EQ((docs_->getCount() * 2) + updateSequence_, db_->UpdateSequence());
     updateSequence_ += docs_->getCount() * 2;
+}
+
+TEST_F(BasicDatabaseTests, test8) {
+    auto results = db_->PostBulkDocuments(docs_, true);
+    ASSERT_EQ(docs_->getCount(), results.size());
+    
+    ASSERT_EQ(docs_->getCount(), db_->DocCount());
+    ASSERT_EQ(docs_->getCount() + updateSequence_, db_->UpdateSequence());
+    
+    for (auto i = 0; i < results.size(); ++i) {
+        auto result = results[i];
+        auto doc = db_->GetDocument(result.id_.c_str(), false);
+        ASSERT_NE(nullptr, doc);
+        ASSERT_STREQ(result.id_.c_str(), doc->getId());
+        ASSERT_STREQ(result.rev_.c_str(), doc->getRev());
+        ASSERT_TRUE(ValidateRevision(1, doc));
+    }
+    
+    for (long i = results.size() - 1; i >= 0; --i) {
+        auto result = results[i];
+        auto doc = db_->GetDocument(result.id_.c_str(), false);
+        ASSERT_NE(nullptr, doc);
+        ASSERT_STREQ(result.id_.c_str(), doc->getId());
+        ASSERT_STREQ(result.rev_.c_str(), doc->getRev());
+        ASSERT_TRUE(ValidateRevision(1, doc));
+    }
+    
+    updateSequence_ += docs_->getCount();
+}
+
+TEST_F(BasicDatabaseTests, test9) {
+    rs::scriptobject::utils::ArrayVector ids;
+    for (long i = docs_->getCount() - 1; i >= 0; --i) {
+        auto id = MakeDocId(i);
+        ids.emplace_back(id.c_str());
+    }
+    
+    rs::scriptobject::utils::ScriptArrayVectorSource idSource{ids};    
+    auto keys = rs::scriptobject::ScriptArrayFactory::CreateArray(idSource);
+    
+    rs::httpserver::QueryString qs{""};    
+    PostAllDocumentsOptions options{qs, keys};    
+    DocumentsCollection::size_type totalDocs = 0, updateSequence = 0;    
+    auto results = db_->PostDocuments(options, totalDocs, updateSequence);
+    
+    ASSERT_EQ(docs_->getCount(), results->size());
+    for (auto i = 0; i < results->size(); ++i) {
+        auto result = (*results)[i];
+        auto doc = docs_->getObject(docs_->getCount() - 1 - i);
+        ASSERT_STREQ(doc->getString("_id"), result->getId());
+    }
+}
+
+TEST_F(BasicDatabaseTests, test10) {
+    rs::scriptobject::utils::ArrayVector ids;
+    for (auto i = 0; i < docs_->getCount(); i++) {
+        auto id = MakeDocId(i);
+        ids.emplace_back(id.c_str());
+    }
+    
+    rs::scriptobject::utils::ScriptArrayVectorSource idSource{ids};    
+    auto keys = rs::scriptobject::ScriptArrayFactory::CreateArray(idSource);
+    
+    rs::httpserver::QueryString qs{"limit=10"};
+    PostAllDocumentsOptions options{qs, keys};    
+    DocumentsCollection::size_type totalDocs = 0, updateSequence = 0;    
+    auto results = db_->PostDocuments(options, totalDocs, updateSequence);
+    
+    ASSERT_EQ(10, results->size());
+    for (auto i = 0; i < 10; ++i) {
+        auto result = (*results)[i];
+        auto doc = docs_->getObject(i);
+        ASSERT_STREQ(doc->getString("_id"), result->getId());
+    }
+}
+
+TEST_F(BasicDatabaseTests, test11) {
+    rs::scriptobject::utils::ArrayVector ids;
+    for (auto i = 0; i < docs_->getCount(); i++) {
+        auto id = MakeDocId(i);
+        ids.emplace_back(id.c_str());
+    }
+    
+    rs::scriptobject::utils::ScriptArrayVectorSource idSource{ids};    
+    auto keys = rs::scriptobject::ScriptArrayFactory::CreateArray(idSource);
+    
+    rs::httpserver::QueryString qs{"limit=10&skip=20"};
+    PostAllDocumentsOptions options{qs, keys};    
+    DocumentsCollection::size_type totalDocs = 0, updateSequence = 0;    
+    auto results = db_->PostDocuments(options, totalDocs, updateSequence);
+    
+    ASSERT_EQ(10, results->size());
+    for (auto i = 0; i < 10; ++i) {
+        auto result = (*results)[i];
+        auto doc = docs_->getObject(i + 20);
+        ASSERT_STREQ(doc->getString("_id"), result->getId());
+    }
+}
+
+TEST_F(BasicDatabaseTests, test12) {
+    rs::scriptobject::utils::ArrayVector ids;
+    for (auto i = 0; i < docs_->getCount(); i++) {
+        auto id = MakeDocId(i);
+        ids.emplace_back(id.c_str());
+    }
+    
+    rs::scriptobject::utils::ScriptArrayVectorSource idSource{ids};    
+    auto keys = rs::scriptobject::ScriptArrayFactory::CreateArray(idSource);
+    
+    rs::httpserver::QueryString qs{"descending=true"};
+    PostAllDocumentsOptions options{qs, keys};    
+    DocumentsCollection::size_type totalDocs = 0, updateSequence = 0;    
+    auto results = db_->PostDocuments(options, totalDocs, updateSequence);
+    
+    ASSERT_EQ(docs_->getCount(), results->size());
+    for (auto i = 0; i < results->size(); ++i) {
+        auto result = (*results)[i];
+        auto doc = docs_->getObject(docs_->getCount() - 1 - i);
+        ASSERT_STREQ(doc->getString("_id"), result->getId());
+    }
+}
+
+TEST_F(BasicDatabaseTests, test13) {
+    rs::scriptobject::utils::ArrayVector ids;
+    for (auto i = 0; i < docs_->getCount(); i++) {
+        auto id = MakeDocId(i);
+        ids.emplace_back(id.c_str());
+    }
+    
+    rs::scriptobject::utils::ScriptArrayVectorSource idSource{ids};    
+    auto keys = rs::scriptobject::ScriptArrayFactory::CreateArray(idSource);
+    
+    rs::httpserver::QueryString qs{"descending=true&limit=10"};
+    PostAllDocumentsOptions options{qs, keys};    
+    DocumentsCollection::size_type totalDocs = 0, updateSequence = 0;    
+    auto results = db_->PostDocuments(options, totalDocs, updateSequence);
+    
+    ASSERT_EQ(10, results->size());
+    for (auto i = 0; i < 10; ++i) {
+        auto result = (*results)[i];
+        auto doc = docs_->getObject(docs_->getCount() - 1 - i);
+        ASSERT_STREQ(doc->getString("_id"), result->getId());
+    }
+}
+
+TEST_F(BasicDatabaseTests, test14) {
+    rs::scriptobject::utils::ArrayVector ids;
+    for (auto i = 0; i < docs_->getCount(); i++) {
+        auto id = MakeDocId(i);
+        ids.emplace_back(id.c_str());
+    }
+    
+    rs::scriptobject::utils::ScriptArrayVectorSource idSource{ids};    
+    auto keys = rs::scriptobject::ScriptArrayFactory::CreateArray(idSource);
+    
+    rs::httpserver::QueryString qs{"descending=true&limit=10&skip=20"};
+    PostAllDocumentsOptions options{qs, keys};    
+    DocumentsCollection::size_type totalDocs = 0, updateSequence = 0;    
+    auto results = db_->PostDocuments(options, totalDocs, updateSequence);
+    
+    ASSERT_EQ(10, results->size());
+    for (auto i = 0; i < 10; ++i) {
+        auto result = (*results)[i];
+        auto doc = docs_->getObject(docs_->getCount() - 1 - i - 20);
+        ASSERT_STREQ(doc->getString("_id"), result->getId());
+    }
 }

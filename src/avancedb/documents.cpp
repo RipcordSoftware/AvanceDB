@@ -282,6 +282,10 @@ document_array_ptr Documents::PostDocuments(const PostAllDocumentsOptions& optio
     
     totalDocs = docs->size();
     
+    if (options.Descending()) {
+        std::reverse(results->begin(), results->end());
+    }
+    
     DocumentsCollection::size_type startIndex = options.Skip();
     DocumentsCollection::size_type endIndex = results->size();
     DocumentsCollection::size_type indexLimit = options.Limit();
@@ -293,10 +297,6 @@ document_array_ptr Documents::PostDocuments(const PostAllDocumentsOptions& optio
         results = boost::make_shared<document_array>(results->cbegin() + startIndex, results->cbegin() + endIndex);
     } else {
         results->clear();
-    }
-    
-    if (options.Descending()) {
-        std::reverse(results->begin(), results->end());
     }
     
     return results;
