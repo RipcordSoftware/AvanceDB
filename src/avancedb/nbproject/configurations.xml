@@ -84,6 +84,12 @@
                    displayName="Test Files"
                    projectFiles="false"
                    kind="TEST_LOGICAL_FOLDER">
+      <logicalFolder name="f1"
+                     displayName="Map Reduce Iterator Tests"
+                     projectFiles="true"
+                     kind="TEST">
+        <itemPath>tests/map_reduce_iterator_tests.cpp</itemPath>
+      </logicalFolder>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -224,6 +230,32 @@
       </item>
       <item path="documents_collection.h" ex="false" tool="3" flavor2="0">
       </item>
+      <folder path="TestFiles">
+        <ccTool>
+          <incDir>
+            <pElem>../../externals/installed/include</pElem>
+          </incDir>
+          <commandLine>--coverage</commandLine>
+        </ccTool>
+        <linkerTool>
+          <commandLine>../../externals/installed/lib/libgtest_main.a ../../externals/installed/lib/libgtest.a --coverage</commandLine>
+        </linkerTool>
+      </folder>
+      <folder path="TestFiles/f1">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+        <ccTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+        </ccTool>
+        <linkerTool>
+          <output>${TESTDIR}/TestFiles/f1</output>
+        </linkerTool>
+      </folder>
       <item path="get_all_documents_options.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="get_all_documents_options.h" ex="false" tool="3" flavor2="0">
@@ -323,6 +355,11 @@
       <item path="set_thread_name.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="set_thread_name.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/map_reduce_iterator_tests.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
       </item>
       <item path="types.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -470,6 +507,31 @@
       </item>
       <item path="documents_collection.h" ex="false" tool="3" flavor2="0">
       </item>
+      <folder path="TestFiles">
+        <ccTool>
+          <incDir>
+            <pElem>../../externals/installed/include</pElem>
+          </incDir>
+        </ccTool>
+        <linkerTool>
+          <commandLine>../../externals/installed/lib/libgtest_main.a ../../externals/installed/lib/libgtest.a</commandLine>
+        </linkerTool>
+      </folder>
+      <folder path="TestFiles/f1">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+        <ccTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+        </ccTool>
+        <linkerTool>
+          <output>${TESTDIR}/TestFiles/f1</output>
+        </linkerTool>
+      </folder>
       <item path="get_all_documents_options.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="get_all_documents_options.h" ex="false" tool="3" flavor2="0">
@@ -569,6 +631,11 @@
       <item path="set_thread_name.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="set_thread_name.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/map_reduce_iterator_tests.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
       </item>
       <item path="types.h" ex="false" tool="3" flavor2="0">
       </item>
