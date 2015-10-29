@@ -7,13 +7,14 @@ var program = require('commander');
 
 program
   .version('0.0.1')
-  .option('-n, --name [name]', 'The name of the database to create', 'avancedb-loadtest')
-  .option('-c, --count [records]', 'The number of records to add to the database', 1000000, parseInt)
-  .option('-b, --block [size]', 'The number of records in each block', 2000, parseInt)
+  .option('-n, --name [name=avancedb-loadtest]', 'The name of the database to create', 'avancedb-loadtest')
+  .option('-c, --count [records=1000000]', 'The number of records to add to the database', 1000000, parseInt)
+  .option('-b, --block [size=2000]', 'The number of records in each block', 2000, parseInt)
+  .option('-s, --step [size=1]', 'The step to use when incrementing record ids', 1, parseInt)
   .option('-a, --anonymous', 'Add records without an _id field', false)
   .option('-u, --update', 'Update the database if it already exists, don\'t drop it first', false)
-  .option('-p, --port [port]', 'The port number to connect to', 5994, parseInt)
-  .option('-h, --host [name]', 'The IP or hostname to connect to', '127.0.0.1')
+  .option('-p, --port [port=5994]', 'The port number to connect to', 5994, parseInt)
+  .option('-h, --host [name=127.0.0.1]', 'The IP or hostname to connect to', '127.0.0.1')
   .parse(process.argv);
 
 var host = 'http://' + program.host;
@@ -73,6 +74,7 @@ init.then(function() {
     var overflow = program.count % program.block;
     var active = 0;
     var index = 0;
+    var step = Number(program.step);
     var start = process.hrtime();
     
     var save = function(next) {
@@ -88,7 +90,8 @@ init.then(function() {
 
             var testData  = [];
             for (var i = 0; i < blockSize; ++i) {
-                testData[i] = program.anonymous ? testDocument : _.extend({index: index, _id: ('00000000' + (index++)).slice(-8)}, testDocument);
+                testData[i] = program.anonymous ? testDocument : _.extend({index: index, _id: ('00000000' + index).slice(-8)}, testDocument);
+                index += step;
             }
             
             db.save(testData, function(err, res) {
