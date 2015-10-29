@@ -300,7 +300,7 @@ TEST_F(JsonHelperTests, test19) {
     }
 }
 
-TEST_F(JsonHelperTests, 20) {
+TEST_F(JsonHelperTests, test20) {
     const char* json = "01234567890123456789";
     std::array<char, 22> buffer;
     std::string str;
@@ -316,7 +316,7 @@ TEST_F(JsonHelperTests, 20) {
     ASSERT_STREQ(json, str.data());
 }
 
-TEST_F(JsonHelperTests, 21) {
+TEST_F(JsonHelperTests, test21) {
     const char* json = "0123456789012345678901234567890123456789";
     std::array<char, 22> buffer;
     std::string str;

@@ -84,6 +84,12 @@
                    displayName="Test Files"
                    projectFiles="false"
                    kind="TEST_LOGICAL_FOLDER">
+      <logicalFolder name="f3"
+                     displayName="Basic Database Tests"
+                     projectFiles="true"
+                     kind="TEST">
+        <itemPath>tests/basic_database_tests.cpp</itemPath>
+      </logicalFolder>
       <logicalFolder name="f2"
                      displayName="JSON Helper Tests"
                      projectFiles="true"
@@ -277,6 +283,21 @@
           <output>${TESTDIR}/TestFiles/f2</output>
         </linkerTool>
       </folder>
+      <folder path="TestFiles/f3">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+        <ccTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+        </ccTool>
+        <linkerTool>
+          <output>${TESTDIR}/TestFiles/f3</output>
+        </linkerTool>
+      </folder>
       <item path="get_all_documents_options.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="get_all_documents_options.h" ex="false" tool="3" flavor2="0">
@@ -376,6 +397,8 @@
       <item path="set_thread_name.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="set_thread_name.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/basic_database_tests.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="tests/json_helper_tests.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -570,6 +593,21 @@
           <output>${TESTDIR}/TestFiles/f2</output>
         </linkerTool>
       </folder>
+      <folder path="TestFiles/f3">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+        <ccTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+        </ccTool>
+        <linkerTool>
+          <output>${TESTDIR}/TestFiles/f3</output>
+        </linkerTool>
+      </folder>
       <item path="get_all_documents_options.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="get_all_documents_options.h" ex="false" tool="3" flavor2="0">
@@ -669,6 +707,8 @@
       <item path="set_thread_name.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="set_thread_name.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/basic_database_tests.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="tests/json_helper_tests.cpp" ex="false" tool="1" flavor2="0">
       </item>
