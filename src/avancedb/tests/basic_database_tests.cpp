@@ -496,7 +496,7 @@ TEST_F(BasicDatabaseTests, test15c) {
     DocumentsCollection::size_type offset = 0, totalDocs = 0, updateSequence = 0;    
     auto results = db_->GetDocuments(options, offset, totalDocs, updateSequence);
     
-    ASSERT_EQ(410, offset);    
+    ASSERT_EQ(401, offset);
     ASSERT_EQ(0, results->size());    
 }
 
@@ -780,4 +780,222 @@ TEST_F(BasicDatabaseTests, test32) {
         auto doc = docs_->getObject(100 - i - 10);
         ASSERT_STREQ(doc->getString("_id"), result->getId());
     }
+}
+
+TEST_F(BasicDatabaseTests, test33) {    
+    rs::httpserver::QueryString qs{R"(descending=true&endkey="00000900")"};
+    GetAllDocumentsOptions options{qs};    
+    DocumentsCollection::size_type offset = 0, totalDocs = 0, updateSequence = 0;    
+    auto results = db_->GetDocuments(options, offset, totalDocs, updateSequence);
+    
+    ASSERT_EQ(0, offset);
+    
+    ASSERT_EQ(100, results->size());
+    for (auto i = 0; i < results->size(); ++i) {
+        auto result = (*results)[i];
+        auto doc = docs_->getObject(docs_->getCount() - 1 - i);
+        ASSERT_STREQ(doc->getString("_id"), result->getId());
+    }
+}
+
+TEST_F(BasicDatabaseTests, test34) {    
+    rs::httpserver::QueryString qs{R"(descending=true&endkey="00000900"&inclusive_end=false)"};
+    GetAllDocumentsOptions options{qs};    
+    DocumentsCollection::size_type offset = 0, totalDocs = 0, updateSequence = 0;    
+    auto results = db_->GetDocuments(options, offset, totalDocs, updateSequence);
+    
+    ASSERT_EQ(0, offset);
+    
+    ASSERT_EQ(99, results->size());
+    for (auto i = 0; i < results->size(); ++i) {
+        auto result = (*results)[i];
+        auto doc = docs_->getObject(docs_->getCount() - 1 - i);
+        ASSERT_STREQ(doc->getString("_id"), result->getId());
+    }
+}
+
+TEST_F(BasicDatabaseTests, test35) {    
+    rs::httpserver::QueryString qs{R"(descending=true&endkey="00000900"&skip=10)"};
+    GetAllDocumentsOptions options{qs};    
+    DocumentsCollection::size_type offset = 0, totalDocs = 0, updateSequence = 0;    
+    auto results = db_->GetDocuments(options, offset, totalDocs, updateSequence);
+    
+    ASSERT_EQ(10, offset);
+    
+    ASSERT_EQ(90, results->size());
+    for (auto i = 0; i < results->size(); ++i) {
+        auto result = (*results)[i];
+        auto doc = docs_->getObject(docs_->getCount() - 1 - 10 - i);
+        ASSERT_STREQ(doc->getString("_id"), result->getId());
+    }
+}
+
+TEST_F(BasicDatabaseTests, test36) {    
+    rs::httpserver::QueryString qs{R"(descending=true&endkey="00000900"&skip=10&limit=20)"};
+    GetAllDocumentsOptions options{qs};    
+    DocumentsCollection::size_type offset = 0, totalDocs = 0, updateSequence = 0;    
+    auto results = db_->GetDocuments(options, offset, totalDocs, updateSequence);
+    
+    ASSERT_EQ(10, offset);
+    
+    ASSERT_EQ(20, results->size());
+    for (auto i = 0; i < results->size(); ++i) {
+        auto result = (*results)[i];
+        auto doc = docs_->getObject(docs_->getCount() - 1 - 10 - i);
+        ASSERT_STREQ(doc->getString("_id"), result->getId());
+    }
+}
+
+TEST_F(BasicDatabaseTests, test37) {    
+    rs::httpserver::QueryString qs{R"(descending=true&startkey="00000900"&endkey="00000800")"};
+    GetAllDocumentsOptions options{qs};    
+    DocumentsCollection::size_type offset = 0, totalDocs = 0, updateSequence = 0;    
+    auto results = db_->GetDocuments(options, offset, totalDocs, updateSequence);
+    
+    ASSERT_EQ(99, offset);
+    
+    ASSERT_EQ(101, results->size());
+    for (auto i = 0; i < results->size(); ++i) {
+        auto result = (*results)[i];
+        auto doc = docs_->getObject(docs_->getCount() - 1 - 99 - i);
+        ASSERT_STREQ(doc->getString("_id"), result->getId());
+    }
+}
+
+TEST_F(BasicDatabaseTests, test38) {    
+    rs::httpserver::QueryString qs{R"(descending=true&startkey="00000900"&endkey="00000800"&inclusive_end=false)"};
+    GetAllDocumentsOptions options{qs};    
+    DocumentsCollection::size_type offset = 0, totalDocs = 0, updateSequence = 0;    
+    auto results = db_->GetDocuments(options, offset, totalDocs, updateSequence);
+    
+    ASSERT_EQ(99, offset);
+    
+    ASSERT_EQ(100, results->size());
+    for (auto i = 0; i < results->size(); ++i) {
+        auto result = (*results)[i];
+        auto doc = docs_->getObject(docs_->getCount() - 1 - 99 - i);
+        ASSERT_STREQ(doc->getString("_id"), result->getId());
+    }
+}
+
+TEST_F(BasicDatabaseTests, test39) {    
+    rs::httpserver::QueryString qs{R"(descending=true&startkey="00000900"&endkey="00000800"&skip=10)"};
+    GetAllDocumentsOptions options{qs};    
+    DocumentsCollection::size_type offset = 0, totalDocs = 0, updateSequence = 0;    
+    auto results = db_->GetDocuments(options, offset, totalDocs, updateSequence);
+    
+    ASSERT_EQ(109, offset);
+    
+    ASSERT_EQ(91, results->size());
+    for (auto i = 0; i < results->size(); ++i) {
+        auto result = (*results)[i];
+        auto doc = docs_->getObject(docs_->getCount() - 1 - 109 - i);
+        ASSERT_STREQ(doc->getString("_id"), result->getId());
+    }
+}
+
+TEST_F(BasicDatabaseTests, test40) {    
+    rs::httpserver::QueryString qs{R"(descending=true&startkey="00000900"&endkey="00000800"&skip=10&limit=20)"};
+    GetAllDocumentsOptions options{qs};    
+    DocumentsCollection::size_type offset = 0, totalDocs = 0, updateSequence = 0;    
+    auto results = db_->GetDocuments(options, offset, totalDocs, updateSequence);
+    
+    ASSERT_EQ(109, offset);
+    
+    ASSERT_EQ(20, results->size());
+    for (auto i = 0; i < results->size(); ++i) {
+        auto result = (*results)[i];
+        auto doc = docs_->getObject(docs_->getCount() - 1 - 109 - i);
+        ASSERT_STREQ(doc->getString("_id"), result->getId());
+    }
+}
+
+TEST_F(BasicDatabaseTests, test41) {
+    rs::httpserver::QueryString qs{R"(startkey="00001000")"};
+    GetAllDocumentsOptions options{qs};    
+    DocumentsCollection::size_type offset = 0, totalDocs = 0, updateSequence = 0;    
+    auto results = db_->GetDocuments(options, offset, totalDocs, updateSequence);
+    
+    ASSERT_EQ(1000, offset);    
+    ASSERT_EQ(0, results->size());
+}
+
+TEST_F(BasicDatabaseTests, test42) {
+    rs::httpserver::QueryString qs{R"(startkey="00001000"&skip=1000)"};
+    GetAllDocumentsOptions options{qs};    
+    DocumentsCollection::size_type offset = 0, totalDocs = 0, updateSequence = 0;    
+    auto results = db_->GetDocuments(options, offset, totalDocs, updateSequence);
+    
+    ASSERT_EQ(1000, offset);    
+    ASSERT_EQ(0, results->size());
+}
+
+TEST_F(BasicDatabaseTests, test43) {
+    rs::httpserver::QueryString qs{R"(startkey="10000000")"};
+    GetAllDocumentsOptions options{qs};    
+    DocumentsCollection::size_type offset = 0, totalDocs = 0, updateSequence = 0;    
+    auto results = db_->GetDocuments(options, offset, totalDocs, updateSequence);
+    
+    ASSERT_EQ(1000, offset);    
+    ASSERT_EQ(0, results->size());
+}
+
+TEST_F(BasicDatabaseTests, test44) {
+    rs::httpserver::QueryString qs{R"(endkey="++++++++")"};
+    GetAllDocumentsOptions options{qs};    
+    DocumentsCollection::size_type offset = 0, totalDocs = 0, updateSequence = 0;    
+    auto results = db_->GetDocuments(options, offset, totalDocs, updateSequence);
+    
+    ASSERT_EQ(0, offset);    
+    ASSERT_EQ(0, results->size());
+}
+
+TEST_F(BasicDatabaseTests, test45) {
+    rs::httpserver::QueryString qs{R"(endkey="++++++++"&skip=10000)"};
+    GetAllDocumentsOptions options{qs};    
+    DocumentsCollection::size_type offset = 0, totalDocs = 0, updateSequence = 0;    
+    auto results = db_->GetDocuments(options, offset, totalDocs, updateSequence);
+    
+    ASSERT_EQ(0, offset);
+    ASSERT_EQ(0, results->size());
+}
+
+TEST_F(BasicDatabaseTests, test46) {
+    rs::httpserver::QueryString qs{R"(endkey="++++++++"&limit=10)"};
+    GetAllDocumentsOptions options{qs};    
+    DocumentsCollection::size_type offset = 0, totalDocs = 0, updateSequence = 0;    
+    auto results = db_->GetDocuments(options, offset, totalDocs, updateSequence);
+    
+    ASSERT_EQ(0, offset);    
+    ASSERT_EQ(0, results->size());
+}
+
+TEST_F(BasicDatabaseTests, test47) {
+    rs::httpserver::QueryString qs{R"(endkey="++++++++"&inclusive_end=false)"};
+    GetAllDocumentsOptions options{qs};    
+    DocumentsCollection::size_type offset = 0, totalDocs = 0, updateSequence = 0;    
+    auto results = db_->GetDocuments(options, offset, totalDocs, updateSequence);
+    
+    ASSERT_EQ(0, offset);    
+    ASSERT_EQ(0, results->size());
+}
+
+TEST_F(BasicDatabaseTests, test48) {
+    rs::httpserver::QueryString qs{R"(startkey="00001000"&endkey="++++++++")"};
+    GetAllDocumentsOptions options{qs};    
+    DocumentsCollection::size_type offset = 0, totalDocs = 0, updateSequence = 0;    
+    auto results = db_->GetDocuments(options, offset, totalDocs, updateSequence);
+    
+    ASSERT_EQ(0, offset);    
+    ASSERT_EQ(0, results->size());
+}
+
+TEST_F(BasicDatabaseTests, test49) {
+    rs::httpserver::QueryString qs{R"(startkey="00001000"&endkey="++++++++"&skip=1000)"};
+    GetAllDocumentsOptions options{qs};    
+    DocumentsCollection::size_type offset = 0, totalDocs = 0, updateSequence = 0;    
+    auto results = db_->GetDocuments(options, offset, totalDocs, updateSequence);
+    
+    ASSERT_EQ(0, offset);    
+    ASSERT_EQ(0, results->size());
 }

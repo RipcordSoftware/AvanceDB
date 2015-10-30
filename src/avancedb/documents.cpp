@@ -245,15 +245,14 @@ document_array_ptr Documents::GetDocuments(const GetAllDocumentsOptions& options
         }
     }
 
-    startIndex += indexSkip;
+    startIndex = std::min(startIndex + indexSkip, docs->size());
+    endIndex = std::min(startIndex + indexLimit, endIndex);
+    endIndex = std::min(endIndex, docs->size());
 
-    offset = startIndex;
+    offset = std::min(startIndex, endIndex);
     totalDocs = docs->size();
 
     if (startIndex < docs->size() && startIndex < endIndex) {
-        endIndex = std::min(startIndex + indexLimit, endIndex);
-        endIndex = std::min(endIndex, docs->size());
-
         docs = boost::make_shared<document_array>(docs->cbegin() + startIndex, docs->cbegin() + endIndex);
     } else {
         docs = boost::make_shared<document_array>();
