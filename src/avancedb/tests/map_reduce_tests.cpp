@@ -37,7 +37,8 @@
 #include "../get_view_options.h"
 #include "../config.h"
 #include "../map_reduce_thread_pool.h"
-#include "map_reduce_result.h"
+#include "../map_reduce_result.h"
+#include "../map_reduce_result_comparers.h"
 
 class MapReduceTests : public ::testing::Test {
 protected:
@@ -115,6 +116,19 @@ protected:
         return obj;
     }
     
+    static void CompareResults(map_reduce_result_array_ptr::element_type::const_iterator begin, map_reduce_result_array_ptr::element_type::const_iterator end,
+            map_reduce_result_array_ptr::element_type::const_reverse_iterator riter, map_reduce_result_array_ptr::element_type::const_reverse_iterator rend) {
+        map_reduce_result_array_ptr::element_type items{begin, end};
+        std::reverse(items.begin(), items.end());
+
+        auto iter = items.cbegin();
+        auto iterEnd = items.cend();
+        for (; iter != iterEnd && riter != rend ; ++iter, ++riter) {
+            auto diff = MapReduceResultComparers::Compare(*iter, *riter);
+            ASSERT_EQ(0, diff);
+        }
+    }
+    
     static Databases databases_;
     static database_ptr db_;
     static script_array_ptr docs_;
@@ -176,6 +190,8 @@ TEST_F(MapReduceTests, test1) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
+    
+    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test2) {
@@ -214,6 +230,8 @@ TEST_F(MapReduceTests, test2) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
+    
+    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test3) {
@@ -251,6 +269,8 @@ TEST_F(MapReduceTests, test3) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
+    
+    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test4) {
@@ -288,6 +308,8 @@ TEST_F(MapReduceTests, test4) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
+    
+    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test4b) {
@@ -345,6 +367,8 @@ TEST_F(MapReduceTests, test5) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
+    
+    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test6) {
@@ -382,6 +406,8 @@ TEST_F(MapReduceTests, test6) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
+    
+    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test7) {
@@ -419,6 +445,8 @@ TEST_F(MapReduceTests, test7) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
+    
+    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test7b) {
@@ -477,6 +505,8 @@ TEST_F(MapReduceTests, test8) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
+    
+    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test9) {
@@ -515,6 +545,8 @@ TEST_F(MapReduceTests, test9) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
+    
+    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test10) {
@@ -553,6 +585,8 @@ TEST_F(MapReduceTests, test10) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
+    
+    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test11) {
@@ -611,6 +645,8 @@ TEST_F(MapReduceTests, test12) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
+    
+    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test13) {
@@ -649,6 +685,8 @@ TEST_F(MapReduceTests, test13) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
+    
+    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test14) {
@@ -687,6 +725,8 @@ TEST_F(MapReduceTests, test14) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
+    
+    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test15) {
@@ -725,6 +765,8 @@ TEST_F(MapReduceTests, test15) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
+    
+    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test16) {
@@ -763,6 +805,8 @@ TEST_F(MapReduceTests, test16) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
+    
+    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test17) {
@@ -801,6 +845,8 @@ TEST_F(MapReduceTests, test17) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
+    
+    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test18) {
@@ -839,6 +885,8 @@ TEST_F(MapReduceTests, test18) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
+    
+    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test19) {
@@ -877,6 +925,8 @@ TEST_F(MapReduceTests, test19) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
+    
+    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test20) {
@@ -915,6 +965,8 @@ TEST_F(MapReduceTests, test20) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
+    
+    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test21) {
@@ -954,6 +1006,7 @@ TEST_F(MapReduceTests, test21) {
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
     
+    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test22) {
@@ -992,6 +1045,8 @@ TEST_F(MapReduceTests, test22) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
+    
+    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test23) {
@@ -1030,6 +1085,8 @@ TEST_F(MapReduceTests, test23) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
+    
+    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test24) {
@@ -1088,6 +1145,8 @@ TEST_F(MapReduceTests, test25) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
+    
+    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test26) {
@@ -1126,6 +1185,8 @@ TEST_F(MapReduceTests, test26) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
+    
+    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test27) {
@@ -1164,6 +1225,8 @@ TEST_F(MapReduceTests, test27) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
+    
+    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test28) {
@@ -1202,6 +1265,8 @@ TEST_F(MapReduceTests, test28) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
+    
+    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test29) {
@@ -1240,6 +1305,8 @@ TEST_F(MapReduceTests, test29) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
+    
+    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test30) {
@@ -1278,4 +1345,6 @@ TEST_F(MapReduceTests, test30) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
+    
+    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
