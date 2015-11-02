@@ -34,9 +34,8 @@ MapReduceResults::MapReduceResults(map_reduce_result_array_ptr results) :
 MapReduceResults::MapReduceResults(const GetViewOptions& options, map_reduce_result_array_ptr results) :
         MapReduceResults(results) {
     descending_ = options.Descending();
-    endIndex_ = !descending_ ? results->size() : Subtract(results->size(), 1);
-    auto inclusiveStart = descending_ ?  options.InclusiveEnd() : true;
-    inclusiveEnd_ = !descending_ ?  options.InclusiveEnd() : true;
+    auto inclusiveStart = descending_ ? options.InclusiveEnd() : true;
+    inclusiveEnd_ = !descending_ ? options.InclusiveEnd() : true;
     skip_ = std::min(options.Skip(), results->size());
     limit_ = std::min(options.Limit(), results->size());
     
@@ -58,7 +57,7 @@ MapReduceResults::MapReduceResults(const GetViewOptions& options, map_reduce_res
         endIndex_ = FindResult(*results_, endKey);
         if (endIndex_ & FindMissedFlag) {
             endIndex_ = ~endIndex_;
-        } else if (!descending_ && inclusiveEnd_) {
+        } else if (inclusiveEnd_) {
             ++endIndex_;
         }
     }
@@ -66,10 +65,10 @@ MapReduceResults::MapReduceResults(const GetViewOptions& options, map_reduce_res
 
 DocumentsCollection::size_type MapReduceResults::Offset() const {
     if (!descending_) {
-        return startIndex_ + skip_;
+        return std::min(startIndex_ + skip_, results_->size());
     } else {
-        // TODO: this is possibly wrong
-        return Subtract(results_->size(), 1) - endIndex_ + skip_;
+        auto offset = Subtract(endIndex_, skip_);
+        return results_->size() - offset;
     }
 }
 
@@ -137,51 +136,51 @@ DocumentsCollection::size_type MapReduceResults::Subtract(DocumentsCollection::s
 }
 
 MapReduceResults::const_iterator MapReduceResults::cbegin() const {
-    auto limits = GetAscendingIndexes();    
-    if (limits.first < limits.second) {
-        return results_->cbegin() + limits.first;
+    if (!descending_) {
+        auto startIndex = std::min(startIndex_ + skip_, results_->size());
+        startIndex = std::min(startIndex, endIndex_);
+        return results_->cbegin() + startIndex;
     } else {
-        return results_->cend();
+        auto startIndex = Subtract(endIndex_, skip_);
+        startIndex = Subtract(startIndex, limit_);
+        startIndex = std::max(startIndex, startIndex_);
+        return results_->cbegin() + startIndex;
     }
 }
 
-MapReduceResults::const_iterator MapReduceResults::cend() const {    
-    auto limits = GetAscendingIndexes();    
-    if (limits.first < limits.second) {
-        return results_->cbegin() + limits.second;
+MapReduceResults::const_iterator MapReduceResults::cend() const {
+    if (!descending_) {    
+        auto endIndex = std::min(endIndex_, results_->size());
+        endIndex = std::min(endIndex, startIndex_ + skip_ + limit_);
+        return results_->cbegin() + endIndex;
     } else {
-        return results_->cend();
+        auto iter = results_->cbegin() + endIndex_;
+        iter -= std::min(skip_, endIndex_);
+        return iter;
     }
 }
 
 MapReduceResults::const_reverse_iterator MapReduceResults::crbegin() const {
-    auto limits = GetDescendingIndexes();    
-    if (limits.first < limits.second) {
-        return results_->crend() - limits.second;
+    if (!descending_) {
+        auto endIndex = std::min(startIndex_ + skip_ + limit_, endIndex_);
+        auto endDelta = results_->size() - endIndex;
+        return results_->crbegin() + endDelta;
     } else {
-        return results_->crend();
-    }            
-}
-
-MapReduceResults::const_reverse_iterator MapReduceResults::crend() const {
-    auto limits = GetDescendingIndexes();
-    if (limits.first < limits.second) {
-        return results_->crend() - limits.first;
-    } else {
-        return results_->crend();
+        auto endIndex = Subtract(endIndex_, skip_);
+        endIndex = std::max(endIndex, startIndex_);
+        auto endDelta = results_->size() - endIndex;
+        return results_->crbegin() + endDelta;
     }
 }
 
-std::pair<DocumentsCollection::size_type, DocumentsCollection::size_type> MapReduceResults::GetAscendingIndexes() const {
-    auto startIndex = std::min(startIndex_ + skip_, results_->size());
-    auto endIndex = std::min(endIndex_, results_->size());
-    endIndex = std::min(endIndex, startIndex_ + skip_ + limit_);
-    return std::make_pair(startIndex, endIndex);
-}
-
-std::pair<DocumentsCollection::size_type, DocumentsCollection::size_type> MapReduceResults::GetDescendingIndexes() const {
-    auto startIndex = inclusiveEnd_ ? startIndex_ : startIndex_ + 1;
-    startIndex = std::max(startIndex, Subtract(endIndex_ + 1, skip_ + limit_));
-    auto endIndex = Subtract(endIndex_ + 1, skip_);
-    return std::make_pair(startIndex, endIndex);
+MapReduceResults::const_reverse_iterator MapReduceResults::crend() const {
+    if (!descending_) {
+        auto startIndex = std::min(startIndex_ + skip_, endIndex_);
+        return results_->crend() - startIndex;
+    } else {
+        auto startIndex = Subtract(endIndex_, skip_);
+        startIndex = Subtract(startIndex, limit_);
+        startIndex = std::max(startIndex_, startIndex);
+        return results_->crend() - startIndex;
+    }
 }

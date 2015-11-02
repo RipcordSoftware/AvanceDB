@@ -96,11 +96,11 @@
                      kind="TEST">
         <itemPath>tests/json_helper_tests.cpp</itemPath>
       </logicalFolder>
-      <logicalFolder name="f1"
-                     displayName="Map Reduce Iterator Tests"
+      <logicalFolder name="f4"
+                     displayName="Map Reduce Tests"
                      projectFiles="true"
                      kind="TEST">
-        <itemPath>tests/map_reduce_iterator_tests.cpp</itemPath>
+        <itemPath>tests/map_reduce_tests.cpp</itemPath>
       </logicalFolder>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
@@ -298,6 +298,21 @@
           <output>${TESTDIR}/TestFiles/f3</output>
         </linkerTool>
       </folder>
+      <folder path="TestFiles/f4">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+        <ccTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+        </ccTool>
+        <linkerTool>
+          <output>${TESTDIR}/TestFiles/f4</output>
+        </linkerTool>
+      </folder>
       <item path="get_all_documents_options.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="get_all_documents_options.h" ex="false" tool="3" flavor2="0">
@@ -402,10 +417,7 @@
       </item>
       <item path="tests/json_helper_tests.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="tests/map_reduce_iterator_tests.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
+      <item path="tests/map_reduce_tests.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="types.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -608,6 +620,21 @@
           <output>${TESTDIR}/TestFiles/f3</output>
         </linkerTool>
       </folder>
+      <folder path="TestFiles/f4">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+        <ccTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+        </ccTool>
+        <linkerTool>
+          <output>${TESTDIR}/TestFiles/f4</output>
+        </linkerTool>
+      </folder>
       <item path="get_all_documents_options.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="get_all_documents_options.h" ex="false" tool="3" flavor2="0">
@@ -712,10 +739,7 @@
       </item>
       <item path="tests/json_helper_tests.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="tests/map_reduce_iterator_tests.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
+      <item path="tests/map_reduce_tests.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="types.h" ex="false" tool="3" flavor2="0">
       </item>

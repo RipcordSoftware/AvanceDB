@@ -55,9 +55,11 @@ protected:
             auto id = MakeDocId(i);
             json += MakeDocJson(id);
         }
-        json += R"(]}\0)";
+        json += R"(]})";
         
         std::vector<char> buffer{json.cbegin(), json.cend()};
+        buffer.push_back('\0');
+        
         rs::scriptobject::ScriptObjectJsonSource source(buffer.data());        
         auto obj = rs::scriptobject::ScriptObjectFactory::CreateObject(source, false);
         docs_ = obj->getArray("docs");

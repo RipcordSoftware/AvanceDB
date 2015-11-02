@@ -56,10 +56,7 @@ private:
     
     static DocumentsCollection::size_type FindResult(const map_reduce_result_array& results, const map_reduce_query_key_ptr key);
     
-    static DocumentsCollection::size_type Subtract(DocumentsCollection::size_type, DocumentsCollection::size_type);
-    
-    std::pair<DocumentsCollection::size_type, DocumentsCollection::size_type> GetAscendingIndexes() const;
-    std::pair<DocumentsCollection::size_type, DocumentsCollection::size_type> GetDescendingIndexes() const;
+    static DocumentsCollection::size_type Subtract(DocumentsCollection::size_type, DocumentsCollection::size_type);    
     
     const map_reduce_result_array_ptr results_;
     bool inclusiveEnd_;

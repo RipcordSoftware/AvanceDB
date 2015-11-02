@@ -74,7 +74,7 @@ TESTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}/tests
 TESTFILES= \
 	${TESTDIR}/TestFiles/f3 \
 	${TESTDIR}/TestFiles/f2 \
-	${TESTDIR}/TestFiles/f1
+	${TESTDIR}/TestFiles/f4
 
 # C Compiler Flags
 CFLAGS=
@@ -282,9 +282,9 @@ ${TESTDIR}/TestFiles/f2: ${TESTDIR}/tests/json_helper_tests.o ${OBJECTFILES:%.o=
 	${MKDIR} -p ${TESTDIR}/TestFiles
 	${LINK.cc} ../../externals/installed/lib/libgtest_main.a ../../externals/installed/lib/libgtest.a --coverage  -o ${TESTDIR}/TestFiles/f2 $^ ${LDLIBSOPTIONS} 
 
-${TESTDIR}/TestFiles/f1: ${TESTDIR}/tests/map_reduce_iterator_tests.o ${OBJECTFILES:%.o=%_nomain.o}
+${TESTDIR}/TestFiles/f4: ${TESTDIR}/tests/map_reduce_tests.o ${OBJECTFILES:%.o=%_nomain.o}
 	${MKDIR} -p ${TESTDIR}/TestFiles
-	${LINK.cc} ../../externals/installed/lib/libgtest_main.a ../../externals/installed/lib/libgtest.a --coverage  -o ${TESTDIR}/TestFiles/f1 $^ ${LDLIBSOPTIONS} 
+	${LINK.cc} ../../externals/installed/lib/libgtest_main.a ../../externals/installed/lib/libgtest.a --coverage  -o ${TESTDIR}/TestFiles/f4 $^ ${LDLIBSOPTIONS} 
 
 
 ${TESTDIR}/tests/basic_database_tests.o: tests/basic_database_tests.cpp 
@@ -299,10 +299,10 @@ ${TESTDIR}/tests/json_helper_tests.o: tests/json_helper_tests.cpp
 	$(COMPILE.cc) -g -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- -I../../externals/thread-pool-cpp/thread_pool -I../../externals/installed/include -I. `pkg-config --cflags zlib` -std=c++11 --coverage -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/json_helper_tests.o tests/json_helper_tests.cpp
 
 
-${TESTDIR}/tests/map_reduce_iterator_tests.o: tests/map_reduce_iterator_tests.cpp 
+${TESTDIR}/tests/map_reduce_tests.o: tests/map_reduce_tests.cpp 
 	${MKDIR} -p ${TESTDIR}/tests
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- -I../../externals/thread-pool-cpp/thread_pool -I../../externals/installed/include -I. `pkg-config --cflags zlib` -std=c++11 --coverage -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/map_reduce_iterator_tests.o tests/map_reduce_iterator_tests.cpp
+	$(COMPILE.cc) -g -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- -I../../externals/thread-pool-cpp/thread_pool -I../../externals/installed/include -I. `pkg-config --cflags zlib` -std=c++11 --coverage -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/map_reduce_tests.o tests/map_reduce_tests.cpp
 
 
 ${OBJECTDIR}/_ext/1383664149/city_nomain.o: ${OBJECTDIR}/_ext/1383664149/city.o ../../externals/cityhash/src/city.cc 
@@ -714,7 +714,7 @@ ${OBJECTDIR}/uuid_helper_nomain.o: ${OBJECTDIR}/uuid_helper.o uuid_helper.cpp
 	then  \
 	    ${TESTDIR}/TestFiles/f3 || true; \
 	    ${TESTDIR}/TestFiles/f2 || true; \
-	    ${TESTDIR}/TestFiles/f1 || true; \
+	    ${TESTDIR}/TestFiles/f4 || true; \
 	else  \
 	    ./${TEST} || true; \
 	fi
