@@ -25,3 +25,6 @@
 [submodule "externals/thread-pool-cpp"]
 	path = externals/thread-pool-cpp
 	url = https://github.com/RipcordSoftware/thread-pool-cpp.git
+[submodule "externals/gperftools"]
+	path = externals/gperftools
+	url = https://github.com/gperftools/gperftools.git

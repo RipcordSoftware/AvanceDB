@@ -109,7 +109,7 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb: ../../externals/libjsapi/ex
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
-	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb ${OBJECTFILES} ${LDLIBSOPTIONS} `if test "$$(uname)" = "Linux"; then echo "-lrt"; fi;` 
+	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb ${OBJECTFILES} ${LDLIBSOPTIONS} `if test "$$(uname)" = "Linux"; then echo "-lrt ../../externals/installed/lib/libtcmalloc_minimal.a"; fi;` 
 
 ${OBJECTDIR}/_ext/1383664149/city.o: ../../externals/cityhash/src/city.cc 
 	${MKDIR} -p ${OBJECTDIR}/_ext/1383664149

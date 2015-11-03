@@ -525,7 +525,7 @@
             <linkerLibStdlibItem>DynamicLinking</linkerLibStdlibItem>
             <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
           </linkerLibItems>
-          <commandLine>`if test "$$(uname)" = "Linux"; then echo "-lrt"; fi;` </commandLine>
+          <commandLine>`if test "$$(uname)" = "Linux"; then echo "-lrt ../../externals/installed/lib/libtcmalloc_minimal.a"; fi;` </commandLine>
         </linkerTool>
       </compileType>
       <item path="../../externals/cityhash/src/city.cc"

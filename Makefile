@@ -1,12 +1,12 @@
 GTEST_VER=1.7.0
 
-build: force_true .googletest
+build: force_true .googletest .gperftools
 	cd externals/libjsapi && $(MAKE) $(MFLAGS) $(MAKEOVERRIDES) build
 	cd externals/libscriptobject && $(MAKE) $(MFLAGS) $(MAKEOVERRIDES) build
 	cd externals/libhttpserver && $(MAKE) $(MFLAGS) $(MAKEOVERRIDES) build
 	cd src/avancedb && $(MAKE) $(MFLAGS) $(MAKEOVERRIDES) build
 
-all: force_true .googletest
+all: force_true .googletest .gperftools
 	cd externals/libjsapi && $(MAKE) $(MFLAGS) $(MAKEOVERRIDES) all
 	cd externals/libscriptobject && $(MAKE) $(MFLAGS) $(MAKEOVERRIDES) all
 	cd externals/libhttpserver && $(MAKE) $(MFLAGS) $(MAKEOVERRIDES) all
@@ -43,6 +43,15 @@ clean: force_true
 			if [ ! -d "../installed/lib" ]; then mkdir -p ../installed/lib; fi && \
 		cp -Rf include/* ../installed/include && \
 		cp -Rf lib/.libs/* ../installed/lib; \
+	fi
+
+.gperftools: force_true
+	cd externals/gperftools && \
+	if [ ! -f configure ]; then \
+		./autogen.sh && \
+		./configure --enable-minimal --with-tcmalloc-pagesize=32 --prefix=${PWD}/externals/installed && \
+		make -j 2 && \
+		make install; \
 	fi
 
 force_true:
