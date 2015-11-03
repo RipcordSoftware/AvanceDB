@@ -16,50 +16,41 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MAP_REDUCE_RESULTS_H
-#define MAP_REDUCE_RESULTS_H
-
-#include <limits>
+#ifndef MAP_REDUCE_SHARD_RESULTS_H
+#define MAP_REDUCE_SHARD_RESULTS_H
 
 #include "types.h"
 #include "documents_collection.h"
-#include "get_view_options.h"
 
-class MapReduceResultsIterator;
-
-class MapReduceResults final {
+class MapReduceShardResults final {
 public:
-    using value_type = map_reduce_result_array_ptr::element_type::value_type;
-    using const_reference = map_reduce_result_array_ptr::element_type::const_reference;
     using const_iterator = map_reduce_result_array_ptr::element_type::const_iterator;
-    using const_reverse_iterator = map_reduce_result_array_ptr::element_type::const_reverse_iterator;
     using size_type = DocumentsCollection::size_type;
     
-    MapReduceResults(map_reduce_result_array_ptr results, size_type offset, size_type totalRows, size_type skip, size_type limit, size_type descending);
+    MapReduceShardResults(map_reduce_result_array_ptr results, size_type limit, map_reduce_query_key_ptr startKey, map_reduce_query_key_ptr endKey, bool inclusiveEnd, bool descending);
     
     size_type Offset() const;
     size_type FilteredRows() const;
     size_type TotalRows() const;
     
-    MapReduceResultsIterator Iterator() const;
-    
     const_iterator cbegin() const;
-    const_iterator cend() const;
-    
-    const_reverse_iterator crbegin() const;
-    const_reverse_iterator crend() const;
+    const_iterator cend() const;    
     
 private:
+    
+    const size_type FindMissedFlag = ~(std::numeric_limits<size_type>::max() / 2);
+    
+    static size_type FindResult(const map_reduce_result_array& results, const map_reduce_query_key_ptr key);
     
     static size_type Subtract(size_type, size_type);    
     
     const map_reduce_result_array_ptr results_;
+    const bool inclusiveEnd_;
     const bool descending_;
+    size_type startIndex_;
+    size_type endIndex_;
     const size_type limit_;
-    const size_type skip_;
-    const size_type offset_;
-    const size_type totalRows_;
 };
 
-#endif	/* MAP_REDUCE_RESULTS_H */
+#endif	/* MAP_REDUCE_SHARD_RESULTS_H */
 

@@ -1097,7 +1097,7 @@ TEST_F(MapReduceTests, test24) {
     auto results = db_->PostTempView(options, mapObj);
     
     ASSERT_NE(nullptr, results);
-    ASSERT_EQ(1000, results->Offset());
+    ASSERT_EQ(901, results->Offset());
     ASSERT_EQ(docs_->getCount(), results->TotalRows());
     
     auto iter = results->cbegin();
@@ -1347,4 +1347,144 @@ TEST_F(MapReduceTests, test30) {
     }
     
     CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
+}
+
+TEST_F(MapReduceTests, test31) {
+    rs::httpserver::QueryString qs{R"(startkey=1000)"};
+    GetViewOptions options{qs};
+    
+    auto mapObj = MakeMapObject(R"(function(doc) { emit(doc.index, null); })");
+    auto results = db_->PostTempView(options, mapObj);
+    
+    ASSERT_NE(nullptr, results);
+    ASSERT_EQ(1000, results->Offset());
+    ASSERT_EQ(docs_->getCount(), results->TotalRows());
+    
+    auto iter = results->cbegin();
+    auto end = results->cend();       
+    ASSERT_EQ(0, std::distance(iter, end));
+    
+    auto riter = results->crbegin();
+    auto rend = results->crend();
+    ASSERT_EQ(0, std::distance(riter, rend));   
+}
+
+TEST_F(MapReduceTests, test32) {
+    rs::httpserver::QueryString qs{R"(endkey=0)"};
+    GetViewOptions options{qs};
+    
+    auto mapObj = MakeMapObject(R"(function(doc) { emit(doc.index, null); })");
+    auto results = db_->PostTempView(options, mapObj);
+    
+    ASSERT_NE(nullptr, results);
+    ASSERT_EQ(0, results->Offset());
+    ASSERT_EQ(docs_->getCount(), results->TotalRows());
+    
+    auto iter = results->cbegin();
+    auto end = results->cend();       
+    ASSERT_EQ(1, std::distance(iter, end));
+    
+    auto riter = results->crbegin();
+    auto rend = results->crend();
+    ASSERT_EQ(1, std::distance(riter, rend));   
+}
+
+TEST_F(MapReduceTests, test33) {
+    rs::httpserver::QueryString qs{R"(endkey=0&inclusive_end=false)"};
+    GetViewOptions options{qs};
+    
+    auto mapObj = MakeMapObject(R"(function(doc) { emit(doc.index, null); })");
+    auto results = db_->PostTempView(options, mapObj);
+    
+    ASSERT_NE(nullptr, results);
+    ASSERT_EQ(0, results->Offset());
+    ASSERT_EQ(docs_->getCount(), results->TotalRows());
+    
+    auto iter = results->cbegin();
+    auto end = results->cend();       
+    ASSERT_EQ(0, std::distance(iter, end));
+    
+    auto riter = results->crbegin();
+    auto rend = results->crend();
+    ASSERT_EQ(0, std::distance(riter, rend));   
+}
+
+TEST_F(MapReduceTests, test34) {
+    rs::httpserver::QueryString qs{R"(startkey=1000&endkey=0&inclusive_end=false)"};
+    GetViewOptions options{qs};
+    
+    auto mapObj = MakeMapObject(R"(function(doc) { emit(doc.index, null); })");
+    auto results = db_->PostTempView(options, mapObj);
+    
+    ASSERT_NE(nullptr, results);
+    ASSERT_EQ(1000, results->Offset());
+    ASSERT_EQ(docs_->getCount(), results->TotalRows());
+    
+    auto iter = results->cbegin();
+    auto end = results->cend();       
+    ASSERT_EQ(0, std::distance(iter, end));
+    
+    auto riter = results->crbegin();
+    auto rend = results->crend();
+    ASSERT_EQ(0, std::distance(riter, rend));   
+}
+
+TEST_F(MapReduceTests, test35) {
+    rs::httpserver::QueryString qs{R"(startkey=1000&endkey=0&inclusive_end=false&skip=2000)"};
+    GetViewOptions options{qs};
+    
+    auto mapObj = MakeMapObject(R"(function(doc) { emit(doc.index, null); })");
+    auto results = db_->PostTempView(options, mapObj);
+    
+    ASSERT_NE(nullptr, results);
+    ASSERT_EQ(1000, results->Offset());
+    ASSERT_EQ(docs_->getCount(), results->TotalRows());
+    
+    auto iter = results->cbegin();
+    auto end = results->cend();       
+    ASSERT_EQ(0, std::distance(iter, end));
+    
+    auto riter = results->crbegin();
+    auto rend = results->crend();
+    ASSERT_EQ(0, std::distance(riter, rend));   
+}
+
+TEST_F(MapReduceTests, test36) {
+    rs::httpserver::QueryString qs{R"(startkey=0&endkey=1000&descending=true)"};
+    GetViewOptions options{qs};
+    
+    auto mapObj = MakeMapObject(R"(function(doc) { emit(doc.index, null); })");
+    auto results = db_->PostTempView(options, mapObj);
+    
+    ASSERT_NE(nullptr, results);
+    ASSERT_EQ(999, results->Offset());
+    ASSERT_EQ(docs_->getCount(), results->TotalRows());
+    
+    auto iter = results->cbegin();
+    auto end = results->cend();       
+    ASSERT_EQ(0, std::distance(iter, end));
+    
+    auto riter = results->crbegin();
+    auto rend = results->crend();
+    ASSERT_EQ(0, std::distance(riter, rend));   
+}
+
+TEST_F(MapReduceTests, test37) {
+    rs::httpserver::QueryString qs{R"(startkey=0&endkey=1000&descending=true&inclusive_end=false)"};
+    GetViewOptions options{qs};
+    
+    auto mapObj = MakeMapObject(R"(function(doc) { emit(doc.index, null); })");
+    auto results = db_->PostTempView(options, mapObj);
+    
+    ASSERT_NE(nullptr, results);
+    ASSERT_EQ(999, results->Offset());
+    ASSERT_EQ(docs_->getCount(), results->TotalRows());
+    
+    auto iter = results->cbegin();
+    auto end = results->cend();       
+    ASSERT_EQ(0, std::distance(iter, end));
+    
+    auto riter = results->crbegin();
+    auto rend = results->crend();
+    ASSERT_EQ(0, std::distance(riter, rend));   
 }

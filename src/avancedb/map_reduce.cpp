@@ -26,6 +26,7 @@
 
 #include "script_array_jsapi_key_value_source.h"
 #include "map_reduce_result.h"
+#include "map_reduce_shard_results.h"
 #include "script_object_jsapi_source.h"
 #include "script_array_jsapi_source.h"
 #include "map_reduce_script_object_state.h"
@@ -46,9 +47,16 @@ MapReduce::MapReduce() : mapReduceThreadPool_(MapReduceThreadPool::Get()) {
 map_reduce_results_ptr MapReduce::Execute(const GetViewOptions& options, const MapReduceTask& task, document_collections_ptr colls) {        
     std::mutex m;
     auto collsSize = colls->size();
-    std::vector<map_reduce_result_array_ptr> resultArray;
+    std::vector<map_reduce_shard_results_ptr> filteredResults;
     std::vector<rs::jsapi::ScriptException> scriptExceptions;
     std::atomic<int> threads(collsSize);
+    
+    const auto skip = options.Skip();
+    const auto limit = options.Limit();
+    const auto startKey = options.StartKeyObj();
+    const auto endKey = options.EndKeyObj();
+    const auto inclusiveEnd = options.InclusiveEnd();
+    const auto descending = options.Descending();
     
     // run the map
     for (auto& docs : *colls) {
@@ -58,11 +66,14 @@ map_reduce_results_ptr MapReduce::Execute(const GetViewOptions& options, const M
             try {
                 BOOST_SCOPE_EXIT(&threads) { --threads; } BOOST_SCOPE_EXIT_END
                 auto& rt = mapReduceThreadPool_->GetThreadRuntime();
+                
+                auto result = Execute(rt, task, docs);                                
+                
+                auto filteredResult = boost::make_shared<map_reduce_shard_results_ptr::element_type>(
+                    result, skip + std::min(limit, result->size()), startKey, endKey, inclusiveEnd, descending);               
 
-                auto result = Execute(rt, task, docs);
-
-                l.lock();
-                resultArray.emplace_back(result);
+                l.lock();                
+                filteredResults.emplace_back(filteredResult);
             } catch (const rs::jsapi::ScriptException& ex) {
                 l.lock();
                 scriptExceptions.emplace_back(ex);
@@ -83,25 +94,29 @@ map_reduce_results_ptr MapReduce::Execute(const GetViewOptions& options, const M
     
     // if the number of results doesn't match the number of colls then
     // we've most likely got a non-script exception during the map phase
-    if (resultArray.size() != colls->size()) {
+    if (filteredResults.size() != colls->size()) {
         throw MapReduceException{};
     }
     
     // calculate the number of map rows and offsets
-    decltype(resultArray.size()) totalRows = 0;
-    std::vector<decltype(totalRows)> rowOffsets;
-    for (const auto& result : resultArray) {
-        rowOffsets.emplace_back(totalRows);
-        totalRows += result->size();        
+    decltype(filteredResults.size()) filteredRows = 0;
+    decltype(filteredResults.size()) totalRows = 0;
+    decltype(filteredResults.size()) offset = 0;
+    std::vector<decltype(filteredRows)> filteredRowOffsets;
+    for (const auto& result : filteredResults) {
+        filteredRowOffsets.emplace_back(filteredRows);
+        filteredRows += result->FilteredRows();
+        totalRows += result->TotalRows();
+        offset += result->Offset();
     }
-    rowOffsets.emplace_back(totalRows);
+    filteredRowOffsets.emplace_back(filteredRows);
     
     // allocate the results collection
     auto results = boost::make_shared<map_reduce_result_array_ptr::element_type>();
-    results->reserve(totalRows);
+    results->reserve(filteredRows);
     
     // copy the shard results into the main results collection
-    for (const auto& result : resultArray) {
+    for (const auto& result : filteredResults) {
         results->insert(results->end(), result->cbegin(), result->cend());
     }
     
@@ -116,9 +131,9 @@ map_reduce_results_ptr MapReduce::Execute(const GetViewOptions& options, const M
         auto midIndex = startIndex + midStep;
         auto endIndex = std::min(startIndex + step, collsSize);
 
-        auto startOffset = rowOffsets[startIndex];
-        auto midOffset = rowOffsets[midIndex];
-        auto endOffset = rowOffsets[endIndex];
+        auto startOffset = filteredRowOffsets[startIndex];
+        auto midOffset = filteredRowOffsets[midIndex];
+        auto endOffset = filteredRowOffsets[endIndex];
 
         const auto& begin = results->begin();
         std::inplace_merge(begin + startOffset, begin + midOffset, begin + endOffset, less);
@@ -126,10 +141,15 @@ map_reduce_results_ptr MapReduce::Execute(const GetViewOptions& options, const M
 
     // merge the result shards on the main results collection
     decltype(collsSize) step = 2;
+    const auto useThreadsForMerge = filteredRows >= 10000;
     while ((threads = collsSize / step) > 0) {
         
         for (decltype(collsSize) i = 0; i <= collsSize - step; i += step) {
-            mapReduceThreadPool_->Post([=]() { mergeResultsWorker(i, step); });
+            if (useThreadsForMerge) {
+                mapReduceThreadPool_->Post([=]() { mergeResultsWorker(i, step); });
+            } else {
+                mergeResultsWorker(i, step);
+            }
         }
         
         // wait for the merge threads to finish
@@ -145,7 +165,7 @@ map_reduce_results_ptr MapReduce::Execute(const GetViewOptions& options, const M
         mergeResultsWorker(0, step);
     }
     
-    return boost::make_shared<map_reduce_results_ptr::element_type>(options, results);
+    return boost::make_shared<map_reduce_results_ptr::element_type>(results, offset, totalRows, skip, limit, descending);
 }
 
 map_reduce_result_array_ptr MapReduce::Execute(rs::jsapi::Runtime& rt, const MapReduceTask& task, const document_array& docs) {
