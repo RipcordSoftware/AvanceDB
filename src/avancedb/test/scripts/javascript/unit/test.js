@@ -4639,6 +4639,18 @@ describe('avancedb -- temp views --', function() {
                 done();
             });
     });
+
+    it('execute a bad temp view - unsupported language', function(done) {
+        db.temporaryView(
+            { language: 'xyz', map: 'function(doc) { emit(1, 1); }' },
+            function(err, doc) {
+                assert.notEqual(null, err);
+                assert.equal(null, doc);
+                assert.equal('EXIT', err.error);
+                assert.equal(500, err.headers.status);
+                done();
+            });
+    });
     
     it('delete the database', function(done) {
         db.destroy(function(err, res) {

@@ -71,4 +71,9 @@ public:
     CompilationError(const char* msg);
 };
 
+class BadLanguageError final : public HttpServerException {
+public:
+    BadLanguageError(const char* msg);
+};
+
 #endif	/* REST_EXCEPTIONS_H */

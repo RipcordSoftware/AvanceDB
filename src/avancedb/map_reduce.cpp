@@ -20,6 +20,7 @@
 
 #include <boost/make_shared.hpp>
 #include <boost/scope_exit.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <memory>
 #include <algorithm>
@@ -44,7 +45,12 @@ MapReduce::MapReduce() : mapReduceThreadPool_(MapReduceThreadPool::Get()) {
     
 }
 
-map_reduce_results_ptr MapReduce::Execute(const GetViewOptions& options, const MapReduceTask& task, document_collections_ptr colls) {        
+map_reduce_results_ptr MapReduce::Execute(const GetViewOptions& options, const MapReduceTask& task, document_collections_ptr colls) {
+    auto language = task.Language();
+    if (!boost::iequals("javascript", language)) {
+        throw BadLanguageError{language};
+    }
+    
     std::mutex m;
     auto collsSize = colls->size();
     std::vector<map_reduce_shard_results_ptr> filteredResults;

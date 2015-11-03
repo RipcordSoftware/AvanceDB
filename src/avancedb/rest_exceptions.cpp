@@ -79,6 +79,11 @@ static const char* compilationErrorJsonBody = R"({
     "reason": "%s"
 })";
 
+static const char* badLanguageErrorJsonBody = R"({
+    "error": "EXIT",
+    "reason": "%s is not a supported map/reduce language"
+})";
+
 static const char* contentType = "application/json";
 
 DatabaseAlreadyExists::DatabaseAlreadyExists() : 
@@ -128,5 +133,10 @@ InvalidRevisionFormat::InvalidRevisionFormat() :
 
 CompilationError::CompilationError(const char* msg) :
     HttpServerException(500, internalServerErrorDescription, (boost::format(compilationErrorJsonBody) % JsonHelper::EscapeJsonString(msg)).str(), contentType) {
+    
+}
+
+BadLanguageError::BadLanguageError(const char* msg) :
+    HttpServerException(500, internalServerErrorDescription, (boost::format(badLanguageErrorJsonBody) % JsonHelper::EscapeJsonString(msg)).str(), contentType) {
     
 }
