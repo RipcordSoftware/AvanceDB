@@ -2764,6 +2764,25 @@ describe('avancedb -- temp views --', function() {
                 done();
             });
     });
+
+    it('execute a simple temp view - (_id, null) - include_docs', function(done) {
+        db.temporaryView(            
+            { map: function(doc) { emit(doc._id, null); } },
+            { include_docs: true },
+            function(err, doc) {
+                assert.equal(null, err);
+                assert.notEqual(null, doc);
+                assert.equal(1, doc.length);
+                assert.equal(testId, doc[0].key);
+                assert.equal(testId, doc[0].id);
+                assert.equal(null, doc[0].value);
+                assert.notEqual(null, doc[0].doc);
+                delete doc[0].doc._id;
+                delete doc[0].doc._rev;
+                assert.deepEqual(testDocument, doc[0].doc);
+                done();
+            });
+    });
     
     it('execute a simple temp view - (_id, doc)', function(done) {
         db.temporaryView(
@@ -4480,6 +4499,30 @@ describe('avancedb -- temp views --', function() {
             });
     });
 
+    it('execute a simple temp view - ([(0, null), (1, null), (2, null), (3, null), (4, null)]) -- descending,startkey=4,endkey=0,limit=3,skip=2,inclusive_end=false,include_docs=true', function(done) {
+        db.temporaryView(
+            { map: function(doc) { emit(0, null); emit(1, null); emit(2, null); emit(3, null); emit(4, null); } },
+            { descending: true, startkey: 4, endkey: 0, limit: 3, skip: 2, inclusive_end: false, include_docs: true },
+            function(err, doc) {
+                assert.equal(null, err);
+                assert.notEqual(null, doc);
+                assert.equal(2, doc.length);
+                assert.equal(testId, doc[0].id);
+                assert.equal(2, doc[0].key);
+                assert.equal(null, doc[0].value);
+                delete doc[0].doc._id;
+                delete doc[0].doc._rev;
+                assert.deepEqual(testDocument, doc[0].doc);
+                assert.equal(testId, doc[1].id);
+                assert.equal(1, doc[1].key);
+                assert.equal(null, doc[1].value);
+                delete doc[1].doc._id;
+                delete doc[1].doc._rev;
+                assert.deepEqual(testDocument, doc[1].doc);
+                done();
+            });
+    });
+
     it('execute a simple temp view - ([(0, null), (1, null), (2, null)]) -- startkey=0,startkey_docid=test1', function(done) {
         db.temporaryView(
             { map: function(doc) { emit(0, null); emit(1, null); emit(2, null); } },
@@ -4614,6 +4657,36 @@ describe('avancedb -- temp views --', function() {
                 assert.equal(testId, doc[2].id);
                 assert.equal(3, doc[2].key);
                 assert.equal(null, doc[2].value);
+                done();
+            });
+    });
+
+    it('execute a simple temp view - ([(0, null), (1, null), (2, null), (3, null), (4, null)]) -- startkey=1,endkey=3,endkey_docid=test0,include_docs=true', function(done) {
+        db.temporaryView(
+            { map: function(doc) { emit(0, null); emit(1, null); emit(2, null); emit(3, null); emit(4, null); } },
+            { startkey: 1, endkey: 3, endkey_docid: 'test0', include_docs: true },
+            function(err, doc) {
+                assert.equal(null, err);
+                assert.notEqual(null, doc);
+                assert.equal(3, doc.length);
+                assert.equal(testId, doc[0].id);
+                assert.equal(1, doc[0].key);
+                assert.equal(null, doc[0].value);
+                delete doc[0].doc._id;
+                delete doc[0].doc._rev;
+                assert.deepEqual(testDocument, doc[0].doc);
+                assert.equal(testId, doc[1].id);
+                assert.equal(2, doc[1].key);
+                assert.equal(null, doc[1].value);
+                delete doc[1].doc._id;
+                delete doc[1].doc._rev;
+                assert.deepEqual(testDocument, doc[1].doc);
+                assert.equal(testId, doc[2].id);
+                assert.equal(3, doc[2].key);
+                assert.equal(null, doc[2].value);
+                delete doc[2].doc._id;
+                delete doc[2].doc._rev;
+                assert.deepEqual(testDocument, doc[2].doc);
                 done();
             });
     });

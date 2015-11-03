@@ -769,6 +769,7 @@ bool RestServer::PostTempView(rs::httpserver::request_ptr request, const rs::htt
     auto db = GetDatabase(args);
     if (!!db) {
         GetViewOptions options{request->getQueryString()};
+        const auto includeDocs = options.IncludeDocs();
         
         auto obj = GetJsonBody(request);
         if (!obj || obj->getType("map") != rs::scriptobject::ScriptObjectType::String) {
@@ -792,6 +793,11 @@ bool RestServer::PostTempView(rs::httpserver::request_ptr request, const rs::htt
             objStream.Serialize(resultObj, MapReduceResult::KeyIndex);
             objStream << R"(,"value":)";
             objStream.Serialize(resultObj, MapReduceResult::ValueIndex);
+            
+            if (includeDocs) {
+                objStream << R"(,"doc":)" << result->getDoc()->getObject();
+            }
+            
             objStream << '}';
             prefixComma = true;
             
