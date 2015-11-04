@@ -44,10 +44,7 @@ public:
     MapReduceResultsIterator Iterator() const;
     
     const_iterator cbegin() const;
-    const_iterator cend() const;
-    
-    const_reverse_iterator crbegin() const;
-    const_reverse_iterator crend() const;
+    const_iterator cend() const;    
     
 private:
     

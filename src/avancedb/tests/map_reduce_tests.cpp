@@ -116,19 +116,6 @@ protected:
         return obj;
     }
     
-    static void CompareResults(map_reduce_result_array_ptr::element_type::const_iterator begin, map_reduce_result_array_ptr::element_type::const_iterator end,
-            map_reduce_result_array_ptr::element_type::const_reverse_iterator riter, map_reduce_result_array_ptr::element_type::const_reverse_iterator rend) {
-        map_reduce_result_array_ptr::element_type items{begin, end};
-        std::reverse(items.begin(), items.end());
-
-        auto iter = items.cbegin();
-        auto iterEnd = items.cend();
-        for (; iter != iterEnd && riter != rend ; ++iter, ++riter) {
-            auto diff = MapReduceResultComparers::Compare(*iter, *riter);
-            ASSERT_EQ(0, diff);
-        }
-    }
-    
     static Databases databases_;
     static database_ptr db_;
     static script_array_ptr docs_;
@@ -177,21 +164,6 @@ TEST_F(MapReduceTests, test1) {
         ASSERT_EQ(i, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(results->TotalRows(), std::distance(riter, rend));
-    
-    for (auto i = 0; riter != rend; ++riter, ++i) {
-        const auto& result = *riter;
-        auto index = docs_->getCount() - 1 - i;
-        auto obj = docs_->getObject(index);
-        ASSERT_STREQ(obj->getString("_id"), result->getId());
-        ASSERT_EQ(index, result->getKeyDouble());
-        ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
-    }
-    
-    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test2) {
@@ -217,21 +189,6 @@ TEST_F(MapReduceTests, test2) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(results->TotalRows(), std::distance(riter, rend));
-    
-    for (auto i = 0; riter != rend; ++riter, ++i) {
-        const auto& result = *riter;
-        auto index = docs_->getCount() - 1 - (i / 2);
-        auto obj = docs_->getObject(index);
-        ASSERT_STREQ(obj->getString("_id"), result->getId());
-        ASSERT_EQ(index, result->getKeyDouble());
-        ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
-    }
-    
-    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test3) {
@@ -256,21 +213,6 @@ TEST_F(MapReduceTests, test3) {
         ASSERT_EQ(i, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(results->TotalRows(), std::distance(riter, rend));
-    
-    for (auto i = 0; riter != rend; ++riter, i += 2) {
-        const auto& result = *riter;
-        auto index = docs_->getCount() - 2 - i;
-        auto obj = docs_->getObject(index);
-        ASSERT_STREQ(obj->getString("_id"), result->getId());
-        ASSERT_EQ(index, result->getKeyDouble());
-        ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
-    }
-    
-    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test4) {
@@ -295,21 +237,6 @@ TEST_F(MapReduceTests, test4) {
         ASSERT_EQ(i + 10, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(results->TotalRows() - 10, std::distance(riter, rend));
-    
-    for (auto i = 0; riter != rend; ++riter, ++i) {
-        const auto& result = *riter;
-        auto index = docs_->getCount() - 1 - i;
-        auto obj = docs_->getObject(index);
-        ASSERT_STREQ(obj->getString("_id"), result->getId());
-        ASSERT_EQ(index, result->getKeyDouble());
-        ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
-    }
-    
-    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test4b) {
@@ -326,10 +253,6 @@ TEST_F(MapReduceTests, test4b) {
     auto iter = results->cbegin();
     auto end = results->cend();       
     ASSERT_EQ(0, std::distance(iter, end));
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(0, std::distance(riter, rend));
 }
 
 TEST_F(MapReduceTests, test5) {
@@ -354,21 +277,6 @@ TEST_F(MapReduceTests, test5) {
         ASSERT_EQ(i + 10, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(20, std::distance(riter, rend));
-    
-    for (auto i = 0; riter != rend; ++riter, ++i) {
-        const auto& result = *riter;
-        auto index = 10 + 20 - 1 - i;
-        auto obj = docs_->getObject(index);
-        ASSERT_STREQ(obj->getString("_id"), result->getId());
-        ASSERT_EQ(index, result->getKeyDouble());
-        ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
-    }
-    
-    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test6) {
@@ -393,21 +301,6 @@ TEST_F(MapReduceTests, test6) {
         ASSERT_EQ(i, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(results->TotalRows(), std::distance(riter, rend));
-    
-    for (auto i = 0; riter != rend; ++riter, ++i) {
-        const auto& result = *riter;
-        auto index = docs_->getCount() - 1 - i;
-        auto obj = docs_->getObject(index);
-        ASSERT_STREQ(obj->getString("_id"), result->getId());
-        ASSERT_EQ(index, result->getKeyDouble());
-        ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
-    }
-    
-    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test7) {
@@ -432,21 +325,6 @@ TEST_F(MapReduceTests, test7) {
         ASSERT_EQ(i, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(results->TotalRows() - 10, std::distance(riter, rend));
-    
-    for (auto i = 0; riter != rend; ++riter, ++i) {
-        const auto& result = *riter;
-        auto index = docs_->getCount() - 10 - 1 - i;
-        auto obj = docs_->getObject(index);
-        ASSERT_STREQ(obj->getString("_id"), result->getId());
-        ASSERT_EQ(index, result->getKeyDouble());
-        ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
-    }
-    
-    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test7b) {
@@ -462,11 +340,7 @@ TEST_F(MapReduceTests, test7b) {
     
     auto iter = results->cbegin();
     auto end = results->cend();       
-    ASSERT_EQ(0, std::distance(iter, end));    
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(0, std::distance(riter, rend));    
+    ASSERT_EQ(0, std::distance(iter, end));
 }
 
 TEST_F(MapReduceTests, test8) {
@@ -492,21 +366,6 @@ TEST_F(MapReduceTests, test8) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(20, std::distance(riter, rend));
-    
-    for (auto i = 0; riter != rend; ++riter, ++i) {
-        const auto& result = *riter;
-        auto index = docs_->getCount() - 10 - 1 - i;
-        auto obj = docs_->getObject(index);
-        ASSERT_STREQ(obj->getString("_id"), result->getId());
-        ASSERT_EQ(index, result->getKeyDouble());
-        ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
-    }
-    
-    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test9) {
@@ -532,21 +391,6 @@ TEST_F(MapReduceTests, test9) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(100, std::distance(riter, rend));
-    
-    for (auto i = 0; riter != rend; ++riter, ++i) {
-        const auto& result = *riter;
-        auto index = docs_->getCount() - 1 - i;
-        auto obj = docs_->getObject(index);
-        ASSERT_STREQ(obj->getString("_id"), result->getId());
-        ASSERT_EQ(index, result->getKeyDouble());
-        ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
-    }
-    
-    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test10) {
@@ -572,21 +416,6 @@ TEST_F(MapReduceTests, test10) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(90, std::distance(riter, rend));
-    
-    for (auto i = 0; riter != rend; ++riter, ++i) {
-        const auto& result = *riter;
-        auto index = docs_->getCount() - 1 - i;
-        auto obj = docs_->getObject(index);
-        ASSERT_STREQ(obj->getString("_id"), result->getId());
-        ASSERT_EQ(index, result->getKeyDouble());
-        ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
-    }
-    
-    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test11) {
@@ -603,10 +432,6 @@ TEST_F(MapReduceTests, test11) {
     auto iter = results->cbegin();
     auto end = results->cend();       
     ASSERT_EQ(0, std::distance(iter, end));
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(0, std::distance(riter, rend));
 }
 
 TEST_F(MapReduceTests, test12) {
@@ -632,21 +457,6 @@ TEST_F(MapReduceTests, test12) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(20, std::distance(riter, rend));
-    
-    for (auto i = 0; riter != rend; ++riter, ++i) {
-        const auto& result = *riter;
-        auto index = 900 + 10 + 20 - 1 - i;
-        auto obj = docs_->getObject(index);
-        ASSERT_STREQ(obj->getString("_id"), result->getId());
-        ASSERT_EQ(index, result->getKeyDouble());
-        ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
-    }
-    
-    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test13) {
@@ -672,21 +482,6 @@ TEST_F(MapReduceTests, test13) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(90, std::distance(riter, rend));
-    
-    for (auto i = 0; riter != rend; ++riter, ++i) {
-        const auto& result = *riter;
-        auto index = docs_->getCount() - 1 - i;
-        auto obj = docs_->getObject(index);
-        ASSERT_STREQ(obj->getString("_id"), result->getId());
-        ASSERT_EQ(index, result->getKeyDouble());
-        ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
-    }
-    
-    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test14) {
@@ -712,21 +507,6 @@ TEST_F(MapReduceTests, test14) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(101, std::distance(riter, rend));
-    
-    for (auto i = 0; riter != rend; ++riter, ++i) {
-        const auto& result = *riter;
-        auto index = 101 - 1 - i;
-        auto obj = docs_->getObject(index);
-        ASSERT_STREQ(obj->getString("_id"), result->getId());
-        ASSERT_EQ(index, result->getKeyDouble());
-        ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
-    }
-    
-    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test15) {
@@ -752,21 +532,6 @@ TEST_F(MapReduceTests, test15) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(100, std::distance(riter, rend));
-    
-    for (auto i = 0; riter != rend; ++riter, ++i) {
-        const auto& result = *riter;
-        auto index = 100 - 1 - i;
-        auto obj = docs_->getObject(index);
-        ASSERT_STREQ(obj->getString("_id"), result->getId());
-        ASSERT_EQ(index, result->getKeyDouble());
-        ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
-    }
-    
-    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test16) {
@@ -792,21 +557,6 @@ TEST_F(MapReduceTests, test16) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(91, std::distance(riter, rend));
-    
-    for (auto i = 0; riter != rend; ++riter, ++i) {
-        const auto& result = *riter;
-        auto index = 101 - 1 - i;
-        auto obj = docs_->getObject(index);
-        ASSERT_STREQ(obj->getString("_id"), result->getId());
-        ASSERT_EQ(index, result->getKeyDouble());
-        ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
-    }
-    
-    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test17) {
@@ -832,21 +582,6 @@ TEST_F(MapReduceTests, test17) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(90, std::distance(riter, rend));
-    
-    for (auto i = 0; riter != rend; ++riter, ++i) {
-        const auto& result = *riter;
-        auto index = 100 - 1 - i;
-        auto obj = docs_->getObject(index);
-        ASSERT_STREQ(obj->getString("_id"), result->getId());
-        ASSERT_EQ(index, result->getKeyDouble());
-        ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
-    }
-    
-    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test18) {
@@ -872,21 +607,6 @@ TEST_F(MapReduceTests, test18) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(20, std::distance(riter, rend));
-    
-    for (auto i = 0; riter != rend; ++riter, ++i) {
-        const auto& result = *riter;
-        auto index = 10 + 20 - 1 - i;
-        auto obj = docs_->getObject(index);
-        ASSERT_STREQ(obj->getString("_id"), result->getId());
-        ASSERT_EQ(index, result->getKeyDouble());
-        ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
-    }
-    
-    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test19) {
@@ -912,21 +632,6 @@ TEST_F(MapReduceTests, test19) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(101, std::distance(riter, rend));
-    
-    for (auto i = 0; riter != rend; ++riter, ++i) {
-        const auto& result = *riter;
-        auto index = 901 - 1 - i;
-        auto obj = docs_->getObject(index);
-        ASSERT_STREQ(obj->getString("_id"), result->getId());
-        ASSERT_EQ(index, result->getKeyDouble());
-        ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
-    }
-    
-    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test20) {
@@ -952,21 +657,6 @@ TEST_F(MapReduceTests, test20) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(100, std::distance(riter, rend));
-    
-    for (auto i = 0; riter != rend; ++riter, ++i) {
-        const auto& result = *riter;
-        auto index = 900 - 1 - i;
-        auto obj = docs_->getObject(index);
-        ASSERT_STREQ(obj->getString("_id"), result->getId());
-        ASSERT_EQ(index, result->getKeyDouble());
-        ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
-    }
-    
-    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test21) {
@@ -992,21 +682,6 @@ TEST_F(MapReduceTests, test21) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(91, std::distance(riter, rend));
-    
-    for (auto i = 0; riter != rend; ++riter, ++i) {
-        const auto& result = *riter;
-        auto index = 901 - 1 - i;
-        auto obj = docs_->getObject(index);
-        ASSERT_STREQ(obj->getString("_id"), result->getId());
-        ASSERT_EQ(index, result->getKeyDouble());
-        ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
-    }
-    
-    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test22) {
@@ -1032,21 +707,6 @@ TEST_F(MapReduceTests, test22) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(10, std::distance(riter, rend));
-    
-    for (auto i = 0; riter != rend; ++riter, ++i) {
-        const auto& result = *riter;
-        auto index = 800 + 10 - 1 - i;
-        auto obj = docs_->getObject(index);
-        ASSERT_STREQ(obj->getString("_id"), result->getId());
-        ASSERT_EQ(index, result->getKeyDouble());
-        ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
-    }
-    
-    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test23) {
@@ -1072,21 +732,6 @@ TEST_F(MapReduceTests, test23) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(20, std::distance(riter, rend));
-    
-    for (auto i = 0; riter != rend; ++riter, ++i) {
-        const auto& result = *riter;
-        auto index = 800 + 10 + 20 - 1 - i;
-        auto obj = docs_->getObject(index);
-        ASSERT_STREQ(obj->getString("_id"), result->getId());
-        ASSERT_EQ(index, result->getKeyDouble());
-        ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
-    }
-    
-    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test24) {
@@ -1103,10 +748,6 @@ TEST_F(MapReduceTests, test24) {
     auto iter = results->cbegin();
     auto end = results->cend();       
     ASSERT_EQ(0, std::distance(iter, end));
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(0, std::distance(riter, rend));
 }
 
 TEST_F(MapReduceTests, test25) {
@@ -1132,21 +773,6 @@ TEST_F(MapReduceTests, test25) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(101, std::distance(riter, rend));
-    
-    for (auto i = 0; riter != rend; ++riter, ++i) {
-        const auto& result = *riter;
-        auto index = 900 - i;
-        auto obj = docs_->getObject(index);
-        ASSERT_STREQ(obj->getString("_id"), result->getId());
-        ASSERT_EQ(index, result->getKeyDouble());
-        ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
-    }
-    
-    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test26) {
@@ -1172,21 +798,6 @@ TEST_F(MapReduceTests, test26) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(100, std::distance(riter, rend));
-    
-    for (auto i = 0; riter != rend; ++riter, ++i) {
-        const auto& result = *riter;
-        auto index = 900 - i;
-        auto obj = docs_->getObject(index);
-        ASSERT_STREQ(obj->getString("_id"), result->getId());
-        ASSERT_EQ(index, result->getKeyDouble());
-        ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
-    }
-    
-    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test27) {
@@ -1212,21 +823,6 @@ TEST_F(MapReduceTests, test27) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(91, std::distance(riter, rend));
-    
-    for (auto i = 0; riter != rend; ++riter, ++i) {
-        const auto& result = *riter;
-        auto index = 900 - 10 - i;
-        auto obj = docs_->getObject(index);
-        ASSERT_STREQ(obj->getString("_id"), result->getId());
-        ASSERT_EQ(index, result->getKeyDouble());
-        ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
-    }
-    
-    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test28) {
@@ -1252,21 +848,6 @@ TEST_F(MapReduceTests, test28) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(90, std::distance(riter, rend));
-    
-    for (auto i = 0; riter != rend; ++riter, ++i) {
-        const auto& result = *riter;
-        auto index = 900 - 10 - i;
-        auto obj = docs_->getObject(index);
-        ASSERT_STREQ(obj->getString("_id"), result->getId());
-        ASSERT_EQ(index, result->getKeyDouble());
-        ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
-    }
-    
-    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test29) {
@@ -1292,21 +873,6 @@ TEST_F(MapReduceTests, test29) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(20, std::distance(riter, rend));
-    
-    for (auto i = 0; riter != rend; ++riter, ++i) {
-        const auto& result = *riter;
-        auto index = 900 - 10 - i;
-        auto obj = docs_->getObject(index);
-        ASSERT_STREQ(obj->getString("_id"), result->getId());
-        ASSERT_EQ(index, result->getKeyDouble());
-        ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
-    }
-    
-    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test30) {
@@ -1332,21 +898,6 @@ TEST_F(MapReduceTests, test30) {
         ASSERT_EQ(index, result->getKeyDouble());
         ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
     }
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(20, std::distance(riter, rend));
-    
-    for (auto i = 0; riter != rend; ++riter, ++i) {
-        const auto& result = *riter;
-        auto index = 900 - 10 - i;
-        auto obj = docs_->getObject(index);
-        ASSERT_STREQ(obj->getString("_id"), result->getId());
-        ASSERT_EQ(index, result->getKeyDouble());
-        ASSERT_EQ(rs::scriptobject::ScriptObjectType::Null, result->getValueType());
-    }
-    
-    CompareResults(results->cbegin(), results->cend(), results->crbegin(), results->crend());
 }
 
 TEST_F(MapReduceTests, test31) {
@@ -1363,10 +914,6 @@ TEST_F(MapReduceTests, test31) {
     auto iter = results->cbegin();
     auto end = results->cend();       
     ASSERT_EQ(0, std::distance(iter, end));
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(0, std::distance(riter, rend));   
 }
 
 TEST_F(MapReduceTests, test32) {
@@ -1383,10 +930,6 @@ TEST_F(MapReduceTests, test32) {
     auto iter = results->cbegin();
     auto end = results->cend();       
     ASSERT_EQ(1, std::distance(iter, end));
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(1, std::distance(riter, rend));   
 }
 
 TEST_F(MapReduceTests, test33) {
@@ -1403,10 +946,6 @@ TEST_F(MapReduceTests, test33) {
     auto iter = results->cbegin();
     auto end = results->cend();       
     ASSERT_EQ(0, std::distance(iter, end));
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(0, std::distance(riter, rend));   
 }
 
 TEST_F(MapReduceTests, test34) {
@@ -1423,10 +962,6 @@ TEST_F(MapReduceTests, test34) {
     auto iter = results->cbegin();
     auto end = results->cend();       
     ASSERT_EQ(0, std::distance(iter, end));
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(0, std::distance(riter, rend));   
 }
 
 TEST_F(MapReduceTests, test35) {
@@ -1443,10 +978,6 @@ TEST_F(MapReduceTests, test35) {
     auto iter = results->cbegin();
     auto end = results->cend();       
     ASSERT_EQ(0, std::distance(iter, end));
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(0, std::distance(riter, rend));   
 }
 
 TEST_F(MapReduceTests, test36) {
@@ -1463,10 +994,6 @@ TEST_F(MapReduceTests, test36) {
     auto iter = results->cbegin();
     auto end = results->cend();       
     ASSERT_EQ(0, std::distance(iter, end));
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(0, std::distance(riter, rend));   
 }
 
 TEST_F(MapReduceTests, test37) {
@@ -1483,8 +1010,4 @@ TEST_F(MapReduceTests, test37) {
     auto iter = results->cbegin();
     auto end = results->cend();       
     ASSERT_EQ(0, std::distance(iter, end));
-    
-    auto riter = results->crbegin();
-    auto rend = results->crend();
-    ASSERT_EQ(0, std::distance(riter, rend));   
 }

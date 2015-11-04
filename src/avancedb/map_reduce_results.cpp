@@ -73,23 +73,3 @@ MapReduceResults::const_iterator MapReduceResults::cend() const {
         return results_->cend() - skip_;
     }
 }
-
-MapReduceResults::const_reverse_iterator MapReduceResults::crbegin() const {
-    if (!descending_) {
-        auto endIndex = std::min(skip_ + limit_, results_->size());
-        auto endDelta = results_->size() - endIndex;
-        return results_->crbegin() + endDelta;
-    } else {
-        return results_->crbegin() + skip_;
-    }
-}
-
-MapReduceResults::const_reverse_iterator MapReduceResults::crend() const {
-    if (!descending_) {
-        return results_->crend() - skip_;
-    } else {
-        auto startIndex = Subtract(results_->size(), skip_);
-        startIndex = Subtract(startIndex, limit_);
-        return results_->crend() - startIndex;
-    }
-}

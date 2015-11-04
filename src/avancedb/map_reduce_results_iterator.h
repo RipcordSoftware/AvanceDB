@@ -32,11 +32,13 @@ public:
 private:    
     
     const MapReduceResults& results_;
-    MapReduceResults::const_iterator iter_;
+    const MapReduceResults::const_iterator begin_;
     const MapReduceResults::const_iterator end_;
-    MapReduceResults::const_reverse_iterator riter_;
-    const MapReduceResults::const_reverse_iterator rend_;
-    const bool descending_;
+    const bool empty_;
+    const MapReduceResults::const_iterator ibegin_;
+    const MapReduceResults::const_iterator iend_;
+    MapReduceResults::const_iterator iter_;
+    const int direction_;
     const MapReduceResults::value_type null_;
 };
 
