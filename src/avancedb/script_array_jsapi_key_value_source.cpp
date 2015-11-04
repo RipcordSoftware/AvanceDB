@@ -22,42 +22,42 @@
 #include "map_reduce.h"
 
 ScriptArrayJsapiKeyValueSource ScriptArrayJsapiKeyValueSource::Create(const rs::jsapi::Value& key, const rs::jsapi::Value& value) {
-    ScriptArrayJsapiKeyValueSource source;
+    ScriptArrayJsapiKeyValueSource source{key, value};
     
     auto cx = key.getContext();
-    JSAutoRequest ar{cx};        
-    
-    source.values_ = std::vector<rs::jsapi::Value>{ key, value };
-    
-    source.stringValues_.resize(source.values_.size());
 
     for (decltype(source.values_.size()) i = 0, length = source.values_.size(); i < length; ++i) {
         switch (JS_TypeOfValue(cx, source.values_[i])) {
             case JSTYPE_OBJECT: 
                 if (source.values_[i].isArray() || rs::jsapi::DynamicArray::IsDynamicArray(source.values_[i])) {
-                    source.types_.push_back(ScriptObjectType::Array);
+                    source.types_[i] = ScriptObjectType::Array;
                 } else if (!source.values_[i].isNull()) {
-                    source.types_.push_back(ScriptObjectType::Object);
+                    source.types_[i] = ScriptObjectType::Object;
                 } else {
-                    source.types_.push_back(ScriptObjectType::Null);
+                    source.types_[i] = ScriptObjectType::Null;
                 }
                 break;
 
-            case JSTYPE_STRING: 
-                source.types_.push_back(ScriptObjectType::String); 
+            case JSTYPE_STRING:
+                if (source.stringValues_.size() != length) {
+                    source.stringValues_.resize(length);
+                }
+
+                source.types_[i] = ScriptObjectType::String;
                 source.stringValues_[i] = source.values_[i].ToString(); 
                 break;
 
-            case JSTYPE_NUMBER: source.types_.push_back(ScriptObjectType::Double); break;
-            case JSTYPE_BOOLEAN: source.types_.push_back(ScriptObjectType::Boolean); break;
-            default: source.types_.push_back(ScriptObjectType::Null); break;
+            case JSTYPE_NUMBER: source.types_[i] = ScriptObjectType::Double; break;
+            case JSTYPE_BOOLEAN: source.types_[i] = ScriptObjectType::Boolean; break;
+            default: source.types_[i] = ScriptObjectType::Null; break;
         }
     }
     
     return source;
 }
 
-ScriptArrayJsapiKeyValueSource::ScriptArrayJsapiKeyValueSource() {
+ScriptArrayJsapiKeyValueSource::ScriptArrayJsapiKeyValueSource(const rs::jsapi::Value& key, const rs::jsapi::Value& value) :
+        values_{ key, value }, types_(values_.size(), ScriptObjectType::Unknown) {
     
 }
 

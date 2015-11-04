@@ -45,7 +45,7 @@ public:
     
 private:
     
-    ScriptArrayJsapiKeyValueSource();    
+    ScriptArrayJsapiKeyValueSource(const rs::jsapi::Value& key, const rs::jsapi::Value& value);    
     
     std::vector<rs::jsapi::Value> values_;
     std::vector<std::string> stringValues_;
