@@ -19,6 +19,8 @@
 #ifndef MAP_REDUCE_SHARD_RESULTS_H
 #define MAP_REDUCE_SHARD_RESULTS_H
 
+#include <limits>
+
 #include "types.h"
 #include "document_collection.h"
 

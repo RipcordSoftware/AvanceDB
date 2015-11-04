@@ -19,8 +19,6 @@
 #ifndef MAP_REDUCE_RESULTS_H
 #define MAP_REDUCE_RESULTS_H
 
-#include <limits>
-
 #include "types.h"
 #include "document_collection.h"
 #include "get_view_options.h"
