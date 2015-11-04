@@ -662,7 +662,7 @@ bool RestServer::GetDatabaseAllDocs(rs::httpserver::request_ptr request, const r
         const auto includeDocs = options.IncludeDocs();
         const auto updateSequence = options.UpdateSequence();
         
-        DocumentsCollection::size_type offset = 0, totalDocs = 0;
+        DocumentCollection::size_type offset = 0, totalDocs = 0;
         sequence_type updateSequenceNumber = 0;
         auto docs = db->GetDocuments(options, offset, totalDocs, updateSequenceNumber);
         
@@ -717,7 +717,7 @@ bool RestServer::PostDatabaseAllDocs(rs::httpserver::request_ptr request, const 
         const auto includeDocs = options.IncludeDocs();
         const auto updateSequence = options.UpdateSequence();
         
-        DocumentsCollection::size_type totalDocs = 0;
+        DocumentCollection::size_type totalDocs = 0;
         sequence_type updateSequenceNumber = 0;
         auto docs = db->PostDocuments(options, totalDocs, updateSequenceNumber);
         

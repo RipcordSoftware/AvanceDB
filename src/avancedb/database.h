@@ -57,8 +57,8 @@ public:
     document_ptr DeleteLocalDocument(const char* id, const char* rev);
     document_ptr SetLocalDocument(const char* id, script_object_ptr);
     
-    document_array_ptr GetDocuments(const GetAllDocumentsOptions& options, DocumentsCollection::size_type& offset, DocumentsCollection::size_type& totalDocs, sequence_type& updateSequence);
-    document_array_ptr PostDocuments(const PostAllDocumentsOptions& options, DocumentsCollection::size_type& totalDocs, sequence_type& updateSequence);
+    document_array_ptr GetDocuments(const GetAllDocumentsOptions& options, DocumentCollection::size_type& offset, DocumentCollection::size_type& totalDocs, sequence_type& updateSequence);
+    document_array_ptr PostDocuments(const PostAllDocumentsOptions& options, DocumentCollection::size_type& totalDocs, sequence_type& updateSequence);
     
     BulkDocumentsResults PostBulkDocuments(script_array_ptr docs, bool newEdits);
     

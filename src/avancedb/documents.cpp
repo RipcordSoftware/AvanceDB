@@ -47,7 +47,7 @@ documents_ptr Documents::Create(database_ptr db) {
     return boost::make_shared<documents_ptr::element_type>(db);
 }
 
-DocumentsCollection::size_type Documents::getCount() {
+DocumentCollection::size_type Documents::getCount() {
     return docCount_.load(boost::memory_order_relaxed);
 }
 
@@ -205,7 +205,7 @@ document_collections_ptr Documents::GetDocumentCollections(sequence_type& update
     return colls;
 }
 
-document_array_ptr Documents::GetDocuments(const GetAllDocumentsOptions& options, DocumentsCollection::size_type& offset, DocumentsCollection::size_type& totalDocs, sequence_type& updateSequence) {       
+document_array_ptr Documents::GetDocuments(const GetAllDocumentsOptions& options, DocumentCollection::size_type& offset, DocumentCollection::size_type& totalDocs, sequence_type& updateSequence) {       
     auto docs = GetDocuments(updateSequence);
     
     if (options.Descending()) {
@@ -213,10 +213,10 @@ document_array_ptr Documents::GetDocuments(const GetAllDocumentsOptions& options
         std::reverse(docs->begin(), docs->end());
     }
 
-    DocumentsCollection::size_type startIndex = 0;
-    DocumentsCollection::size_type endIndex = docs->size();
-    DocumentsCollection::size_type indexSkip = options.Skip();
-    DocumentsCollection::size_type indexLimit = options.Limit();
+    DocumentCollection::size_type startIndex = 0;
+    DocumentCollection::size_type endIndex = docs->size();
+    DocumentCollection::size_type indexSkip = options.Skip();
+    DocumentCollection::size_type indexLimit = options.Limit();
 
     if (options.HasKey()) {
         startIndex = FindDocument(*docs, options.Key(), options.Descending());
@@ -261,7 +261,7 @@ document_array_ptr Documents::GetDocuments(const GetAllDocumentsOptions& options
     return docs;
 }
 
-document_array_ptr Documents::PostDocuments(const PostAllDocumentsOptions& options, DocumentsCollection::size_type& totalDocs, sequence_type& updateSequence) {
+document_array_ptr Documents::PostDocuments(const PostAllDocumentsOptions& options, DocumentCollection::size_type& totalDocs, sequence_type& updateSequence) {
     auto docs = GetDocuments(updateSequence);
     
     const auto& keys = options.Keys();
@@ -285,9 +285,9 @@ document_array_ptr Documents::PostDocuments(const PostAllDocumentsOptions& optio
         std::reverse(results->begin(), results->end());
     }
     
-    DocumentsCollection::size_type startIndex = options.Skip();
-    DocumentsCollection::size_type endIndex = results->size();
-    DocumentsCollection::size_type indexLimit = options.Limit();
+    DocumentCollection::size_type startIndex = options.Skip();
+    DocumentCollection::size_type endIndex = results->size();
+    DocumentCollection::size_type indexLimit = options.Limit();
     
     if (startIndex < endIndex) {
         endIndex = std::min(startIndex + indexLimit, endIndex);
@@ -439,7 +439,7 @@ map_reduce_results_ptr Documents::PostTempView(const GetViewOptions& options, rs
     return results;
 }
 
-DocumentsCollection::size_type Documents::FindDocument(const document_array& docs, const std::string& key, bool descending) {
+DocumentCollection::size_type Documents::FindDocument(const document_array& docs, const std::string& key, bool descending) {
     const auto size = docs.size();
     
     if (size == 0) {
@@ -452,9 +452,9 @@ DocumentsCollection::size_type Documents::FindDocument(const document_array& doc
             keyIdLength -= 2;
         }
         
-        DocumentsCollection::size_type min = 0;
-        DocumentsCollection::size_type mid = 0;
-        DocumentsCollection::size_type max = size - 1;
+        DocumentCollection::size_type min = 0;
+        DocumentCollection::size_type mid = 0;
+        DocumentCollection::size_type max = size - 1;
 
         while (min <= max) {
             mid = ((max - min) / 2) + min;

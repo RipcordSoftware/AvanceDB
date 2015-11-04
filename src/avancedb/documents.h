@@ -30,7 +30,7 @@
 
 #include "types.h"
 #include "document.h"
-#include "documents_collection.h"
+#include "document_collection.h"
 #include "get_all_documents_options.h"
 #include "post_all_documents_options.h"
 #include "bulk_documents_result.h"
@@ -57,14 +57,14 @@ public:
     document_ptr DeleteLocalDocument(const char* id, const char* rev);
     document_ptr SetLocalDocument(const char* id, script_object_ptr obj);
     
-    document_array_ptr GetDocuments(const GetAllDocumentsOptions& options, DocumentsCollection::size_type& offset, DocumentsCollection::size_type& totalDocs, sequence_type& updateSequence);
-    document_array_ptr PostDocuments(const PostAllDocumentsOptions& options, DocumentsCollection::size_type& totalDocs, sequence_type& updateSequence);
+    document_array_ptr GetDocuments(const GetAllDocumentsOptions& options, DocumentCollection::size_type& offset, DocumentCollection::size_type& totalDocs, sequence_type& updateSequence);
+    document_array_ptr PostDocuments(const PostAllDocumentsOptions& options, DocumentCollection::size_type& totalDocs, sequence_type& updateSequence);
     
     BulkDocumentsResults PostBulkDocuments(script_array_ptr docs, bool newEdits);
     
     map_reduce_results_ptr PostTempView(const GetViewOptions& options, rs::scriptobject::ScriptObjectPtr obj);
     
-    DocumentsCollection::size_type getCount();
+    DocumentCollection::size_type getCount();
     std::uint64_t getDataSize();
     sequence_type getUpdateSequence();
     
@@ -72,7 +72,7 @@ private:
     
     friend documents_ptr boost::make_shared<documents_ptr::element_type>(database_ptr&);
     
-    const DocumentsCollection::size_type FindMissedFlag = ~(std::numeric_limits<DocumentsCollection::size_type>::max() / 2);
+    const DocumentCollection::size_type FindMissedFlag = ~(std::numeric_limits<DocumentCollection::size_type>::max() / 2);
     
     class DocumentsMutex {
     public:
@@ -93,7 +93,7 @@ private:
     
     document_array_ptr GetDocuments(sequence_type& updateSequence);
     document_collections_ptr GetDocumentCollections(sequence_type& updateSequence, bool sort = true);
-    DocumentsCollection::size_type FindDocument(const document_array& docs, const std::string& key, bool descending);
+    DocumentCollection::size_type FindDocument(const document_array& docs, const std::string& key, bool descending);
     unsigned GetCollectionCount() const;
     unsigned GetDocumentCollectionIndex(const char* id) const;
     
@@ -101,13 +101,13 @@ private:
     
     const unsigned collections_;
     std::vector<DocumentsMutex> docsMtx_;
-    std::vector<DocumentsCollection> docs_;
-    boost::atomic<DocumentsCollection::size_type> docCount_;
+    std::vector<DocumentCollection> docs_;
+    boost::atomic<DocumentCollection::size_type> docCount_;
     boost::atomic<std::uint64_t> dataSize_;
     boost::atomic<sequence_type> updateSeq_;
     
     boost::mutex localDocsMtx_;
-    DocumentsCollection localDocs_;
+    DocumentCollection localDocs_;
     boost::atomic<sequence_type> localUpdateSeq_;
     
     boost::mutex allDocsCacheMtx_;

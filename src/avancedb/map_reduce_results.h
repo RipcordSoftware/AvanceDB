@@ -22,7 +22,7 @@
 #include <limits>
 
 #include "types.h"
-#include "documents_collection.h"
+#include "document_collection.h"
 #include "get_view_options.h"
 
 class MapReduceResultsIterator;
@@ -33,7 +33,7 @@ public:
     using const_reference = map_reduce_result_array_ptr::element_type::const_reference;
     using const_iterator = map_reduce_result_array_ptr::element_type::const_iterator;
     using const_reverse_iterator = map_reduce_result_array_ptr::element_type::const_reverse_iterator;
-    using size_type = DocumentsCollection::size_type;
+    using size_type = DocumentCollection::size_type;
     
     MapReduceResults(map_reduce_result_array_ptr results, size_type offset, size_type totalRows, size_type skip, size_type limit, size_type descending);
     

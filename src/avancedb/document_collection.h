@@ -16,14 +16,14 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DOCUMENTS_COLLECTION_H
-#define DOCUMENTS_COLLECTION_H
+#ifndef DOCUMENT_COLLECTION_H
+#define DOCUMENT_COLLECTION_H
 
 #include "document.h"
 
 #include "../../externals/lazyflatset/lazyflatset.hpp"
 
-using DocumentsCollection = rs::LazyFlatSet<document_ptr, Document::Less, Document::Equal, rs::LazyFlatSetQuickSort<document_ptr, Document::Less>, std::allocator<document_ptr>, true>;
+using DocumentCollection = rs::LazyFlatSet<document_ptr, Document::Less, Document::Equal, rs::LazyFlatSetQuickSort<document_ptr, Document::Less>, std::allocator<document_ptr>, true>;
 
-#endif	/* DOCUMENTS_COLLECTION_H */
+#endif	/* DOCUMENT_COLLECTION_H */
 

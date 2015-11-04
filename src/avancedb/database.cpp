@@ -76,11 +76,11 @@ document_ptr Database::SetDesignDocument(const char* id, script_object_ptr obj) 
     return docs_->SetDesignDocument(id, obj);
 }
 
-document_array_ptr Database::GetDocuments(const GetAllDocumentsOptions& options, DocumentsCollection::size_type& offset, DocumentsCollection::size_type& totalDocs, sequence_type& updateSequence) {
+document_array_ptr Database::GetDocuments(const GetAllDocumentsOptions& options, DocumentCollection::size_type& offset, DocumentCollection::size_type& totalDocs, sequence_type& updateSequence) {
     return docs_->GetDocuments(options, offset, totalDocs, updateSequence);
 }
 
-document_array_ptr Database::PostDocuments(const PostAllDocumentsOptions& options, DocumentsCollection::size_type& totalDocs, sequence_type& updateSequence) {
+document_array_ptr Database::PostDocuments(const PostAllDocumentsOptions& options, DocumentCollection::size_type& totalDocs, sequence_type& updateSequence) {
     return docs_->PostDocuments(options, totalDocs, updateSequence);
 }
 

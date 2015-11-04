@@ -20,12 +20,12 @@
 #define MAP_REDUCE_SHARD_RESULTS_H
 
 #include "types.h"
-#include "documents_collection.h"
+#include "document_collection.h"
 
 class MapReduceShardResults final {
 public:
     using const_iterator = map_reduce_result_array_ptr::element_type::const_iterator;
-    using size_type = DocumentsCollection::size_type;
+    using size_type = DocumentCollection::size_type;
     
     MapReduceShardResults(map_reduce_result_array_ptr results, size_type limit, map_reduce_query_key_ptr startKey, map_reduce_query_key_ptr endKey, bool inclusiveEnd, bool descending);
     

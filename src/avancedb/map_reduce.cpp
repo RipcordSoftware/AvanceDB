@@ -223,7 +223,7 @@ map_reduce_result_array_ptr MapReduce::Execute(rs::jsapi::Runtime& rt, const Map
     rs::jsapi::FunctionArguments args(rt);
     args.Append(object);
 
-    for (DocumentsCollection::size_type i = 0, size = docs.size(); i < size; ++i) {
+    for (DocumentCollection::size_type i = 0, size = docs.size(); i < size; ++i) {
         doc = docs[i];
         scriptObj = doc->getObject();
 
