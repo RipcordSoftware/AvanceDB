@@ -39,9 +39,9 @@ public:
     collection::const_iterator cbegin();
     collection::const_iterator cend();
     
-    void lock();
-    bool try_lock();
-    void unlock();
+    void lock() const;
+    bool try_lock() const;
+    void unlock() const;
     
     void insert(const collection::value_type&);
     size_type erase(const collection::value_type&);
@@ -56,7 +56,7 @@ private:
     
     collection coll_;
     
-    boost::mutex mtx_;
+    mutable boost::mutex mtx_;
     char padding_[64];
 };
 

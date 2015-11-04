@@ -34,15 +34,15 @@ DocumentCollection::collection::const_iterator DocumentCollection::cend() {
     return coll_.cend();
 }
 
-void DocumentCollection::lock() { 
+void DocumentCollection::lock() const { 
     mtx_.lock(); 
 }
 
-bool DocumentCollection::try_lock() { 
+bool DocumentCollection::try_lock() const { 
     return mtx_.try_lock(); 
 }
 
-void DocumentCollection::unlock() { 
+void DocumentCollection::unlock() const { 
     mtx_.unlock(); 
 }
 

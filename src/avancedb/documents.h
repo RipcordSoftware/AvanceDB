@@ -92,7 +92,6 @@ private:
     Documents(database_ptr db);
     
     document_array_ptr GetDocuments(sequence_type& updateSequence);
-    document_collections_ptr GetDocumentCollections(sequence_type& updateSequence, bool sort = true);
     DocumentCollection::size_type FindDocument(const document_array& docs, const std::string& key, bool descending);
     unsigned GetCollectionCount() const;
     unsigned GetDocumentCollectionIndex(const char* id) const;
@@ -100,7 +99,7 @@ private:
     database_wptr db_;
     
     const unsigned collections_;
-    std::vector<document_collection_ptr> docs_;
+    document_collections_ptr_array docs_;
     boost::atomic<DocumentCollection::size_type> docCount_;
     boost::atomic<std::uint64_t> dataSize_;
     boost::atomic<sequence_type> updateSeq_;

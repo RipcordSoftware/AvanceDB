@@ -60,7 +60,7 @@ public:
     
     MapReduce();
     
-    map_reduce_results_ptr Execute(const GetViewOptions& options, const MapReduceTask& task, document_collections_ptr colls);
+    map_reduce_results_ptr Execute(const GetViewOptions& options, const MapReduceTask& task, document_collections_ptr_array colls);
     
     static script_object_ptr GetValueScriptObject(const rs::jsapi::Value& value);
     static script_array_ptr GetValueScriptArray(const rs::jsapi::Value& value);

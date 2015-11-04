@@ -45,14 +45,14 @@ MapReduce::MapReduce() : mapReduceThreadPool_(MapReduceThreadPool::Get()) {
     
 }
 
-map_reduce_results_ptr MapReduce::Execute(const GetViewOptions& options, const MapReduceTask& task, document_collections_ptr colls) {
+map_reduce_results_ptr MapReduce::Execute(const GetViewOptions& options, const MapReduceTask& task, document_collections_ptr_array colls) {
     auto language = task.Language();
     if (!boost::iequals("javascript", language)) {
         throw BadLanguageError{language};
     }
     
     std::mutex m;
-    auto collsSize = colls->size();
+    auto collsSize = colls.size();
     std::vector<map_reduce_shard_results_ptr> filteredResults;
     std::vector<rs::jsapi::ScriptException> scriptExceptions;
     std::atomic<int> threads(collsSize);
@@ -65,13 +65,18 @@ map_reduce_results_ptr MapReduce::Execute(const GetViewOptions& options, const M
     const auto descending = options.Descending();
     
     // run the map
-    for (auto& docs : *colls) {
+    for (auto& coll : colls) {
         mapReduceThreadPool_->Post([&]() {
             std::unique_lock<std::mutex> l{m, std::defer_lock};
             
             try {
                 BOOST_SCOPE_EXIT(&threads) { --threads; } BOOST_SCOPE_EXIT_END
                 auto& rt = mapReduceThreadPool_->GetThreadRuntime();
+                
+                boost::unique_lock<document_collections_ptr_array::value_type::element_type> collLock{*coll};                
+                document_array docs;
+                coll->copy(docs, false);
+                collLock.unlock();
                 
                 auto result = Execute(rt, task, docs);                                
                 
@@ -100,7 +105,7 @@ map_reduce_results_ptr MapReduce::Execute(const GetViewOptions& options, const M
     
     // if the number of results doesn't match the number of colls then
     // we've most likely got a non-script exception during the map phase
-    if (filteredResults.size() != colls->size()) {
+    if (filteredResults.size() != colls.size()) {
         throw MapReduceException{};
     }
     

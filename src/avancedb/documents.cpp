@@ -189,21 +189,6 @@ document_array_ptr Documents::GetDocuments(sequence_type& updateSequence) {
     }
 }
 
-document_collections_ptr Documents::GetDocumentCollections(sequence_type& updateSequence, bool sort) {
-    auto colls = boost::make_shared<document_collections_ptr::element_type>();
-    colls->resize(collections_);    
-        
-    updateSequence = updateSeq_;
-
-    for (unsigned i = 0; i < collections_; ++i) {
-        auto& coll = (*colls)[i];
-        boost::lock_guard<DocumentCollection> lock{*docs_[i]};
-        docs_[i]->copy(coll, sort);
-    }
-    
-    return colls;
-}
-
 document_array_ptr Documents::GetDocuments(const GetAllDocumentsOptions& options, DocumentCollection::size_type& offset, DocumentCollection::size_type& totalDocs, sequence_type& updateSequence) {       
     auto docs = GetDocuments(updateSequence);
     
@@ -429,8 +414,7 @@ document_ptr Documents::DeleteLocalDocument(const char* id, const char* rev) {
 }
 
 map_reduce_results_ptr Documents::PostTempView(const GetViewOptions& options, rs::scriptobject::ScriptObjectPtr obj) {        
-    sequence_type updateSequence = 0;
-    auto colls = GetDocumentCollections(updateSequence, false);
+    document_collections_ptr_array colls{docs_.cbegin(), docs_.cend()};
     
     auto task = MapReduce::MapReduceTask::Create(obj);
     
