@@ -25,6 +25,7 @@
 #include <boost/make_shared.hpp>
 
 #include "document.h"
+#include "document_collection.h"
 #include "rest_exceptions.h"
 #include "database.h"
 #include "document_revision.h"
@@ -34,12 +35,13 @@
 
 Documents::Documents(database_ptr db) : db_(db), docCount_(0),
         dataSize_(0), updateSeq_(0), localUpdateSeq_(0),
-        collections_(GetCollectionCount()), docsMtx_(collections_),
+        collections_(GetCollectionCount()),
         allDocsCacheDocs_(boost::make_shared<document_array>()),
-        allDocsCacheUpdateSequence_(0) {
+        allDocsCacheUpdateSequence_(0),
+        localDocs_(DocumentCollection::Create()) {
    
     for (unsigned i = 0; i < collections_; ++i) {
-        docs_.emplace_back(64, 32 * 1024);
+        docs_.emplace_back(DocumentCollection::Create(64, 32 * 1024));
     }
 }
 
@@ -62,13 +64,13 @@ sequence_type Documents::getUpdateSequence() {
 document_ptr Documents::GetDocument(const char* id, bool throwOnFail) {
     auto coll = GetDocumentCollectionIndex(id);
     
-    boost::lock_guard<DocumentsMutex> guard{docsMtx_[coll]};
+    boost::lock_guard<DocumentCollection> guard{*docs_[coll]};
     
     Document::Compare compare{id};
-    auto doc = docs_[coll].find_fn(compare);
+    auto doc = docs_[coll]->find_fn(compare);
     
     if (!doc && throwOnFail) {
-        throw DocumentMissing();
+        throw DocumentMissing{};
     }
     
     return doc;
@@ -77,23 +79,23 @@ document_ptr Documents::GetDocument(const char* id, bool throwOnFail) {
 document_ptr Documents::DeleteDocument(const char* id, const char* rev) {
     auto coll = GetDocumentCollectionIndex(id);
     
-    boost::lock_guard<DocumentsMutex> guard{docsMtx_[coll]};
+    boost::lock_guard<DocumentCollection> guard{*docs_[coll]};
     
     Document::Compare compare{id};
-    auto doc = docs_[coll].find_fn(compare);
+    auto doc = docs_[coll]->find_fn(compare);
     
     if (!doc) {
-        throw DocumentMissing();
+        throw DocumentMissing{};
     }
     
     DocumentRevision::Validate(rev, true);
     
     auto docRev = doc->getRev();
     if (std::strcmp(rev, docRev) != 0) {
-        throw DocumentConflict();
+        throw DocumentConflict{};
     }
     
-    docs_[coll].erase(doc);
+    docs_[coll]->erase(doc);
     
     ++updateSeq_;
     docCount_.fetch_sub(1, boost::memory_order_relaxed);
@@ -105,10 +107,10 @@ document_ptr Documents::DeleteDocument(const char* id, const char* rev) {
 document_ptr Documents::SetDocument(const char* id, script_object_ptr obj) {
     auto coll = GetDocumentCollectionIndex(id);
     
-    boost::lock_guard<DocumentsMutex> guard{docsMtx_[coll]};
+    boost::lock_guard<DocumentCollection> guard{*docs_[coll]};
     
     Document::Compare compare{id};
-    auto oldDoc = docs_[coll].find_fn(compare);
+    auto oldDoc = docs_[coll]->find_fn(compare);
     
     auto objRev = obj->getString("_rev", false);
 
@@ -116,7 +118,7 @@ document_ptr Documents::SetDocument(const char* id, script_object_ptr obj) {
         auto docRev = oldDoc->getRev();
         
         if (objRev == nullptr || std::strcmp(objRev, docRev) != 0) {
-            throw DocumentConflict();
+            throw DocumentConflict{};
         }
     } else if (objRev != nullptr) {
         DocumentRevision::Validate(objRev, true);
@@ -124,7 +126,7 @@ document_ptr Documents::SetDocument(const char* id, script_object_ptr obj) {
 
     auto newDoc = Document::Create(id, obj, ++updateSeq_);
 
-    docs_[coll].insert(newDoc);
+    docs_[coll]->insert(newDoc);
     
     if (!oldDoc) {
         docCount_.fetch_add(1, boost::memory_order_relaxed);
@@ -167,15 +169,14 @@ document_array_ptr Documents::GetDocuments(sequence_type& updateSequence) {
         auto allDocs = boost::make_shared<document_array>();
         allDocs->reserve(count);
         
-        std::vector<boost::unique_lock<DocumentsMutex>> locks{docsMtx_.begin(), docsMtx_.end()};
-        
         updateSequence = updateSeq_;
         allDocsCacheUpdateSequence_ = updateSequence;
 
         for (unsigned i = 0; i < collections_; ++i) {
             auto oldSize = allDocs->size();
-            allDocs->insert(allDocs->end(), docs_[i].cbegin(), docs_[i].cend());
-            locks[i].unlock();
+            boost::unique_lock<DocumentCollection> lock{*docs_[i]};
+            allDocs->insert(allDocs->end(), docs_[i]->cbegin(), docs_[i]->cend());
+            lock.unlock();
             
             if (i > 0) {
                 std::inplace_merge(allDocs->begin(), allDocs->begin() + oldSize, allDocs->end(), Document::Less{});
@@ -190,16 +191,14 @@ document_array_ptr Documents::GetDocuments(sequence_type& updateSequence) {
 
 document_collections_ptr Documents::GetDocumentCollections(sequence_type& updateSequence, bool sort) {
     auto colls = boost::make_shared<document_collections_ptr::element_type>();
-    colls->resize(collections_);
-    
-    std::vector<boost::unique_lock<DocumentsMutex>> locks{docsMtx_.begin(), docsMtx_.end()};
+    colls->resize(collections_);    
         
     updateSequence = updateSeq_;
 
     for (unsigned i = 0; i < collections_; ++i) {
         auto& coll = (*colls)[i];
-        docs_[i].copy(coll, sort);
-        locks[i].unlock();
+        boost::lock_guard<DocumentCollection> lock{*docs_[i]};
+        docs_[i]->copy(coll, sort);
     }
     
     return colls;
@@ -328,10 +327,10 @@ BulkDocumentsResults Documents::PostBulkDocuments(script_array_ptr docs, bool ne
         
         auto coll = GetDocumentCollectionIndex(id);
     
-        boost::lock_guard<DocumentsMutex> guard{docsMtx_[coll]};
+        boost::lock_guard<DocumentCollection> guard{*docs_[coll]};
         
         Document::Compare compare{id};
-        auto oldDoc = docs_[coll].find_fn(compare);
+        auto oldDoc = docs_[coll]->find_fn(compare);
         
         auto objRev = obj->getString("_rev", false);
         
@@ -349,7 +348,7 @@ BulkDocumentsResults Documents::PostBulkDocuments(script_array_ptr docs, bool ne
         if (!error) {
             auto newDoc = Document::Create(id, obj, ++updateSeq_, newEdits);
 
-            docs_[coll].insert(newDoc);
+            docs_[coll]->insert(newDoc);
 
             auto newRev = newDoc->getRev();
             results.emplace_back(id, newRev);
@@ -370,10 +369,10 @@ BulkDocumentsResults Documents::PostBulkDocuments(script_array_ptr docs, bool ne
 }
 
 document_ptr Documents::GetLocalDocument(const char* id) {
-    boost::lock_guard<boost::mutex> guard(localDocsMtx_);
+    boost::lock_guard<DocumentCollection> guard{*localDocs_};
     
     Document::Compare compare{id};
-    auto doc = localDocs_.find_fn(compare);
+    auto doc = localDocs_->find_fn(compare);
     
     if (!doc) {
         throw DocumentMissing{};
@@ -383,10 +382,10 @@ document_ptr Documents::GetLocalDocument(const char* id) {
 }
 
 document_ptr Documents::SetLocalDocument(const char* id, script_object_ptr obj) {
-    boost::lock_guard<boost::mutex> guard(localDocsMtx_);
+    boost::lock_guard<DocumentCollection> guard{*localDocs_};
     
     Document::Compare compare{id};
-    auto doc = localDocs_.find_fn(compare);
+    auto doc = localDocs_->find_fn(compare);
     
     const char* objRev = obj->getString("_rev", false);
 
@@ -402,16 +401,16 @@ document_ptr Documents::SetLocalDocument(const char* id, script_object_ptr obj) 
     
     doc = Document::Create(id, obj, ++localUpdateSeq_);
 
-    localDocs_.insert(doc);
+    localDocs_->insert(doc);
 
     return doc;
 }
 
 document_ptr Documents::DeleteLocalDocument(const char* id, const char* rev) {
-    boost::lock_guard<boost::mutex> guard(localDocsMtx_);
+    boost::lock_guard<DocumentCollection> guard{*localDocs_};
     
     Document::Compare compare{id};
-    auto doc = localDocs_.find_fn(compare);
+    auto doc = localDocs_->find_fn(compare);
     
     if (!doc) {
         throw DocumentMissing{};
@@ -424,7 +423,7 @@ document_ptr Documents::DeleteLocalDocument(const char* id, const char* rev) {
         throw DocumentConflict{};
     }
     
-    localDocs_.erase(doc);
+    localDocs_->erase(doc);
     
     return doc;
 }

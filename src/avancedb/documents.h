@@ -100,14 +100,12 @@ private:
     database_wptr db_;
     
     const unsigned collections_;
-    std::vector<DocumentsMutex> docsMtx_;
-    std::vector<DocumentCollection> docs_;
+    std::vector<document_collection_ptr> docs_;
     boost::atomic<DocumentCollection::size_type> docCount_;
     boost::atomic<std::uint64_t> dataSize_;
     boost::atomic<sequence_type> updateSeq_;
     
-    boost::mutex localDocsMtx_;
-    DocumentCollection localDocs_;
+    document_collection_ptr localDocs_;
     boost::atomic<sequence_type> localUpdateSeq_;
     
     boost::mutex allDocsCacheMtx_;

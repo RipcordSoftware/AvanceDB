@@ -34,6 +34,10 @@ using documents_ptr = boost::shared_ptr<Documents>;
 
 class Document;
 using document_ptr = boost::shared_ptr<Document>;
+
+class DocumentCollection;
+using document_collection_ptr = boost::shared_ptr<DocumentCollection>;
+
 using document_array = std::vector<document_ptr>;
 using document_array_ptr = boost::shared_ptr<document_array>;
 using document_collections_ptr = boost::shared_ptr<std::vector<document_array>>;
