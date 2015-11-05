@@ -113,9 +113,9 @@ uint64_t GetAllDocumentsOptions::Skip() const {
     return skip_.get();
 }
 
-uint64_t GetAllDocumentsOptions::Limit() const {
+uint64_t GetAllDocumentsOptions::Limit(uint64_t defaultValue) const {
     if (!limit_.is_initialized()) {
-        limit_ = GetUnsigned("limit", std::numeric_limits<uint64_t>::max());
+        limit_ = GetUnsigned("limit", defaultValue);
     }
     return limit_.get();
 }

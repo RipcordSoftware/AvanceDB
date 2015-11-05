@@ -34,6 +34,10 @@ DocumentCollection::collection::const_iterator DocumentCollection::cend() {
     return coll_.cend();
 }
 
+DocumentCollection::const_reference DocumentCollection::operator[](int index) const {
+    return coll_[index];
+}
+
 void DocumentCollection::lock() const { 
     mtx_.lock(); 
 }
@@ -44,6 +48,10 @@ bool DocumentCollection::try_lock() const {
 
 void DocumentCollection::unlock() const { 
     mtx_.unlock(); 
+}
+
+DocumentCollection::size_type DocumentCollection::size() const {
+    return coll_.size();
 }
 
 void DocumentCollection::insert(const collection::value_type& k) {

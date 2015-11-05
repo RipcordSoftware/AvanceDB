@@ -20,6 +20,7 @@
 #define GET_ALL_DOCUMENTS_OPTIONS_H
 
 #include <string>
+#include <limits>
 
 #include <boost/optional.hpp>
 
@@ -48,7 +49,7 @@ public:
     bool UpdateSequence() const;
     
     uint64_t Skip() const;
-    uint64_t Limit() const;
+    uint64_t Limit(uint64_t defaultValue = std::numeric_limits<uint64_t>::max()) const;
     
 private:        
     mutable std::string key_;

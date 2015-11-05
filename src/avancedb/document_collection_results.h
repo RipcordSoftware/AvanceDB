@@ -16,24 +16,24 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MAP_REDUCE_SHARD_RESULTS_H
-#define MAP_REDUCE_SHARD_RESULTS_H
+#ifndef DOCUMENT_COLLECTION_RESULTS_H
+#define DOCUMENT_COLLECTION_RESULTS_H
 
 #include <limits>
 
 #include "types.h"
 #include "document_collection.h"
 
-class MapReduceShardResults final {
+class DocumentCollectionResults final {
 public:
-    using const_iterator = map_reduce_result_array_ptr::element_type::const_iterator;
+    using const_iterator = DocumentCollection::const_iterator;
     using size_type = DocumentCollection::size_type;
     
-    MapReduceShardResults(map_reduce_result_array_ptr results, size_type limit, map_reduce_query_key_ptr startKey, map_reduce_query_key_ptr endKey, bool inclusiveEnd, bool descending);
+    DocumentCollectionResults(document_collection_ptr docs, size_type limit, const char* key, const char* startKey, const char* endKey, bool inclusiveEnd, bool descending);
     
     size_type Offset() const;
     size_type FilteredRows() const;
-    size_type TotalRows() const;
+    size_type TotalRows() const;    
     
     const_iterator cbegin() const;
     const_iterator cend() const;
@@ -42,11 +42,11 @@ private:
     
     const size_type FindMissedFlag = ~(std::numeric_limits<size_type>::max() / 2);
     
-    static size_type FindResult(const map_reduce_result_array& results, const map_reduce_query_key_ptr key);
+    static size_type FindDocument(const DocumentCollection& docs, const char* key);
     
     static size_type Subtract(size_type, size_type);
     
-    const map_reduce_result_array_ptr results_;
+    const document_collection_ptr docs_;
     const bool inclusiveEnd_;
     const bool descending_;
     size_type startIndex_;
@@ -54,5 +54,5 @@ private:
     const size_type limit_;
 };
 
-#endif	/* MAP_REDUCE_SHARD_RESULTS_H */
+#endif	/* DOCUMENT_COLLECTION_RESULTS_H */
 

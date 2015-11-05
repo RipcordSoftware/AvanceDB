@@ -32,6 +32,8 @@
 class DocumentCollection final {
 public:
     using collection = rs::LazyFlatSet<document_ptr, Document::Less, Document::Equal, rs::LazyFlatSetQuickSort<document_ptr, Document::Less>, std::allocator<document_ptr>, true>;
+    using const_iterator = collection::const_iterator;
+    using const_reference = collection::const_reference;
     using size_type = collection::size_type;
     
     static document_collection_ptr Create(unsigned maxUnsortedEntries = 16, unsigned maxNurseryEntries = 1024);
@@ -39,10 +41,13 @@ public:
     collection::const_iterator cbegin();
     collection::const_iterator cend();
     
+    const_reference operator[](int index) const;
+    
     void lock() const;
     bool try_lock() const;
     void unlock() const;
     
+    size_type size() const;
     void insert(const collection::value_type&);
     size_type erase(const collection::value_type&);
     void copy(std::vector<collection::value_type>& coll, bool sort = true);

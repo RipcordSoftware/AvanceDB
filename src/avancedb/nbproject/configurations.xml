@@ -11,6 +11,7 @@
       <itemPath>databases.h</itemPath>
       <itemPath>document.h</itemPath>
       <itemPath>document_collection.h</itemPath>
+      <itemPath>document_collection_results.h</itemPath>
       <itemPath>document_revision.h</itemPath>
       <itemPath>documents.h</itemPath>
       <itemPath>get_all_documents_options.h</itemPath>
@@ -55,6 +56,7 @@
       <itemPath>databases.cpp</itemPath>
       <itemPath>document.cpp</itemPath>
       <itemPath>document_collection.cpp</itemPath>
+      <itemPath>document_collection_results.cpp</itemPath>
       <itemPath>document_revision.cpp</itemPath>
       <itemPath>documents.cpp</itemPath>
       <itemPath>get_all_documents_options.cpp</itemPath>
@@ -238,6 +240,10 @@
       <item path="document_collection.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="document_collection.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="document_collection_results.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="document_collection_results.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="document_revision.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -552,6 +558,10 @@
       <item path="document_collection.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="document_collection.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="document_collection_results.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="document_collection_results.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="document_revision.cpp" ex="false" tool="1" flavor2="0">
       </item>

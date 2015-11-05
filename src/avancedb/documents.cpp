@@ -26,6 +26,7 @@
 
 #include "document.h"
 #include "document_collection.h"
+#include "document_collection_results.h"
 #include "rest_exceptions.h"
 #include "database.h"
 #include "document_revision.h"
@@ -189,60 +190,55 @@ document_array_ptr Documents::GetDocuments(sequence_type& updateSequence) {
     }
 }
 
-document_array_ptr Documents::GetDocuments(const GetAllDocumentsOptions& options, DocumentCollection::size_type& offset, DocumentCollection::size_type& totalDocs, sequence_type& updateSequence) {       
-    auto docs = GetDocuments(updateSequence);
+document_array_ptr Documents::GetDocuments(const GetAllDocumentsOptions& options, DocumentCollection::size_type& offset, DocumentCollection::size_type& totalDocs, sequence_type& updateSequence) {
+    offset = 0;    
+    totalDocs = 0;
+    updateSequence = updateSeq_;
     
+    auto results = boost::make_shared<document_array>();
+    
+    auto skip = options.Skip();
+    auto limit = options.Limit();
+    
+    for (unsigned i = 0; i < collections_; ++i) {
+        boost::unique_lock<DocumentCollection> lock{*docs_[i]};
+        DocumentCollectionResults filteredResults{docs_[i], skip + std::min(limit, docs_[i]->size()), options.Key().c_str(),
+            options.StartKey().c_str(), options.EndKey().c_str(), options.InclusiveEnd(), options.Descending()};
+
+        if (i == 0) {
+            results->reserve(filteredResults.FilteredRows() * collections_);
+        }
+
+        auto oldSize = results->size();
+        results->insert(results->end(), filteredResults.cbegin(), filteredResults.cend());        
+        offset += filteredResults.Offset();
+        totalDocs += filteredResults.TotalRows();
+        lock.unlock();
+
+        if (i > 0) {
+            std::inplace_merge(results->begin(), results->begin() + oldSize, results->end(), Document::Less{});
+        }
+    }
+
+    // TODO: this should be optimized out
     if (options.Descending()) {
-        docs = boost::make_shared<document_array>(docs->begin(), docs->end());        
-        std::reverse(docs->begin(), docs->end());
+        results = boost::make_shared<document_array>(results->begin(), results->end());
+        std::reverse(results->begin(), results->end());
     }
-
-    DocumentCollection::size_type startIndex = 0;
-    DocumentCollection::size_type endIndex = docs->size();
-    DocumentCollection::size_type indexSkip = options.Skip();
-    DocumentCollection::size_type indexLimit = options.Limit();
-
-    if (options.HasKey()) {
-        startIndex = FindDocument(*docs, options.Key(), options.Descending());
-        if ((startIndex & FindMissedFlag) == FindMissedFlag) {
-            startIndex = ~startIndex;
-            endIndex = startIndex;
-        } else {
-            endIndex = startIndex + 1;
-        }
+    
+    // TODO: this should be optimized out
+    limit = std::min(limit, results->size());
+    if ((skip > 0 && skip < results->size()) || limit < results->size()) {
+        auto startIndex = std::min(skip, results->size());
+        auto endIndex = std::min(skip + limit, results->size());
+        results = boost::make_shared<document_array>(results->cbegin() + startIndex, results->cbegin() + endIndex);
+        offset += startIndex;
+    } else if (skip >= results->size()) {
+        offset += results->size();
+        results = boost::make_shared<document_array>();
     }
-    else if (options.HasKeys()) {
-        if (options.StartKey().size() > 0) {
-            startIndex = FindDocument(*docs, options.StartKey(), options.Descending());
-            if ((startIndex & FindMissedFlag) == FindMissedFlag) {
-                startIndex = ~startIndex;
-            }
-        }
-
-        if (options.EndKey().size() > 0) {
-            endIndex = FindDocument(*docs, options.EndKey(), options.Descending());
-            if ((endIndex & FindMissedFlag) == FindMissedFlag) {
-                endIndex = ~endIndex;
-            } else if (options.InclusiveEnd()) {
-                endIndex++;
-            }
-        }
-    }
-
-    startIndex = std::min(startIndex + indexSkip, docs->size());
-    endIndex = std::min(startIndex + indexLimit, endIndex);
-    endIndex = std::min(endIndex, docs->size());
-
-    offset = std::min(startIndex, endIndex);
-    totalDocs = docs->size();
-
-    if (startIndex < docs->size() && startIndex < endIndex) {
-        docs = boost::make_shared<document_array>(docs->cbegin() + startIndex, docs->cbegin() + endIndex);
-    } else {
-        docs = boost::make_shared<document_array>();
-    }
-
-    return docs;
+    
+    return results;
 }
 
 document_array_ptr Documents::PostDocuments(const PostAllDocumentsOptions& options, DocumentCollection::size_type& totalDocs, sequence_type& updateSequence) {

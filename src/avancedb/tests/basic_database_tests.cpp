@@ -988,7 +988,7 @@ TEST_F(BasicDatabaseTests, test48) {
     DocumentCollection::size_type offset = 0, totalDocs = 0, updateSequence = 0;    
     auto results = db_->GetDocuments(options, offset, totalDocs, updateSequence);
     
-    ASSERT_EQ(0, offset);    
+    ASSERT_EQ(1000, offset);    
     ASSERT_EQ(0, results->size());
 }
 
@@ -998,7 +998,7 @@ TEST_F(BasicDatabaseTests, test49) {
     DocumentCollection::size_type offset = 0, totalDocs = 0, updateSequence = 0;    
     auto results = db_->GetDocuments(options, offset, totalDocs, updateSequence);
     
-    ASSERT_EQ(0, offset);    
+    ASSERT_EQ(1000, offset);    
     ASSERT_EQ(0, results->size());
 }
 

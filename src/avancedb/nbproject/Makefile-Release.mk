@@ -42,6 +42,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/databases.o \
 	${OBJECTDIR}/document.o \
 	${OBJECTDIR}/document_collection.o \
+	${OBJECTDIR}/document_collection_results.o \
 	${OBJECTDIR}/document_revision.o \
 	${OBJECTDIR}/documents.o \
 	${OBJECTDIR}/get_all_documents_options.o \
@@ -146,6 +147,11 @@ ${OBJECTDIR}/document_collection.o: document_collection.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- -I../../externals/thread-pool-cpp/thread_pool `pkg-config --cflags zlib` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/document_collection.o document_collection.cpp
+
+${OBJECTDIR}/document_collection_results.o: document_collection_results.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- -I../../externals/thread-pool-cpp/thread_pool `pkg-config --cflags zlib` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/document_collection_results.o document_collection_results.cpp
 
 ${OBJECTDIR}/document_revision.o: document_revision.cpp 
 	${MKDIR} -p ${OBJECTDIR}
@@ -406,6 +412,19 @@ ${OBJECTDIR}/document_collection_nomain.o: ${OBJECTDIR}/document_collection.o do
 	    $(COMPILE.cc) -O2 -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- -I../../externals/thread-pool-cpp/thread_pool `pkg-config --cflags zlib` -std=c++11  -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/document_collection_nomain.o document_collection.cpp;\
 	else  \
 	    ${CP} ${OBJECTDIR}/document_collection.o ${OBJECTDIR}/document_collection_nomain.o;\
+	fi
+
+${OBJECTDIR}/document_collection_results_nomain.o: ${OBJECTDIR}/document_collection_results.o document_collection_results.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/document_collection_results.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} "$@.d";\
+	    $(COMPILE.cc) -O2 -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- -I../../externals/thread-pool-cpp/thread_pool `pkg-config --cflags zlib` -std=c++11  -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/document_collection_results_nomain.o document_collection_results.cpp;\
+	else  \
+	    ${CP} ${OBJECTDIR}/document_collection_results.o ${OBJECTDIR}/document_collection_results_nomain.o;\
 	fi
 
 ${OBJECTDIR}/document_revision_nomain.o: ${OBJECTDIR}/document_revision.o document_revision.cpp 
