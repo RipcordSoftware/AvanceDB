@@ -11,6 +11,7 @@ program
   .option('-c, --count [records=1000000]', 'The number of records to add to the database', Number, 1000000)
   .option('-b, --block [size=2000]', 'The number of records in each block', Number, 2000)
   .option('-s, --step [size=1]', 'The step to use when incrementing record ids', Number, 1)
+  .option('-o, --offset [offset=0]', 'The offset from 0 to use for ids', Number, 0)
   .option('-a, --anonymous', 'Add records without an _id field', false)
   .option('-u, --update', 'Update the database if it already exists, don\'t drop it first', false)
   .option('-p, --port [port=5994]', 'The port number to connect to', Number, 5994)
@@ -73,7 +74,7 @@ init.then(function() {
     var count = Math.floor(program.count / program.block);
     var overflow = program.count % program.block;
     var active = 0;
-    var index = 0;
+    var index = program.offset;
     var start = process.hrtime();
     
     var save = function(next) {
