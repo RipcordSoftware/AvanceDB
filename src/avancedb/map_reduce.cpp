@@ -24,6 +24,7 @@
 
 #include <memory>
 #include <algorithm>
+#include <condition_variable>
 
 #include "script_array_jsapi_key_value_source.h"
 #include "map_reduce_result.h"
@@ -56,6 +57,7 @@ map_reduce_results_ptr MapReduce::Execute(const GetViewOptions& options, const M
     std::vector<map_reduce_shard_results_ptr> filteredResults;
     std::vector<rs::jsapi::ScriptException> scriptExceptions;
     std::atomic<int> threads(collsSize);
+    std::condition_variable threadEnd;
     
     const auto skip = options.Skip();
     const auto limit = options.Limit();
@@ -67,7 +69,7 @@ map_reduce_results_ptr MapReduce::Execute(const GetViewOptions& options, const M
     // run the map
     for (auto& coll : colls) {
         mapReduceThreadPool_->Post([&]() {
-            std::unique_lock<std::mutex> l{m, std::defer_lock};
+            std::unique_lock<std::mutex> lock{m, std::defer_lock};
             
             try {
                 BOOST_SCOPE_EXIT(&threads) { --threads; } BOOST_SCOPE_EXIT_END
@@ -83,19 +85,20 @@ map_reduce_results_ptr MapReduce::Execute(const GetViewOptions& options, const M
                 auto filteredResult = boost::make_shared<map_reduce_shard_results_ptr::element_type>(
                     result, skip + std::min(limit, result->size()), startKey, endKey, inclusiveEnd, descending);               
 
-                l.lock();                
+                lock.lock();                
                 filteredResults.emplace_back(filteredResult);
+                threadEnd.notify_one();
             } catch (const rs::jsapi::ScriptException& ex) {
-                l.lock();
+                lock.lock();
+                threadEnd.notify_one();
                 scriptExceptions.emplace_back(ex);
             }
         });
     }
     
     // wait for the map threads to finish
-    while (threads.load() > 0) {        
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
-    }
+    std::unique_lock<std::mutex> lock{m};
+    threadEnd.wait(lock, [&]() { return threads.load() == 0; });
     
     // we need to pass back any script exceptions to the caller
     if (scriptExceptions.size() > 0) {
@@ -196,7 +199,7 @@ map_reduce_result_array_ptr MapReduce::Execute(rs::jsapi::Runtime& rt, const Map
             
             auto resultArr = rs::scriptobject::ScriptArrayFactory::CreateArray(source);
             auto result = MapReduceResult::Create(resultArr, doc);
-            results->emplace_back(result);
+            results->push_back(std::move(result));
     });
 
     // TODO: elegantly handle JS syntax errors
@@ -237,7 +240,7 @@ map_reduce_result_array_ptr MapReduce::Execute(rs::jsapi::Runtime& rt, const Map
         func.CallFunction(args, false);
     }
     
-    SortResultArray(results);   
+    SortResultArray(results);
     
     return results;
 }

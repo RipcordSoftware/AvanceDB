@@ -67,9 +67,9 @@ public:
     
 private:
     
-    friend map_reduce_result_ptr boost::make_shared<map_reduce_result_ptr::element_type>(script_array_ptr&, document_ptr&);
+    friend map_reduce_result_ptr boost::make_shared<map_reduce_result_ptr::element_type>(script_array_ptr&&, document_ptr&&);
     
-    MapReduceResult(script_array_ptr, document_ptr);
+    MapReduceResult(script_array_ptr&&, document_ptr&&);
     
     const char* id_;
     document_ptr doc_;

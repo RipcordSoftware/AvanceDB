@@ -23,12 +23,12 @@
 #include "document.h"
 #include "map_reduce_result_comparers.h"
 
-MapReduceResult::MapReduceResult(script_array_ptr result, document_ptr doc) :
+MapReduceResult::MapReduceResult(script_array_ptr&& result, document_ptr&& doc) :
         result_(result), doc_(doc), id_(doc->getId()) {
 }
 
 map_reduce_result_ptr MapReduceResult::Create(script_array_ptr result, document_ptr doc) {    
-    return boost::make_shared<MapReduceResult>(result, doc);
+    return boost::make_shared<MapReduceResult>(std::move(result), std::move(doc));
 }
 
 const char* MapReduceResult::MapReduceResult::getId() const {
