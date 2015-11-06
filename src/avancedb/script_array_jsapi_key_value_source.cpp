@@ -39,12 +39,8 @@ ScriptArrayJsapiKeyValueSource ScriptArrayJsapiKeyValueSource::Create(const rs::
                 break;
 
             case JSTYPE_STRING:
-                if (source.stringValues_.size() != length) {
-                    source.stringValues_.resize(length);
-                }
-
                 source.types_[i] = ScriptObjectType::String;
-                source.stringValues_[i] = source.values_[i].ToString(); 
+                source.stringValues_[i] = std::move(source.values_[i].ToString());
                 break;
 
             case JSTYPE_NUMBER: source.types_[i] = ScriptObjectType::Double; break;
@@ -57,7 +53,7 @@ ScriptArrayJsapiKeyValueSource ScriptArrayJsapiKeyValueSource::Create(const rs::
 }
 
 ScriptArrayJsapiKeyValueSource::ScriptArrayJsapiKeyValueSource(const rs::jsapi::Value& key, const rs::jsapi::Value& value) :
-        values_{ key, value }, types_(values_.size(), ScriptObjectType::Unknown) {
+        values_{ key, value }, types_{ ScriptObjectType::Unknown, ScriptObjectType::Unknown } {
     
 }
 

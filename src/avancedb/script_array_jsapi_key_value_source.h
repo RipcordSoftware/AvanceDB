@@ -19,6 +19,8 @@
 #ifndef SCRIPT_OBJECT_KEY_VALUE_SOURCE_H
 #define SCRIPT_OBJECT_KEY_VALUE_SOURCE_H
 
+#include <array>
+
 #include "script_array_source.h"
 
 #include "libjsapi.h"
@@ -47,9 +49,9 @@ private:
     
     ScriptArrayJsapiKeyValueSource(const rs::jsapi::Value& key, const rs::jsapi::Value& value);    
     
-    std::vector<rs::jsapi::Value> values_;
-    std::vector<std::string> stringValues_;
-    std::vector<ScriptObjectType> types_;
+    std::array<rs::jsapi::Value, 2> values_;
+    std::array<std::string, 2> stringValues_;
+    std::array<ScriptObjectType, 2> types_;
 
 };
 
