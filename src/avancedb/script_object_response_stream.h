@@ -308,7 +308,7 @@ private:
     // TODO: review
     void AppendDouble(double value, bool comma = false) {
         char buffer[64];
-        auto numLen = std::snprintf(reinterpret_cast<char*>(buffer), sizeof(buffer), "%g", value);
+        auto numLen = std::snprintf(reinterpret_cast<char*>(buffer), sizeof(buffer), "%.16g", value);
         
         auto len = numLen + (comma ? 1 : 0);
         
