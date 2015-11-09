@@ -54,6 +54,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/map_reduce.o \
 	${OBJECTDIR}/map_reduce_query_key.o \
 	${OBJECTDIR}/map_reduce_result.o \
+	${OBJECTDIR}/map_reduce_result_array.o \
 	${OBJECTDIR}/map_reduce_result_comparers.o \
 	${OBJECTDIR}/map_reduce_results.o \
 	${OBJECTDIR}/map_reduce_results_iterator.o \
@@ -207,6 +208,11 @@ ${OBJECTDIR}/map_reduce_result.o: map_reduce_result.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- -I../../externals/thread-pool-cpp/thread_pool `pkg-config --cflags zlib` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/map_reduce_result.o map_reduce_result.cpp
+
+${OBJECTDIR}/map_reduce_result_array.o: map_reduce_result_array.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- -I../../externals/thread-pool-cpp/thread_pool `pkg-config --cflags zlib` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/map_reduce_result_array.o map_reduce_result_array.cpp
 
 ${OBJECTDIR}/map_reduce_result_comparers.o: map_reduce_result_comparers.cpp 
 	${MKDIR} -p ${OBJECTDIR}
@@ -568,6 +574,19 @@ ${OBJECTDIR}/map_reduce_result_nomain.o: ${OBJECTDIR}/map_reduce_result.o map_re
 	    $(COMPILE.cc) -O2 -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- -I../../externals/thread-pool-cpp/thread_pool `pkg-config --cflags zlib` -std=c++11  -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/map_reduce_result_nomain.o map_reduce_result.cpp;\
 	else  \
 	    ${CP} ${OBJECTDIR}/map_reduce_result.o ${OBJECTDIR}/map_reduce_result_nomain.o;\
+	fi
+
+${OBJECTDIR}/map_reduce_result_array_nomain.o: ${OBJECTDIR}/map_reduce_result_array.o map_reduce_result_array.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/map_reduce_result_array.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} "$@.d";\
+	    $(COMPILE.cc) -O2 -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- -I../../externals/thread-pool-cpp/thread_pool `pkg-config --cflags zlib` -std=c++11  -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/map_reduce_result_array_nomain.o map_reduce_result_array.cpp;\
+	else  \
+	    ${CP} ${OBJECTDIR}/map_reduce_result_array.o ${OBJECTDIR}/map_reduce_result_array_nomain.o;\
 	fi
 
 ${OBJECTDIR}/map_reduce_result_comparers_nomain.o: ${OBJECTDIR}/map_reduce_result_comparers.o map_reduce_result_comparers.cpp 

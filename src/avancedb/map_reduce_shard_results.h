@@ -23,6 +23,7 @@
 
 #include "types.h"
 #include "document_collection.h"
+#include "map_reduce_result_array.h"
 
 class MapReduceShardResults final {
 public:
@@ -35,6 +36,8 @@ public:
     size_type FilteredRows() const;
     size_type TotalRows() const;
     
+    map_reduce_result_array_ptr SourceResults() const;
+    
     const_iterator cbegin() const;
     const_iterator cend() const;
     
@@ -42,7 +45,7 @@ private:
     
     const size_type FindMissedFlag = ~(std::numeric_limits<size_type>::max() / 2);
     
-    static size_type FindResult(const map_reduce_result_array& results, const map_reduce_query_key_ptr key);
+    static size_type FindResult(const MapReduceResultArray& results, const map_reduce_query_key_ptr key);
     
     static size_type Subtract(size_type, size_type);
     

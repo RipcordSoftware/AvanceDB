@@ -42,9 +42,9 @@ using document_collection_ptr = boost::shared_ptr<DocumentCollection>;
 using document_collections_ptr_array = std::vector<document_collection_ptr>;
 
 class MapReduceResult;
-using map_reduce_result_ptr = boost::shared_ptr<MapReduceResult>;
-using map_reduce_result_array = std::vector<map_reduce_result_ptr>;
-using map_reduce_result_array_ptr = boost::shared_ptr<map_reduce_result_array>;
+using map_reduce_result_ptr = MapReduceResult*;
+class MapReduceResultArray;
+using map_reduce_result_array_ptr = boost::shared_ptr<MapReduceResultArray>;
 
 class MapReduceResults;
 using map_reduce_results_ptr = boost::shared_ptr<MapReduceResults>;

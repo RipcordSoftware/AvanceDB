@@ -28,7 +28,7 @@ MapReduceResult::MapReduceResult(script_array_ptr&& result, document_ptr&& doc) 
 }
 
 map_reduce_result_ptr MapReduceResult::Create(script_array_ptr result, document_ptr doc) {    
-    return boost::make_shared<MapReduceResult>(std::move(result), std::move(doc));
+    return new MapReduceResult{std::move(result), std::move(doc)};
 }
 
 const char* MapReduceResult::MapReduceResult::getId() const {

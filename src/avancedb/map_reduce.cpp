@@ -25,6 +25,7 @@
 #include <memory>
 #include <algorithm>
 #include <condition_variable>
+#include <functional>
 
 #include "script_array_jsapi_key_value_source.h"
 #include "map_reduce_result.h"
@@ -85,7 +86,7 @@ map_reduce_results_ptr MapReduce::Execute(const GetViewOptions& options, const M
                 auto filteredResult = boost::make_shared<map_reduce_shard_results_ptr::element_type>(
                     result, skip + std::min(limit, result->size()), startKey, endKey, inclusiveEnd, descending);               
 
-                lock.lock();                
+                lock.lock();
                 filteredResults.emplace_back(filteredResult);
                 threadEnd.notify_one();
             } catch (const rs::jsapi::ScriptException& ex) {
@@ -131,7 +132,7 @@ map_reduce_results_ptr MapReduce::Execute(const GetViewOptions& options, const M
     
     // copy the shard results into the main results collection
     for (const auto& result : filteredResults) {
-        results->insert(results->end(), result->cbegin(), result->cend());
+        results->insert(results->end(), result->cbegin(), result->cend(), result->SourceResults());
     }
     
     auto less = [](const map_reduce_result_ptr& a, const map_reduce_result_ptr& b) {
@@ -190,7 +191,8 @@ map_reduce_result_array_ptr MapReduce::Execute(rs::jsapi::Runtime& rt, const Map
     mapScript += task.Map();
     mapScript += "; })();";
     
-    document_ptr doc = nullptr;
+    document_array::value_type empty;
+    auto doc = std::cref(empty);
 
     // define a function in global scope implemented by a C++ lambda
     rs::jsapi::Global::DefineFunction(rt, "emit", 
@@ -199,7 +201,7 @@ map_reduce_result_array_ptr MapReduce::Execute(rs::jsapi::Runtime& rt, const Map
             
             auto resultArr = rs::scriptobject::ScriptArrayFactory::CreateArray(source);
             auto result = MapReduceResult::Create(resultArr, doc);
-            results->push_back(std::move(result));
+            results->push_back(result);
     });
 
     // TODO: elegantly handle JS syntax errors
@@ -232,8 +234,8 @@ map_reduce_result_array_ptr MapReduce::Execute(rs::jsapi::Runtime& rt, const Map
     args.Append(object);
 
     for (DocumentCollection::size_type i = 0, size = docs.size(); i < size; ++i) {
-        doc = docs[i];
-        scriptObj = doc->getObject();
+        doc = std::cref(docs[i]);
+        scriptObj = doc.get()->getObject();
 
         state->scriptObj_ = scriptObj;
 

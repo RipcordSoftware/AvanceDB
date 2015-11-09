@@ -67,7 +67,7 @@ MapReduceShardResults::size_type MapReduceShardResults::TotalRows() const {
     return results_->size();
 }
 
-MapReduceShardResults::size_type MapReduceShardResults::FindResult(const map_reduce_result_array& results, const map_reduce_query_key_ptr key) {
+MapReduceShardResults::size_type MapReduceShardResults::FindResult(const MapReduceResultArray& results, const map_reduce_query_key_ptr key) {
     const auto size = results.size();
     
     if (size == 0) {
@@ -131,4 +131,8 @@ MapReduceShardResults::size_type MapReduceShardResults::Subtract(size_type a, si
         v = 0;
     }
     return v;
+}
+
+map_reduce_result_array_ptr MapReduceShardResults::SourceResults() const {
+    return results_;
 }

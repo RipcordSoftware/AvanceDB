@@ -22,6 +22,7 @@
 #include "types.h"
 #include "document_collection.h"
 #include "get_view_options.h"
+#include "map_reduce_result_array.h"
 
 class MapReduceResultsIterator;
 

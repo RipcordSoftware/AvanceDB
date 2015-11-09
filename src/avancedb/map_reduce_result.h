@@ -20,15 +20,12 @@
 #define MAP_REDUCE_RESULT_H
 
 #include <boost/noncopyable.hpp>
-#include <boost/enable_shared_from_this.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
 
 #include <cstring>
 
 #include "types.h"
 
-class MapReduceResult final : public boost::enable_shared_from_this<MapReduceResult>, private boost::noncopyable {
+class MapReduceResult final : private boost::noncopyable {
 public:
     
     static constexpr unsigned KeyIndex{0};
@@ -66,8 +63,6 @@ public:
     static bool Less(const script_array_ptr& a, const script_array_ptr& b);
     
 private:
-    
-    friend map_reduce_result_ptr boost::make_shared<map_reduce_result_ptr::element_type>(script_array_ptr&&, document_ptr&&);
     
     MapReduceResult(script_array_ptr&&, document_ptr&&);
     

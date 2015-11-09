@@ -39,7 +39,7 @@ private:
     const MapReduceResults::const_iterator iend_;
     MapReduceResults::const_iterator iter_;
     const int direction_;
-    const MapReduceResults::value_type null_;
+    const MapReduceResults::value_type null_{nullptr};
 };
 
 #endif	/* MAP_REDUCE_RESULTS_ITERATOR_H */
