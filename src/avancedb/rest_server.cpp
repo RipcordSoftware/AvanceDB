@@ -896,6 +896,6 @@ rs::scriptobject::ScriptObjectPtr RestServer::GetJsonBody(rs::httpserver::reques
             throw InvalidJson();
         }
     } else {
-        return rs::scriptobject::ScriptObjectPtr(nullptr);
+        return rs::scriptobject::ScriptObjectPtr{};
     }
 }

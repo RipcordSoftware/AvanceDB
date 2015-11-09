@@ -207,9 +207,9 @@ map_reduce_result_array_ptr MapReduce::Execute(rs::jsapi::Runtime& rt, const Map
     rs::jsapi::Value func(rt);
     rt.Evaluate(mapScript.c_str(), func);
     
-    auto state = new MapReduceScriptObjectState{nullptr};
+    auto state = new MapReduceScriptObjectState{};
 
-    rs::scriptobject::ScriptObjectPtr scriptObj = nullptr;
+    rs::scriptobject::ScriptObjectPtr scriptObj;
     rs::jsapi::Value object(rt);
     rs::jsapi::DynamicObject::Create(rt, 
         [&](const char* name, rs::jsapi::Value& value) {
