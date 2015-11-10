@@ -306,14 +306,14 @@ BulkDocumentsResults Documents::PostBulkDocuments(script_array_ptr docs, bool ne
             id = newId;
         }
         
-        auto coll = GetDocumentCollectionIndex(id);
-    
-        boost::lock_guard<DocumentCollection> guard{*docs_[coll]};
-        
         Document::Compare compare{id};
-        auto oldDoc = docs_[coll]->find_fn(compare);
         
         auto objRev = obj->getString("_rev", false);
+        
+        auto coll = GetDocumentCollectionIndex(id);
+    
+        boost::unique_lock<DocumentCollection> lock{*docs_[coll]};                
+        auto oldDoc = docs_[coll]->find_fn(compare);                
         
         const char* error = nullptr;
         const char* reason = nullptr;
@@ -330,6 +330,8 @@ BulkDocumentsResults Documents::PostBulkDocuments(script_array_ptr docs, bool ne
             auto newDoc = Document::Create(id, obj, ++updateSeq_, newEdits);
 
             docs_[coll]->insert(newDoc);
+            
+            lock.unlock();
 
             auto newRev = newDoc->getRev();
             results.emplace_back(id, newRev);
