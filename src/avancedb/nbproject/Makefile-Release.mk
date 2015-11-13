@@ -94,7 +94,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=../../externals/libhttpserver/src/libhttpserver/dist/Release/GNU-Linux-x86/libhttpserver.a ../../externals/libscriptobject/src/libscriptobject_gason/dist/Release/GNU-Linux-x86/liblibscriptobject_gason.a ../../externals/libscriptobject/src/libscriptobject/dist/Release/GNU-Linux-x86/libscriptobject.a ../../externals/libjsapi/src/libjsapi/dist/Release/GNU-Linux-x86/libjsapi.a ../../externals/libjsapi/externals/installed/lib/libjs_static.ajs -lboost_regex -lboost_filesystem -lboost_program_options -lboost_thread -lboost_date_time -lboost_chrono -lboost_system `pkg-config --libs zlib` -ldl  -lpthread   
+LDLIBSOPTIONS=../../externals/libhttpserver/src/libhttpserver/dist/Release/GNU-Linux-x86/libhttpserver.a ../../externals/libscriptobject/src/libscriptobject_gason/dist/Release/GNU-Linux-x86/liblibscriptobject_gason.a ../../externals/libscriptobject/src/libscriptobject/dist/Release/GNU-Linux-x86/libscriptobject.a ../../externals/libjsapi/src/libjsapi/dist/Release/GNU-Linux-x86/libjsapi.a ../../externals/libjsapi/externals/installed/lib/libjs_static.ajs -lboost_regex -lboost_filesystem -lboost_program_options -lboost_thread -lboost_date_time -lboost_chrono -lboost_atomic -lboost_system `pkg-config --libs zlib` -ldl  -lpthread   
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}

@@ -198,6 +198,7 @@
             <linkerLibLibItem>boost_thread</linkerLibLibItem>
             <linkerLibLibItem>boost_date_time</linkerLibLibItem>
             <linkerLibLibItem>boost_chrono</linkerLibLibItem>
+            <linkerLibLibItem>boost_atomic</linkerLibLibItem>
             <linkerLibLibItem>boost_system</linkerLibLibItem>
             <linkerOptionItem>`pkg-config --libs zlib`</linkerOptionItem>
             <linkerLibStdlibItem>DynamicLinking</linkerLibStdlibItem>
@@ -520,6 +521,7 @@
             <linkerLibLibItem>boost_thread</linkerLibLibItem>
             <linkerLibLibItem>boost_date_time</linkerLibLibItem>
             <linkerLibLibItem>boost_chrono</linkerLibLibItem>
+            <linkerLibLibItem>boost_atomic</linkerLibLibItem>
             <linkerLibLibItem>boost_system</linkerLibLibItem>
             <linkerOptionItem>`pkg-config --libs zlib`</linkerOptionItem>
             <linkerLibStdlibItem>DynamicLinking</linkerLibStdlibItem>
