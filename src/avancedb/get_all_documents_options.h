@@ -48,8 +48,8 @@ public:
     bool InclusiveEnd() const;
     bool UpdateSequence() const;
     
-    uint64_t Skip() const;
-    uint64_t Limit(uint64_t defaultValue = std::numeric_limits<uint64_t>::max()) const;
+    std::size_t Skip() const;
+    std::size_t Limit(std::size_t defaultValue = std::numeric_limits<std::size_t>::max()) const;
     
 private:        
     mutable std::string key_;
@@ -63,13 +63,13 @@ private:
     mutable boost::optional<bool> inclusiveEnd_;
     mutable boost::optional<bool> updateSequence_;
     
-    mutable boost::optional<uint64_t> skip_;
-    mutable boost::optional<uint64_t> limit_;
+    mutable boost::optional<std::size_t> skip_;
+    mutable boost::optional<std::size_t> limit_;
     
 protected:
     std::string GetString(const char* name, const char* altName = nullptr) const;
     bool GetBoolean(const char* name, bool defaultValue) const;
-    uint64_t GetUnsigned(const char* name, uint64_t defaultValue) const;
+    std::size_t GetUnsigned(const char* name, std::size_t defaultValue) const;
     
     const rs::httpserver::QueryString& qs_;
 };

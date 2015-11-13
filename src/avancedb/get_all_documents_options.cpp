@@ -106,14 +106,14 @@ bool GetAllDocumentsOptions::UpdateSequence() const {
     return updateSequence_.get();
 }
 
-uint64_t GetAllDocumentsOptions::Skip() const {
+std::size_t GetAllDocumentsOptions::Skip() const {
     if (!skip_.is_initialized()) {
         skip_ = GetUnsigned("skip", 0);
     }
     return skip_.get();
 }
 
-uint64_t GetAllDocumentsOptions::Limit(uint64_t defaultValue) const {
+std::size_t GetAllDocumentsOptions::Limit(std::size_t defaultValue) const {
     if (!limit_.is_initialized()) {
         limit_ = GetUnsigned("limit", defaultValue);
     }
@@ -139,8 +139,8 @@ bool GetAllDocumentsOptions::GetBoolean(const char* name, bool defaultValue) con
     return option;
 }
 
-uint64_t GetAllDocumentsOptions::GetUnsigned(const char* name, uint64_t defaultValue) const {
-    auto option = std::min(defaultValue, (uint64_t)std::numeric_limits<int64_t>::max());
+std::size_t GetAllDocumentsOptions::GetUnsigned(const char* name, std::size_t defaultValue) const {
+    auto option = std::min(defaultValue, (std::size_t)std::numeric_limits<std::size_t>::max());
     
     if (qs_.IsKey(name)) {
         auto value = qs_.getValue(name);    
@@ -149,7 +149,7 @@ uint64_t GetAllDocumentsOptions::GetUnsigned(const char* name, uint64_t defaultV
 
             try {
                 if (value[0] != '-') {
-                    option = boost::lexical_cast<uint64_t>(value);
+                    option = boost::lexical_cast<std::size_t>(value);
                     valid = true;
                 }
             } catch (const boost::bad_lexical_cast&) {
