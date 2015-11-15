@@ -54,6 +54,7 @@ RestServer::RestServer() {
     AddRoute("HEAD", REGEX_DBNAME_GROUP "/{0,}$", &RestServer::HeadDatabase);   
     AddRoute("HEAD", REGEX_DBNAME_GROUP REGEX_DOCID_GROUP, &RestServer::HeadDocument);
     AddRoute("HEAD", REGEX_DBNAME_GROUP "/+_design" REGEX_DESIGNID_GROUP, &RestServer::HeadDesignDocument);
+    AddRoute("HEAD", "/+", &RestServer::HeadServer);
     
     AddRoute("DELETE", REGEX_DBNAME_GROUP "/+_local" REGEX_DOCID_GROUP, &RestServer::DeleteLocalDocument);
     AddRoute("DELETE", REGEX_DBNAME_GROUP "/{0,}$", &RestServer::DeleteDatabase);
@@ -169,6 +170,11 @@ bool RestServer::HeadDatabase(rs::httpserver::request_ptr request, const rs::htt
     }
     
     return found;            
+}
+
+bool RestServer::HeadServer(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {        
+    response->setContentType(ContentTypes::applicationJson).Send();    
+    return true;            
 }
 
 bool RestServer::GetDatabase(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
