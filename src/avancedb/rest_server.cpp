@@ -39,6 +39,7 @@
 #include "get_view_options.h"
 
 #include "libscriptobject_gason.h"
+#include "libscriptobject_msgpack.h"
 
 #define REGEX_DBNAME R"(_?[a-z][a-z0-9_\$\+\-\(\)]+)"
 #define REGEX_DBNAME_GROUP "/(?<db>" REGEX_DBNAME ")"
@@ -236,7 +237,7 @@ bool RestServer::PostDatabase(rs::httpserver::request_ptr request, const rs::htt
     auto db = GetDatabase(args);
     if (!!db) {
         UuidHelper::UuidString uuidString;
-        auto obj = GetJsonBody(request);
+        auto obj = GetRequestBody(request);
 
         if (!!obj) {                      
             auto id = obj->getString("_id", false);
@@ -342,7 +343,7 @@ bool RestServer::PutDocument(rs::httpserver::request_ptr request, const rs::http
     auto db = GetDatabase(args);
     if (!!db) {
         auto id = GetParameter("id", args);
-        auto obj = GetJsonBody(request);        
+        auto obj = GetRequestBody(request);        
 
         if (!!obj) {
             auto doc = db->SetDocument(id, obj);
@@ -368,7 +369,7 @@ bool RestServer::PutDesignDocument(rs::httpserver::request_ptr request, const rs
     auto db = GetDatabase(args);
     if (!!db) {
         auto id = GetParameter("designid", args);
-        auto obj = GetJsonBody(request);        
+        auto obj = GetRequestBody(request);        
 
         if (!!obj) {
             auto doc = db->SetDesignDocument(id, obj);
@@ -393,7 +394,7 @@ bool RestServer::PostDatabaseBulkDocs(rs::httpserver::request_ptr request, const
     bool created = false;
     auto db = GetDatabase(args);
     if (!!db) {
-        auto obj = GetJsonBody(request);
+        auto obj = GetRequestBody(request);
         
         if (obj->getType("docs") != rs::scriptobject::ScriptObjectType::Array) {
             throw InvalidJson{};
@@ -440,7 +441,7 @@ bool RestServer::PostDatabaseRevsDiff(rs::httpserver::request_ptr request, const
     if (!!db) {
         JsonStream stream;
         
-        auto obj = GetJsonBody(request, false);
+        auto obj = GetRequestBody(request, false);
         
         try {
             auto count = obj->getCount();
@@ -531,7 +532,7 @@ bool RestServer::PutLocalDocument(rs::httpserver::request_ptr request, const rs:
     auto db = GetDatabase(args);
     if (!!db) {
         auto id = GetParameter("id", args);
-        auto obj = GetJsonBody(request);        
+        auto obj = GetRequestBody(request);        
 
         if (!!obj) {
             auto doc = db->SetLocalDocument(id, obj);
@@ -711,7 +712,7 @@ bool RestServer::GetDatabaseAllDocs(rs::httpserver::request_ptr request, const r
 bool RestServer::PostDatabaseAllDocs(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
     auto db = GetDatabase(args);
     if (!!db) {
-        auto obj = GetJsonBody(request);
+        auto obj = GetRequestBody(request);
         if (!obj || obj->getType("keys") != rs::scriptobject::ScriptObjectType::Array) {
             throw InvalidJson();
         }
@@ -777,7 +778,7 @@ bool RestServer::PostTempView(rs::httpserver::request_ptr request, const rs::htt
         GetViewOptions options{request->getQueryString()};
         const auto includeDocs = options.IncludeDocs();
         
-        auto obj = GetJsonBody(request);
+        auto obj = GetRequestBody(request);
         if (!obj || obj->getType("map") != rs::scriptobject::ScriptObjectType::String) {
             throw InvalidJson();
         }
@@ -870,10 +871,13 @@ const std::string& RestServer::GetParameter(const char* param, const rs::httpser
     return qs.getValue(param);
 }
 
-rs::scriptobject::ScriptObjectPtr RestServer::GetJsonBody(rs::httpserver::request_ptr request, bool useCachedObjectKeys) {
+rs::scriptobject::ScriptObjectPtr RestServer::GetRequestBody(rs::httpserver::request_ptr request, bool useCachedObjectKeys) {
     if (request->HasBody()) {
-        if (request->getContentType().find(ContentTypes::applicationJson) == std::string::npos) {
-            throw InvalidJson();
+        bool gotJson = request->getContentType().find(ContentTypes::applicationJson) != std::string::npos;
+        bool gotMsgPack = !gotJson && request->getContentType().find(ContentTypes::applicationMsgPack) != std::string::npos;
+        
+        if (!gotJson && !gotMsgPack) {
+            throw InvalidJson{};
         }
 
         auto& requestStream = request->getRequestStream();
@@ -887,7 +891,7 @@ rs::scriptobject::ScriptObjectPtr RestServer::GetJsonBody(rs::httpserver::reques
             auto bytesRead = requestStream.Read(&buffer[offset], 0, remaining, false);
             
             if (bytesRead <= 0) {
-                throw InvalidJson();
+                throw InvalidJson{};
             }
             
             offset += bytesRead;
@@ -895,11 +899,20 @@ rs::scriptobject::ScriptObjectPtr RestServer::GetJsonBody(rs::httpserver::reques
         
         auto json = reinterpret_cast<char*>(buffer.data());
         
-        try {
-            rs::scriptobject::ScriptObjectJsonSource source(json);        
-            return rs::scriptobject::ScriptObjectFactory::CreateObject(source, useCachedObjectKeys);
-        } catch (const std::exception&) {
-            throw InvalidJson();
+        if (gotJson) {
+            try {   
+                rs::scriptobject::ScriptObjectJsonSource source(json);
+                return rs::scriptobject::ScriptObjectFactory::CreateObject(source, useCachedObjectKeys);
+            } catch (const std::exception&) {
+                throw InvalidJson{};
+            }
+        } else {
+            try {
+                rs::scriptobject::ScriptObjectMsgpackSource source(json, requestLength);
+                return rs::scriptobject::ScriptObjectFactory::CreateObject(source, useCachedObjectKeys);
+            } catch (const std::exception&) {
+                throw InvalidMsgPack{};
+            }
         }
     } else {
         return rs::scriptobject::ScriptObjectPtr{};

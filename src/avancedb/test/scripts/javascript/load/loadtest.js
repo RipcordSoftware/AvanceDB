@@ -1,9 +1,11 @@
 'use strict';
 
+var http = require('http');
 var cradle = require('cradle');
 var _ = require('underscore');
 var Promise = require('promise');
 var program = require('commander');
+var msgpack = require("msgpack-lite");
 
 program
   .version('0.0.1')
@@ -16,6 +18,7 @@ program
   .option('-u, --update', 'Update the database if it already exists, don\'t drop it first', false)
   .option('-p, --port [port=5994]', 'The port number to connect to', Number, 5994)
   .option('-h, --host [name=127.0.0.1]', 'The IP or hostname to connect to', '127.0.0.1')
+  .option('-m, --msgpack', 'Use msgpack instead of JSON for bulk POSTs', false)
   .parse(process.argv);
 
 var host = 'http://' + program.host;
@@ -45,6 +48,39 @@ var save = new Promise(function(resolve, reject) {
         }
     });
 });
+
+var dbSave = function(data, cb, useMsgPack) {
+    if (!useMsgPack) {
+        db.save(data, cb);
+    } else {
+        try {
+            var body = {docs: data};
+            var buffer = msgpack.encode(body);
+
+            var options = {headers: {}};
+            options.family = 4;
+            options.host = conn.host;
+            options.port = conn.port;
+            options.path = '/' + testDbName + '/_bulk_docs';
+            options.method = 'POST';
+            options.headers['Content-Type'] = 'application/msgpack';
+            options.headers['Content-Length'] = buffer.length;
+
+            var req = http.request(options, function(res) {
+                res.on('data', function (chunk) {
+                });
+                res.on('end', function () {
+                    cb(null, null);
+                });
+            });
+            req.on('error', function(e) { cb(e, null); });
+            req.write(buffer);
+            req.end();
+        } catch (e) {
+            console.log(e);
+        }
+    }
+}
 
 var init = new Promise(function(resolve, reject) {
     db.exists(function(err, exists) {
@@ -94,12 +130,12 @@ init.then(function() {
                 index += program.step;
             }
             
-            db.save(testData, function(err, res) {
+            dbSave(testData, function(err, res) {
                 --active;
                 if (err) throw err;
                 process.stdout.write('.');
                 next(next);
-            });
+            }, program.msgpack);
             
             if (active < 10) {
                 next(next);

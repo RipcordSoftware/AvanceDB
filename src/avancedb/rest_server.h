@@ -80,7 +80,7 @@ private:
     const char* GetDatabaseName(const rs::httpserver::RequestRouter::CallbackArgs&);
     const std::string& GetParameter(const char* param, const rs::httpserver::QueryString&, bool throwIfMissing = false);
     const char* GetParameter(const char* param, const rs::httpserver::RequestRouter::CallbackArgs&);
-    rs::scriptobject::ScriptObjectPtr GetJsonBody(rs::httpserver::request_ptr request, bool useCachedObjectKeys = true);
+    rs::scriptobject::ScriptObjectPtr GetRequestBody(rs::httpserver::request_ptr request, bool useCachedObjectKeys = true);
     
     rs::httpserver::RequestRouter router_;        
     Databases databases_;

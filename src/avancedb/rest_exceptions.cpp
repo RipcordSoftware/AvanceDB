@@ -106,6 +106,11 @@ InvalidJson::InvalidJson() :
     
 }
 
+InvalidMsgPack::InvalidMsgPack() :
+    HttpServerException(400, badRequestDescription, invalidJsonBody, contentType) {
+    
+}
+
 DocumentConflict::DocumentConflict() :
     HttpServerException(409, conflictDescription, documentConflictJsonBody, contentType) {
     

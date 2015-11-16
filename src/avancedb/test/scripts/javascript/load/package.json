@@ -5,6 +5,7 @@
         "cradle": "*",
         "underscore": "*",
         "promise": "*",
-        "commander": "*"
+        "commander": "*",
+	"msgpack-lite": "*"
     }
 }

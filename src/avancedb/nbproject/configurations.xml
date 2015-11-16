@@ -134,10 +134,12 @@
             <pElem>../../externals/termcolor/include</pElem>
             <pElem>../../externals/libscriptobject/src/libscriptobject</pElem>
             <pElem>../../externals/libscriptobject/src/libscriptobject_gason</pElem>
+            <pElem>../../externals/libscriptobject/src/libscriptobject_msgpack</pElem>
             <pElem>../../externals/libscriptobject/externals/gason/src</pElem>
             <pElem>../../externals/cityhash/src</pElem>
             <pElem>../../externals/libjsapi/externals/installed/include/mozjs-</pElem>
             <pElem>../../externals/thread-pool-cpp/thread_pool</pElem>
+            <pElem>../../externals/libscriptobject/externals/msgpack-c/include</pElem>
           </incDir>
           <commandLine>--coverage</commandLine>
         </ccTool>
@@ -189,6 +191,18 @@
                             BC="${MAKE}  -f Makefile CONF=Debug"
                             CC="${MAKE}  -f Makefile CONF=Debug clean"
                             OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libjsapi.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../../externals/libscriptobject/src/libscriptobject_msgpack"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../../externals/libscriptobject/src/libscriptobject_msgpack"
+                            BC="${MAKE}  -f Makefile CONF=Debug"
+                            CC="${MAKE}  -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liblibscriptobject_msgpack.a">
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibFileItem>../../externals/libjsapi/externals/installed/lib/libjs_static.ajs</linkerLibFileItem>
@@ -452,10 +466,12 @@
             <pElem>../../externals/termcolor/include</pElem>
             <pElem>../../externals/libscriptobject/src/libscriptobject</pElem>
             <pElem>../../externals/libscriptobject/src/libscriptobject_gason</pElem>
+            <pElem>../../externals/libscriptobject/src/libscriptobject_msgpack</pElem>
             <pElem>../../externals/libscriptobject/externals/gason/src</pElem>
             <pElem>../../externals/cityhash/src</pElem>
             <pElem>../../externals/libjsapi/externals/installed/include/mozjs-</pElem>
             <pElem>../../externals/thread-pool-cpp/thread_pool</pElem>
+            <pElem>../../externals/libscriptobject/externals/msgpack-c/include</pElem>
           </incDir>
         </ccTool>
         <fortranCompilerTool>
@@ -512,6 +528,18 @@
                             BC="${MAKE}  -f Makefile CONF=Release"
                             CC="${MAKE}  -f Makefile CONF=Release clean"
                             OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libjsapi.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../../externals/libscriptobject/src/libscriptobject_msgpack"
+                            CT="3"
+                            CN="Release"
+                            AC="false"
+                            BL="true"
+                            WD="../../externals/libscriptobject/src/libscriptobject_msgpack"
+                            BC="${MAKE}  -f Makefile CONF=Release"
+                            CC="${MAKE}  -f Makefile CONF=Release clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liblibscriptobject_msgpack.a">
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibFileItem>../../externals/libjsapi/externals/installed/lib/libjs_static.ajs</linkerLibFileItem>

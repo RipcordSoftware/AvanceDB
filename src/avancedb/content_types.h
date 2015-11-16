@@ -22,6 +22,7 @@
 struct ContentTypes final {
     static constexpr const char* textPlain{"text/plain"};
     static constexpr const char* applicationJson{"application/json"};
+    static constexpr const char* applicationMsgPack{"application/msgpack"};
     
     struct Utf8 final {
         static constexpr const char* textPlain{"text/plain; charset=utf-8"};

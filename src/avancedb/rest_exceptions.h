@@ -41,6 +41,11 @@ public:
     InvalidJson();
 };
 
+class InvalidMsgPack final : public HttpServerException {
+public:
+    InvalidMsgPack();
+};
+
 class DocumentConflict final : public HttpServerException {
 public:
     DocumentConflict();

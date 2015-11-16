@@ -12,6 +12,7 @@
                 <make-dep-project>../../externals/libscriptobject/src/libscriptobject_gason</make-dep-project>
                 <make-dep-project>../../externals/libjsapi/src/libjsapi</make-dep-project>
                 <make-dep-project>../../externals/libscriptobject/src/libscriptobject</make-dep-project>
+                <make-dep-project>../../externals/libscriptobject/src/libscriptobject_msgpack</make-dep-project>
                 <make-dep-project>../../externals/libhttpserver/src/libhttpserver</make-dep-project>
             </make-dep-projects>
             <sourceRootList/>

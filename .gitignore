@@ -34,6 +34,9 @@ src/*/build/
 # ignore netbeans generated files
 .dep.inc
 
+# ignore jetbrains ide files
+.idea
+
 # ignore netbeans project private dirs
 **/nbproject/private/
 
