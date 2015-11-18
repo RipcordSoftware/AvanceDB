@@ -35,6 +35,7 @@ public:
     using const_iterator = collection::const_iterator;
     using const_reference = collection::const_reference;
     using size_type = collection::size_type;
+    using insert_hint = collection::insert_hint;
     
     static document_collection_ptr Create(unsigned maxUnsortedEntries = 16, unsigned maxNurseryEntries = 1024);
     
@@ -48,7 +49,7 @@ public:
     void unlock() const;
     
     size_type size() const;
-    void insert(const collection::value_type&);
+    void insert(const collection::value_type&, insert_hint hint = insert_hint::no_hint);
     size_type erase(const collection::value_type&);
     void copy(std::vector<collection::value_type>& coll, bool sort = true);
     collection::value_type_ptr find_fn(collection::compare_type);

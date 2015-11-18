@@ -411,16 +411,16 @@ bool RestServer::PostDatabaseBulkDocs(rs::httpserver::request_ptr request, const
 
         JsonStream stream{JsonStream::ContextType::Array};
         for (auto result : results) {
-            if (newEdits || !result.ok_) {
+            if (newEdits || !result.ok()) {
                 stream.PushContext(JsonStream::ContextType::Object);
-                stream.Append("id", result.id_);
+                stream.Append("id", result.id());
 
-                if (result.ok_) {
+                if (result.ok()) {
                     stream.Append("ok", true);
-                    stream.Append("rev", result.rev_);
+                    stream.Append("rev", result.rev());
                 } else {
-                    stream.Append("error", result.error_);
-                    stream.Append("reason", result.reason_);
+                    stream.Append("error", result.error());
+                    stream.Append("reason", result.reason());
                 }
 
                 stream.PopContext();

@@ -54,8 +54,8 @@ DocumentCollection::size_type DocumentCollection::size() const {
     return coll_.size();
 }
 
-void DocumentCollection::insert(const collection::value_type& k) {
-    return coll_.insert(k);
+void DocumentCollection::insert(const collection::value_type& k, insert_hint hint) {
+    return coll_.insert(k, hint);
 }
 
 DocumentCollection::size_type DocumentCollection::erase(const collection::value_type& k) {

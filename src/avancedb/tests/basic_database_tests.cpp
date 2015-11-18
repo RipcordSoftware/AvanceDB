@@ -278,14 +278,14 @@ TEST_F(BasicDatabaseTests, test7) {
     
     for (auto i = 0; i < results.size(); ++i) {
         auto result = results[i];
-        ASSERT_STREQ(docs_->getObject(i)->getString("_id"), result.id_.c_str());
-        ASSERT_TRUE(ValidateRevision(1, result.rev_));
+        ASSERT_STREQ(docs_->getObject(i)->getString("_id"), result.id().c_str());
+        ASSERT_TRUE(ValidateRevision(1, result.rev()));
     }       
     
     for (auto i = 0; i < results.size(); ++i) {
         auto result = results[i];
         
-        db_->DeleteDocument(result.id_.c_str(), result.rev_.c_str());
+        db_->DeleteDocument(result.id().c_str(), result.rev().c_str());
         ASSERT_EQ(docs_->getCount() - i - 1, db_->DocCount());
     }
     
@@ -303,19 +303,19 @@ TEST_F(BasicDatabaseTests, test8) {
     
     for (auto i = 0; i < results.size(); ++i) {
         auto result = results[i];
-        auto doc = db_->GetDocument(result.id_.c_str(), false);
+        auto doc = db_->GetDocument(result.id().c_str(), false);
         ASSERT_NE(nullptr, doc);
-        ASSERT_STREQ(result.id_.c_str(), doc->getId());
-        ASSERT_STREQ(result.rev_.c_str(), doc->getRev());
+        ASSERT_STREQ(result.id().c_str(), doc->getId());
+        ASSERT_STREQ(result.rev().c_str(), doc->getRev());
         ASSERT_TRUE(ValidateRevision(1, doc));
     }
     
     for (long i = results.size() - 1; i >= 0; --i) {
         auto result = results[i];
-        auto doc = db_->GetDocument(result.id_.c_str(), false);
+        auto doc = db_->GetDocument(result.id().c_str(), false);
         ASSERT_NE(nullptr, doc);
-        ASSERT_STREQ(result.id_.c_str(), doc->getId());
-        ASSERT_STREQ(result.rev_.c_str(), doc->getRev());
+        ASSERT_STREQ(result.id().c_str(), doc->getId());
+        ASSERT_STREQ(result.rev().c_str(), doc->getRev());
         ASSERT_TRUE(ValidateRevision(1, doc));
     }
     

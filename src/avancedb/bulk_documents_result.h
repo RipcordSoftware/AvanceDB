@@ -21,18 +21,29 @@
 
 #include <vector>
 
-struct BulkDocumentsResult final {
+class BulkDocumentsResult final {
+public:
+
+    BulkDocumentsResult() {}
+
     BulkDocumentsResult(const char* id, const char* rev) : 
         ok_(true), id_(id), rev_(rev) {}
 
     BulkDocumentsResult(const char* id, const char* error, const char* reason) : 
         ok_(false), id_(id), error_(error), reason_(reason) {}
 
-    const bool ok_;
-    const std::string id_;
-    const std::string rev_;        
-    const std::string error_;
-    const std::string reason_;
+    inline bool ok() const { return ok_; }
+    inline const std::string& id() const { return id_; }
+    inline const std::string& rev() const { return rev_; }
+    inline const std::string& error() const { return error_; }
+    inline const std::string& reason() const { return reason_; }
+
+private:
+    bool ok_;
+    std::string id_;
+    std::string rev_;
+    std::string error_;
+    std::string reason_;
 };
 
 using BulkDocumentsResults = std::vector<BulkDocumentsResult>;

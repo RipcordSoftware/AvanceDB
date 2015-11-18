@@ -19,6 +19,7 @@
 #include "documents.h"
 
 #include <algorithm>
+#include <type_traits>
 
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
@@ -282,70 +283,114 @@ document_array_ptr Documents::PostDocuments(const PostAllDocumentsOptions& optio
 }
 
 BulkDocumentsResults Documents::PostBulkDocuments(script_array_ptr docs, bool newEdits) {
-    BulkDocumentsResults results;
-    UuidHelper::UuidGenerator gen;
-    UuidHelper::UuidString newId;
+    using collections_size_type = std::remove_const<decltype(collections_)>::type;
     
-    auto size = docs->getCount();    
-    for (decltype(size) i = 0; i < size; ++i) {
+    // a global collection start index counter - we use this to avoid lock collisions
+    // when dealing with multiple inbound bulk requests
+    static std::atomic<collections_size_type> rollingStartIndex{collections_};
+    
+    auto docsCount = docs->getCount();
+    
+    // calculate a suitable size for each of the pending collections
+    auto pendingCollSizeEstimate = (docsCount / collections_) + collections_;
+    
+    struct PendingDoc final {
+        PendingDoc(std::size_t resultIndex, const char* id, const char* rev, script_object_ptr doc) :
+            resultIndex_(resultIndex), id_(id), rev_(rev), doc_(doc) {
+        }
+        
+        const std::size_t resultIndex_;
+        const char* id_;
+        const char* rev_;
+        const script_object_ptr doc_;
+    };
+    using PendingDocs = std::vector<PendingDoc>;
+    std::vector<PendingDocs> pendingDocs(collections_);
+    std::vector<UuidHelper::UuidString> uuids(docsCount);
+    BulkDocumentsResults results(docsCount);
+
+    // create a uuid generator for docs without an id
+    UuidHelper::UuidGenerator gen;
+    
+    // reserve space for the pending documents
+    for (decltype(pendingDocs.size()) i = 0; i < pendingDocs.size(); ++i) {
+        pendingDocs.reserve(pendingCollSizeEstimate);
+    }
+    
+    // store the pending documents in sharded collections
+    for (decltype(docsCount) i = 0; i < docsCount; ++i) {
         auto obj = docs->getObject(i);
         auto objRev = obj->getString("_rev", false);
         
         if (objRev) {
             DocumentRevision::Validate(objRev, true);
         }
-    }
-    
-    for (decltype(size) i = 0; i < size; ++i) {
-        auto obj = docs->getObject(i);
         
         auto id = obj->getString("_id", false);
         if (id == nullptr) {
             auto uuid = gen();
-            UuidHelper::FormatUuid(uuid, newId);
-            id = newId;
+            UuidHelper::FormatUuid(uuid, uuids[i]);
+            id = uuids[i];
         }
-        
-        Document::Compare compare{id};
-        
-        auto objRev = obj->getString("_rev", false);
         
         auto coll = GetDocumentCollectionIndex(id);
-    
-        boost::unique_lock<DocumentCollection> lock{*docs_[coll]};                
-        auto oldDoc = docs_[coll]->find_fn(compare);                
-        
-        const char* error = nullptr;
-        const char* reason = nullptr;
-        if (!!oldDoc && newEdits) {                     
-            auto docRev = oldDoc->getRev();
+        pendingDocs[coll].emplace_back(i, id, objRev, obj);
+    }
 
-            if (objRev == nullptr || std::strcmp(objRev, docRev) != 0) {
-                error = "conflict";
-                reason = "Document update conflict.";
-            }
-        }
+    // loop through the pending collections inserting the docs into the db
+    for (collections_size_type i = 0, startIndex = --rollingStartIndex; i < collections_; ++i, ++startIndex) {
+        // calculate which collection we will be inserting into
+        auto index = startIndex % collections_;
         
-        if (!error) {
-            auto newDoc = Document::Create(id, obj, ++updateSeq_, newEdits);
-
-            docs_[coll]->insert(newDoc);
+        // lock the collection
+        boost::lock_guard<DocumentCollection> lock{*docs_[index]};
+        
+        // for each of the pendingDocs in the collection
+        for (auto pendingDoc : pendingDocs[index]) {
             
-            lock.unlock();
+            // find an existing doc
+            Document::Compare compare{pendingDoc.id_};
+            auto oldDoc = docs_[index]->find_fn(compare);
+            auto gotOldDoc = !!oldDoc;
+            
+            // check the existing rev matches
+            const char* error = nullptr;
+            const char* reason = nullptr;
+            if (gotOldDoc && newEdits) {
+                auto oldRev = oldDoc->getRev();
 
-            auto newRev = newDoc->getRev();
-            results.emplace_back(id, newRev);
+                if (pendingDoc.rev_ == nullptr || std::strcmp(pendingDoc.rev_, oldRev) != 0) {
+                    error = "conflict";
+                    reason = "Document update conflict.";
+                }
+            }
+            
+            // if we don't have an error we can do the insert
+            if (!error) {
+                // create the doc
+                auto newDoc = Document::Create(pendingDoc.id_, pendingDoc.doc_, ++updateSeq_, newEdits);
+                
+                // insert into the collection
+                auto insertHint = !gotOldDoc ? DocumentCollection::insert_hint::new_item : DocumentCollection::insert_hint::no_hint;
+                docs_[index]->insert(newDoc, insertHint);
 
-            if (!oldDoc) {
-                docCount_.fetch_add(1, boost::memory_order_relaxed);
+                // get the new doc rev and update the results collection
+                auto newRev = newDoc->getRev();
+                results[pendingDoc.resultIndex_] = BulkDocumentsResults::value_type{pendingDoc.id_, newRev};
+
+                // update the doc count and db size counters
+                if (!oldDoc) {
+                    docCount_.fetch_add(1, boost::memory_order_relaxed);
+                } else {
+                    dataSize_.fetch_sub(oldDoc->getObject()->getSize(true), boost::memory_order_relaxed);
+                }
+
+                dataSize_.fetch_add(newDoc->getObject()->getSize(true), boost::memory_order_relaxed);
             } else {
-                dataSize_.fetch_sub(oldDoc->getObject()->getSize(true), boost::memory_order_relaxed);
-            }
-            
-            dataSize_.fetch_add(newDoc->getObject()->getSize(true), boost::memory_order_relaxed);
-        } else {
-            results.emplace_back(id, error, reason);
-        }     
+                // store the error in the results
+                results[pendingDoc.resultIndex_] = BulkDocumentsResults::value_type{pendingDoc.id_, error, reason};
+            }  
+        }
     }
     
     return results;
