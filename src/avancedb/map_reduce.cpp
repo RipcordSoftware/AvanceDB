@@ -204,7 +204,6 @@ map_reduce_result_array_ptr MapReduce::Execute(rs::jsapi::Runtime& rt, const Map
             results->push_back(result);
     });
 
-    // TODO: elegantly handle JS syntax errors
     // execute the script in the context of the runtime, getting the resulting function
     rs::jsapi::Value func(rt);
     rt.Evaluate(mapScript.c_str(), func);
