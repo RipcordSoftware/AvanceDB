@@ -76,6 +76,9 @@ private:
     bool PutLocalDocument(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response);
     bool DeleteLocalDocument(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response);
     
+    bool PutDocumentAttachment(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response);
+    bool GetDocumentAttachment(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response);
+    
     database_ptr GetDatabase(const rs::httpserver::RequestRouter::CallbackArgs&);
     const char* GetDatabaseName(const rs::httpserver::RequestRouter::CallbackArgs&);
     const std::string& GetParameter(const char* param, const rs::httpserver::QueryString&, bool throwIfMissing = false);

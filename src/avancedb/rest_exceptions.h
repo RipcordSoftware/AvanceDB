@@ -56,6 +56,11 @@ public:
     DocumentMissing();
 };
 
+class DocumentAttachmentMissing final : public HttpServerException {
+public:
+    DocumentAttachmentMissing();
+};
+
 class UuidCountLimit final : public HttpServerException {
 public:
     UuidCountLimit();
@@ -79,6 +84,11 @@ public:
 class BadLanguageError final : public HttpServerException {
 public:
     BadLanguageError(const char* msg);
+};
+
+class BadRangeError final : public HttpServerException {
+public:
+    BadRangeError();
 };
 
 #endif	/* REST_EXCEPTIONS_H */

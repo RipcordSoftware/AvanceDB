@@ -27,6 +27,7 @@ static const char* badRequestDescription = "Bad Request";
 static const char* notFoundDescription = "Not Found";
 static const char* conflictDescription = "Conflict";
 static const char* forbiddenDescription = "Forbidden";
+static const char* requestedRangeErrorDescription = "Requested Range Not Satisfiable";
 static const char* internalServerErrorDescription = "Internal Server Error";
 
 static const char* databaseAlreadyExistsBody = R"({
@@ -59,6 +60,11 @@ static const char* missingDocumentJsonBody = R"({
     "reason": "missing"
 })";
 
+static const char* missingDocumentAttachmentJsonBody = R"({
+    "error": "not_found",
+    "reason": "Document is missing attachment"
+})";
+
 static const char* uuidCountLimitJsonBody = R"({
     "error": "forbidden",
     "reason": "count parameter too large"
@@ -82,6 +88,11 @@ static const char* compilationErrorJsonBody = R"({
 static const char* badLanguageErrorJsonBody = R"({
     "error": "EXIT",
     "reason": "%s is not a supported map/reduce language"
+})";
+
+static const char* requestedRangeErrorJsonBody = R"({
+    "error": "requested_range_not_satisfiable",
+    "reason": "Requested range not satisfiable"
 })";
 
 static const char* contentType = "application/json";
@@ -121,6 +132,11 @@ DocumentMissing::DocumentMissing() :
     
 }
 
+DocumentAttachmentMissing::DocumentAttachmentMissing() :
+    HttpServerException(404, notFoundDescription, missingDocumentAttachmentJsonBody, contentType) {
+    
+}
+
 UuidCountLimit::UuidCountLimit() :
     HttpServerException(403, forbiddenDescription, uuidCountLimitJsonBody, contentType) {
     
@@ -143,5 +159,10 @@ CompilationError::CompilationError(const char* msg) :
 
 BadLanguageError::BadLanguageError(const char* msg) :
     HttpServerException(500, internalServerErrorDescription, (boost::format(badLanguageErrorJsonBody) % JsonHelper::EscapeJsonString(msg)).str(), contentType) {
+    
+}
+
+BadRangeError::BadRangeError() :
+    HttpServerException(416, requestedRangeErrorDescription, requestedRangeErrorJsonBody, contentType) {
     
 }

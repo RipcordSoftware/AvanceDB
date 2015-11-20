@@ -41,6 +41,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/database.o \
 	${OBJECTDIR}/databases.o \
 	${OBJECTDIR}/document.o \
+	${OBJECTDIR}/document_attachment.o \
 	${OBJECTDIR}/document_collection.o \
 	${OBJECTDIR}/document_collection_results.o \
 	${OBJECTDIR}/document_revision.o \
@@ -145,6 +146,11 @@ ${OBJECTDIR}/document.o: document.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/src/libscriptobject_msgpack -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- -I../../externals/thread-pool-cpp/thread_pool -I../../externals/libscriptobject/externals/msgpack-c/include `pkg-config --cflags zlib` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/document.o document.cpp
+
+${OBJECTDIR}/document_attachment.o: document_attachment.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/src/libscriptobject_msgpack -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- -I../../externals/thread-pool-cpp/thread_pool -I../../externals/libscriptobject/externals/msgpack-c/include `pkg-config --cflags zlib` -std=c++11  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/document_attachment.o document_attachment.cpp
 
 ${OBJECTDIR}/document_collection.o: document_collection.cpp 
 	${MKDIR} -p ${OBJECTDIR}
@@ -408,6 +414,19 @@ ${OBJECTDIR}/document_nomain.o: ${OBJECTDIR}/document.o document.cpp
 	    $(COMPILE.cc) -g -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/src/libscriptobject_msgpack -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- -I../../externals/thread-pool-cpp/thread_pool -I../../externals/libscriptobject/externals/msgpack-c/include `pkg-config --cflags zlib` -std=c++11  -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/document_nomain.o document.cpp;\
 	else  \
 	    ${CP} ${OBJECTDIR}/document.o ${OBJECTDIR}/document_nomain.o;\
+	fi
+
+${OBJECTDIR}/document_attachment_nomain.o: ${OBJECTDIR}/document_attachment.o document_attachment.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/document_attachment.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} "$@.d";\
+	    $(COMPILE.cc) -g -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/src/libscriptobject_msgpack -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- -I../../externals/thread-pool-cpp/thread_pool -I../../externals/libscriptobject/externals/msgpack-c/include `pkg-config --cflags zlib` -std=c++11  -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/document_attachment_nomain.o document_attachment.cpp;\
+	else  \
+	    ${CP} ${OBJECTDIR}/document_attachment.o ${OBJECTDIR}/document_attachment_nomain.o;\
 	fi
 
 ${OBJECTDIR}/document_collection_nomain.o: ${OBJECTDIR}/document_collection.o document_collection.cpp 

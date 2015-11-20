@@ -74,7 +74,7 @@ void HttpServer::HandleUtilsRequest(rs::httpserver::request_ptr request, rs::htt
     if (uri == "/_utils" || uri == "/_utils/") {
         response->Redirect("/_utils/index.html");
     } else {
-        auto contentType = rs::httpserver::MimeTypes::GetType(uri);
+        auto contentType = rs::httpserver::MimeTypes::GetExtensionType(uri);
         if (contentType) {
             uri = "www" + uri;
 

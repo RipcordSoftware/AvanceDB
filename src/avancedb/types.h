@@ -41,6 +41,9 @@ class DocumentCollection;
 using document_collection_ptr = boost::shared_ptr<DocumentCollection>;
 using document_collections_ptr_array = std::vector<document_collection_ptr>;
 
+class DocumentAttachment;
+using document_attachment_ptr = boost::shared_ptr<DocumentAttachment>;
+
 class MapReduceResult;
 using map_reduce_result_ptr = MapReduceResult*;
 class MapReduceResultArray;

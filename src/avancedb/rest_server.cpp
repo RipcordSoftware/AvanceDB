@@ -24,6 +24,8 @@
 #include <vector>
 #include <algorithm>
 
+#include <boost/format.hpp>
+
 #include "content_types.h"
 #include "json_stream.h"
 #include "rest_exceptions.h"
@@ -45,11 +47,13 @@
 #define REGEX_DBNAME_GROUP "/(?<db>" REGEX_DBNAME ")"
 
 #define REGEX_DOCID R"([a-zA-Z0-9\$\+\-\(\)\:\.\~][a-zA-Z0-9_\$\+\-\(\)\:\.\~]*)"
+#define REGEX_ATTACHMENT_NAME R"(.*)"
 #define REGEX_DESIGNID REGEX_DOCID
 #define REGEX_VIEWID REGEX_DOCID
 #define REGEX_DOCID_GROUP "/+(?<id>" REGEX_DOCID ")"
 #define REGEX_DESIGNID_GROUP "/+(?<designid>" REGEX_DESIGNID ")"
 #define REGEX_VIEWID_GROUP "/+(?<viewid>" REGEX_VIEWID ")"
+#define REGEX_ATTACHMENT_NAME_GROUP "/+(?<attname>" REGEX_ATTACHMENT_NAME ")"
 
 RestServer::RestServer() {
     AddRoute("HEAD", REGEX_DBNAME_GROUP "/{0,}$", &RestServer::HeadDatabase);   
@@ -64,6 +68,7 @@ RestServer::RestServer() {
     
     AddRoute("PUT", REGEX_DBNAME_GROUP "/+_local" REGEX_DOCID_GROUP, &RestServer::PutLocalDocument);
     AddRoute("PUT", REGEX_DBNAME_GROUP "/+_design" REGEX_DESIGNID_GROUP, &RestServer::PutDesignDocument);
+    AddRoute("PUT", REGEX_DBNAME_GROUP REGEX_DOCID_GROUP REGEX_ATTACHMENT_NAME_GROUP, &RestServer::PutDocumentAttachment);
     AddRoute("PUT", REGEX_DBNAME_GROUP REGEX_DOCID_GROUP, &RestServer::PutDocument);
     AddRoute("PUT", REGEX_DBNAME_GROUP "/{0,}$", &RestServer::PutDatabase);
     
@@ -84,6 +89,7 @@ RestServer::RestServer() {
     AddRoute("GET", REGEX_DBNAME_GROUP "/+_local" REGEX_DOCID_GROUP, &RestServer::GetLocalDocument);
     AddRoute("GET", REGEX_DBNAME_GROUP "/+_design" REGEX_DESIGNID_GROUP "/_view" REGEX_VIEWID_GROUP, &RestServer::GetDesignDocumentView);
     AddRoute("GET", REGEX_DBNAME_GROUP "/+_design" REGEX_DESIGNID_GROUP, &RestServer::GetDesignDocument);
+    AddRoute("GET", REGEX_DBNAME_GROUP REGEX_DOCID_GROUP REGEX_ATTACHMENT_NAME_GROUP, &RestServer::GetDocumentAttachment);
     AddRoute("GET", REGEX_DBNAME_GROUP REGEX_DOCID_GROUP, &RestServer::GetDocument);
     AddRoute("GET", REGEX_DBNAME_GROUP "/+_all_docs/{0,}$", &RestServer::GetDatabaseAllDocs);
     AddRoute("GET", REGEX_DBNAME_GROUP "/{0,}$", &RestServer::GetDatabase);    
@@ -833,6 +839,114 @@ bool RestServer::GetConfigQueryServers(rs::httpserver::request_ptr request, cons
 bool RestServer::GetConfigNativeQueryServers(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response) {
     response->setContentType(ContentTypes::applicationJson).Send(RestConfig::getNativeQueryServers());
     return true;
+}
+
+// TODO: this doesn't increment the doc rev
+bool RestServer::PutDocumentAttachment(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
+    bool created = false;
+    auto db = GetDatabase(args);
+    if (!!db) {
+        auto id = GetParameter("id", args);
+        auto doc = db->GetDocument(id, true);
+        
+        auto attName = GetParameter("attname", args);
+        auto contentType = request->getContentType();
+        auto contentLength = request->getContentLength();
+        auto& requestStream = request->getRequestStream();
+
+        std::vector<rs::httpserver::RequestStream::byte> buffer(contentLength);
+
+        decltype(contentLength) offset = 0;
+        while (offset < contentLength) {
+            auto remaining = contentLength - offset;
+            auto bytesRead = requestStream.Read(&buffer[offset], 0, remaining, false);
+
+            if (bytesRead <= 0) {
+                // TODO: this is the wrong exception type
+                throw InvalidJson{};
+            }
+
+            offset += bytesRead;
+        }
+
+        // TODO: inc the rev here
+        doc->putAttachment(attName, contentType.c_str(), buffer.data(), buffer.size());
+
+        auto rev = doc->getRev();
+
+        JsonStream stream;
+        stream.Append("ok", true);
+        stream.Append("id", doc->getId());
+        stream.Append("rev", rev);
+
+        response->setStatusCode(201).setContentType(ContentTypes::Utf8::applicationJson).setETag(rev).Send(stream.Flush());
+
+        created = true;
+    }
+    
+    return created;
+}
+
+bool RestServer::GetDocumentAttachment(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
+    bool found = false;
+    auto db = GetDatabase(args);
+    if (!!db) {
+        auto id = GetParameter("id", args);
+        auto doc = db->GetDocument(id, true);
+        auto attName = GetParameter("attname", args);
+
+        auto attachment = doc->getAttachment(attName);
+        if (!attachment) {
+            throw DocumentAttachmentMissing{};
+        }
+        
+        auto contentType = attachment->ContentType();
+        auto attHash = attachment->Hash();
+        
+        auto requestedRange = request->getRange();
+        auto ifNoneMatch = request->getIfNoneMatch();
+        
+        if (requestedRange.size() == 0 && ifNoneMatch.size() > 0 && ifNoneMatch == attHash) {
+            response->setStatusCode(304).setContentType(contentType, false).setETag(attHash).Send();
+        } else {
+            auto attSize = attachment->Size();
+            auto contentTypeInfo = rs::httpserver::MimeTypes::GetContentType(contentType);
+            auto compress = contentTypeInfo.is_initialized() && contentTypeInfo.get().getCompressible();
+            
+            auto range = request->getByteRanges();
+            if (contentType == ContentTypes::applicationOctetStream && range.size() == 1) {
+                auto start = range[0].first;
+                auto end = range[0].second;
+                
+                if (start < 0) {
+                    start += attSize;
+                }
+                
+                if (start < 0 || start >= attSize) {
+                    throw BadRangeError{};
+                }
+                
+                auto lastEndIndex = static_cast<decltype(end)>(attSize > 0 ? attSize - 1 : 0);
+                end = std::min(end, lastEndIndex);
+                auto size = std::min(end - start + 1, lastEndIndex);
+                
+                auto contentRange = (boost::format("bytes %1%-%2%/%3%") % start % end % attSize).str();
+                
+                response->setStatusCode(206).setStatusDescription("Partial Content").setContentType(contentType, compress).setContentRange(contentRange);
+                auto& stream = response->getResponseStream();
+                stream.Write(attachment->Data(), start, size);
+                stream.Flush();
+            } else {
+                auto& stream = response->setContentType(contentType, compress).setETag(attHash).getResponseStream();
+                stream.Write(attachment->Data(), 0, attachment->Size());
+                stream.Flush();
+            }
+
+            found = true;
+        }
+    }
+    
+    return found;
 }
 
 database_ptr RestServer::GetDatabase(const rs::httpserver::RequestRouter::CallbackArgs& args) {
