@@ -1,6 +1,7 @@
 [![Build Status](https://travis-ci.org/RipcordSoftware/AvanceDB.svg)](https://travis-ci.org/RipcordSoftware/AvanceDB)
 [![Coverage Status](https://coveralls.io/repos/RipcordSoftware/AvanceDB/badge.svg?branch=master&service=github)](https://coveralls.io/github/RipcordSoftware/AvanceDB?branch=master)
 [![License](http://img.shields.io/:license-agpl-blue.svg)](http://doge.agpl-license.org)
+[![Twitter URL](https://img.shields.io/twitter/url/http/shields.io.svg?style=social?style=plastic)](https://twitter.com/RipcordSoftware)
 [![Join the chat at https://gitter.im/RipcordSoftware/AvanceDB](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/RipcordSoftware/AvanceDB?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 # AvanceDB
