@@ -7,7 +7,7 @@ var http = require('http');
 var net = require('net');
 var faker = require('faker');
 
-var host = 'http://localhost';
+var host = 'http://127.0.0.1';
 var port = 15994;
 //var port = 5994;
 var url = host + ':' + port;
