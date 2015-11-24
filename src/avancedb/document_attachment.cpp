@@ -18,14 +18,15 @@
 
 #include "document_attachment.h"
 
-#include "md5.h"
+#include <utility>
 
-DocumentAttachment::DocumentAttachment(const char* name, const char* contentType, const value_type* data, size_type size) :
-    name_(name), contentType_(contentType), data_(data, data + size), hash_(GetHash(data, size)) {
+DocumentAttachment::DocumentAttachment(const char* name, const char* contentType, std::vector<value_type>&& data, const char* digest) :
+    name_(name), contentType_(contentType), data_(std::move(data)), digest_(digest) {
+
 }
 
-document_attachment_ptr DocumentAttachment::Create(const char* name, const char* contentType, const value_type* data, size_type size) {
-    return boost::make_shared<document_attachment_ptr::element_type>(name, contentType, data, size);
+document_attachment_ptr DocumentAttachment::Create(const char* name, const char* contentType, std::vector<value_type>&& data, const char* digest) {
+    return boost::make_shared<document_attachment_ptr::element_type>(name, contentType, std::forward<decltype(data)>(data), digest);
 }
 
 const std::string& DocumentAttachment::Name() const {
@@ -44,13 +45,6 @@ const DocumentAttachment::value_type* DocumentAttachment::Data() const {
     return data_.data();
 }
 
-const std::string& DocumentAttachment::Hash() const {
-    return hash_;
-}
-
-std::string DocumentAttachment::GetHash(const value_type* data, size_type size) {
-    MD5 hash;
-    hash.update(data, size);
-    hash.finalize();
-    return hash.hexdigest();
+const std::string& DocumentAttachment::Digest() const {
+    return digest_;
 }

@@ -34,25 +34,23 @@ public:
     using value_type = unsigned char;
     using size_type = std::size_t;        
     
-    static document_attachment_ptr Create(const char* name, const char* contentType, const value_type* data, size_type size);
+    static document_attachment_ptr Create(const char* name, const char* contentType, std::vector<value_type>&& data, const char* digest);
     
     const std::string& Name() const;
     const std::string& ContentType() const;
     size_type Size() const;
     const value_type* Data() const;
-    const std::string& Hash() const;
+    const std::string& Digest() const;
     
 private:
-    friend document_attachment_ptr boost::make_shared<document_attachment_ptr::element_type>(const char*&, const char*&, const value_type*&, size_type&);
+    friend document_attachment_ptr boost::make_shared<document_attachment_ptr::element_type>(const char*&, const char*&, std::vector<value_type>&&, const char*&);
     
-    DocumentAttachment(const char* name, const char* contentType, const value_type* data, size_type size);
-    
-    static std::string GetHash(const value_type* data, size_type size);
+    DocumentAttachment(const char* name, const char* contentType, std::vector<value_type>&& data, const char* digest);
     
     const std::string name_;
     const std::string contentType_;
     const std::vector<value_type> data_;
-    const std::string hash_;
+    const std::string digest_;
 };
 
 #endif	/* DOCUMENT_ATTACHMENT_H */

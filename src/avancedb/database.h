@@ -19,6 +19,8 @@
 #ifndef DATABASE_H
 #define DATABASE_H
 
+#include <vector>
+
 #include <boost/noncopyable.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/shared_ptr.hpp>
@@ -48,6 +50,9 @@ public:
     document_ptr GetDocument(const char* id, bool throwOnFail = true);
     document_ptr DeleteDocument(const char* id, const char* rev);
     document_ptr SetDocument(const char* id, script_object_ptr);
+    
+    document_ptr SetDocumentAttachment(const char* id, const char* rev, const char* name, const char* contentType, const std::vector<unsigned char>& attachment);
+    document_attachment_ptr GetDocumentAttachment(const char* id, const char* attName);
     
     document_ptr GetDesignDocument(const char* id, bool throwOnFail = true);
     document_ptr DeleteDesignDocument(const char* id, const char* rev);

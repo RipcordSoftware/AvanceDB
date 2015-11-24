@@ -42,6 +42,7 @@
 
 #include "libscriptobject_gason.h"
 #include "libscriptobject_msgpack.h"
+#include "base64_helper.h"
 
 #define REGEX_DBNAME R"(_?[a-z][a-z0-9_\$\+\-\(\)]+)"
 #define REGEX_DBNAME_GROUP "/(?<db>" REGEX_DBNAME ")"
@@ -841,14 +842,17 @@ bool RestServer::GetConfigNativeQueryServers(rs::httpserver::request_ptr request
     return true;
 }
 
-// TODO: this doesn't increment the doc rev
 bool RestServer::PutDocumentAttachment(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
     bool created = false;
     auto db = GetDatabase(args);
     if (!!db) {
         auto id = GetParameter("id", args);
-        auto doc = db->GetDocument(id, true);
-        
+        auto oldRev = GetParameter("rev", request->getQueryString());
+        auto oldDoc = db->GetDocument(id, true);
+        if (std::strcmp(oldRev.c_str(), oldDoc->getRev()) != 0) {
+            throw DocumentConflict{};
+        }
+
         auto attName = GetParameter("attname", args);
         auto contentType = request->getContentType();
         auto contentLength = request->getContentLength();
@@ -862,24 +866,21 @@ bool RestServer::PutDocumentAttachment(rs::httpserver::request_ptr request, cons
             auto bytesRead = requestStream.Read(&buffer[offset], 0, remaining, false);
 
             if (bytesRead <= 0) {
-                // TODO: this is the wrong exception type
-                throw InvalidJson{};
+                throw BadRequestBodyError{};
             }
 
             offset += bytesRead;
         }
-
-        // TODO: inc the rev here
-        doc->putAttachment(attName, contentType.c_str(), buffer.data(), buffer.size());
-
-        auto rev = doc->getRev();
+        
+        auto newDoc = db->SetDocumentAttachment(id, oldRev.c_str(), attName, contentType.c_str(), buffer);
+        auto newRev = newDoc->getRev();
 
         JsonStream stream;
         stream.Append("ok", true);
-        stream.Append("id", doc->getId());
-        stream.Append("rev", rev);
+        stream.Append("id", id);
+        stream.Append("rev", newRev);
 
-        response->setStatusCode(201).setContentType(ContentTypes::Utf8::applicationJson).setETag(rev).Send(stream.Flush());
+        response->setStatusCode(201).setContentType(ContentTypes::Utf8::applicationJson).setETag(newRev).Send(stream.Flush());
 
         created = true;
     }
@@ -891,54 +892,50 @@ bool RestServer::GetDocumentAttachment(rs::httpserver::request_ptr request, cons
     bool found = false;
     auto db = GetDatabase(args);
     if (!!db) {
-        auto id = GetParameter("id", args);
-        auto doc = db->GetDocument(id, true);
+        auto id = GetParameter("id", args);        
         auto attName = GetParameter("attname", args);
-
-        auto attachment = doc->getAttachment(attName);
-        if (!attachment) {
-            throw DocumentAttachmentMissing{};
-        }
         
-        auto contentType = attachment->ContentType();
-        auto attHash = attachment->Hash();
+        auto attachment = db->GetDocumentAttachment(id, attName);
+
+        auto& contentType = attachment->ContentType();
+        auto& digest = attachment->Digest();
         
         auto requestedRange = request->getRange();
         auto ifNoneMatch = request->getIfNoneMatch();
         
-        if (requestedRange.size() == 0 && ifNoneMatch.size() > 0 && ifNoneMatch == attHash) {
-            response->setStatusCode(304).setContentType(contentType, false).setETag(attHash).Send();
+        if (requestedRange.size() == 0 && ifNoneMatch.size() > 0 && ifNoneMatch == digest) {
+            response->setStatusCode(304).setContentType(contentType, false).setETag(digest).Send();
         } else {
-            auto attSize = attachment->Size();
+            auto size = attachment->Size();
             auto contentTypeInfo = rs::httpserver::MimeTypes::GetContentType(contentType);
             auto compress = contentTypeInfo.is_initialized() && contentTypeInfo.get().getCompressible();
             
             auto range = request->getByteRanges();
             if (contentType == ContentTypes::applicationOctetStream && range.size() == 1) {
-                auto start = range[0].first;
-                auto end = range[0].second;
+                auto rangeStart = range[0].first;
+                auto rangeEnd = range[0].second;
                 
-                if (start < 0) {
-                    start += attSize;
+                if (rangeStart < 0) {
+                    rangeStart += size;
                 }
                 
-                if (start < 0 || start >= attSize) {
+                if (rangeStart < 0 || rangeStart >= size) {
                     throw BadRangeError{};
                 }
                 
-                auto lastEndIndex = static_cast<decltype(end)>(attSize > 0 ? attSize - 1 : 0);
-                end = std::min(end, lastEndIndex);
-                auto size = std::min(end - start + 1, lastEndIndex);
+                auto endIndex = static_cast<decltype(rangeEnd)>(size > 0 ? size - 1 : 0);
+                rangeEnd = std::min(rangeEnd, endIndex);
+                auto rangeSize = std::min(rangeEnd - rangeStart + 1, endIndex);
                 
-                auto contentRange = (boost::format("bytes %1%-%2%/%3%") % start % end % attSize).str();
+                auto contentRange = (boost::format("bytes %1%-%2%/%3%") % rangeStart % rangeEnd % rangeSize).str();
                 
                 response->setStatusCode(206).setStatusDescription("Partial Content").setContentType(contentType, compress).setContentRange(contentRange);
                 auto& stream = response->getResponseStream();
-                stream.Write(attachment->Data(), start, size);
+                stream.Write(attachment->Data(), rangeStart, rangeSize);
                 stream.Flush();
             } else {
-                auto& stream = response->setContentType(contentType, compress).setETag(attHash).getResponseStream();
-                stream.Write(attachment->Data(), 0, attachment->Size());
+                auto& stream = response->setContentType(contentType, compress).setETag(digest).getResponseStream();
+                stream.Write(attachment->Data(), 0, size);
                 stream.Flush();
             }
 

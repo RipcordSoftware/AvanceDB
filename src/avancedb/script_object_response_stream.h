@@ -47,6 +47,9 @@ public:
             case rs::scriptobject::ScriptObjectType::Boolean: Serialize(arr->getBoolean(index)); break;
             case rs::scriptobject::ScriptObjectType::Double: Serialize(arr->getDouble(index)); break;
             case rs::scriptobject::ScriptObjectType::Int32: Serialize(arr->getInt32(index)); break;
+            case rs::scriptobject::ScriptObjectType::UInt32: Serialize(arr->getUInt32(index)); break;
+            case rs::scriptobject::ScriptObjectType::Int64: Serialize(arr->getInt64(index)); break;
+            case rs::scriptobject::ScriptObjectType::UInt64: Serialize(arr->getUInt64(index)); break;
             case rs::scriptobject::ScriptObjectType::Null: Serialize("null"); break;
             case rs::scriptobject::ScriptObjectType::Object: Serialize(arr->getObject(index)); break;
             case rs::scriptobject::ScriptObjectType::String: AppendString(arr->getString(index)); break;
@@ -129,6 +132,9 @@ private:
                 case rs::scriptobject::ScriptObjectType::Boolean: AppendBool(obj->getBoolean(i)); break;
                 case rs::scriptobject::ScriptObjectType::Double: AppendDouble(obj->getDouble(i)); break;
                 case rs::scriptobject::ScriptObjectType::Int32: AppendInt64(obj->getInt32(i)); break;
+                case rs::scriptobject::ScriptObjectType::UInt32: AppendInt64(obj->getUInt32(i)); break;
+                case rs::scriptobject::ScriptObjectType::Int64: AppendInt64(obj->getInt64(i)); break;
+                case rs::scriptobject::ScriptObjectType::UInt64: AppendInt64(obj->getUInt64(i)); break;
                 case rs::scriptobject::ScriptObjectType::Null: AppendNull(); break;
                 case rs::scriptobject::ScriptObjectType::Object: AppendObject(obj->getObject(i)); break;
                 case rs::scriptobject::ScriptObjectType::String: AppendString(obj->getString(i)); break;
@@ -165,6 +171,9 @@ private:
                 case rs::scriptobject::ScriptObjectType::Boolean: AppendBool(arr->getBoolean(i), i > 0); break;
                 case rs::scriptobject::ScriptObjectType::Double: AppendDouble(arr->getDouble(i), i > 0); break;
                 case rs::scriptobject::ScriptObjectType::Int32: AppendInt64(arr->getInt32(i), i > 0); break;
+                case rs::scriptobject::ScriptObjectType::UInt32: AppendInt64(arr->getUInt32(i), i > 0); break;
+                case rs::scriptobject::ScriptObjectType::Int64: AppendInt64(arr->getInt64(i), i > 0); break;
+                case rs::scriptobject::ScriptObjectType::UInt64: AppendInt64(arr->getUInt64(i), i > 0); break;
                 case rs::scriptobject::ScriptObjectType::Null: AppendNull(i > 0); break;
                 case rs::scriptobject::ScriptObjectType::Object: AppendObject(arr->getObject(i), i > 0); break;
                 case rs::scriptobject::ScriptObjectType::String: { auto str = arr->getString(i); AppendString(str, i > 0); break; }

@@ -97,17 +97,3 @@ const script_object_ptr Document::getObject() const {
 bool Document::ValidateHashField(const char* name) {
     return name != nullptr && std::strcmp(name, "_id") != 0 && std::strcmp(name, "_rev") != 0;
 }
-
-document_attachment_ptr Document::getAttachment(const char* name) const {
-    auto iter = attachments_.find(name);
-    return iter != attachments_.cend() ? iter->second : nullptr;
-}
-
-Document::attachment_collection Document::getAttachments() const {
-    return attachments_;
-}
-
-void Document::putAttachment(const char* name, const char* contentType, const document_attachment_ptr::element_type::value_type* data, document_attachment_ptr::element_type::size_type size) {
-    auto attachment = document_attachment_ptr::element_type::Create(name, contentType, data, size);
-    attachments_[name] = attachment;
-}

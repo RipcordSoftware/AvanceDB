@@ -166,3 +166,8 @@ BadRangeError::BadRangeError() :
     HttpServerException(416, requestedRangeErrorDescription, requestedRangeErrorJsonBody, contentType) {
     
 }
+
+BadRequestBodyError::BadRequestBodyError() :
+    HttpServerException(400, badRequestDescription, std::string{}, contentType) {
+    
+}

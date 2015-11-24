@@ -64,6 +64,14 @@ document_ptr Database::SetDocument(const char* id, script_object_ptr obj) {
     return docs_->SetDocument(id, obj);
 }
 
+document_ptr Database::SetDocumentAttachment(const char* id, const char* rev, const char* name, const char* contentType, const std::vector<unsigned char>& attachment) {
+    return docs_->SetDocumentAttachment(id, rev, name, contentType, attachment);
+}
+
+document_attachment_ptr Database::GetDocumentAttachment(const char* id, const char* attName) {
+    return docs_->GetDocumentAttachment(id, attName);
+}
+
 document_ptr Database::GetDesignDocument(const char* id, bool throwOnFail) {
     return docs_->GetDesignDocument(id, throwOnFail);
 }

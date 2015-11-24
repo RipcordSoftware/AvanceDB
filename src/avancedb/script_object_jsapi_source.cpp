@@ -18,6 +18,7 @@
 
 #include "script_object_jsapi_source.h"
 #include "map_reduce.h"
+#include "script_object_jsapi_exceptions.h"
 
 #include "jsapi.h"
 
@@ -112,6 +113,18 @@ bool ScriptObjectJsapiSource::getBoolean(int index) const {
 
 std::int32_t ScriptObjectJsapiSource::getInt32(int index) const {
     return values_[index].toInt32();
+}
+
+std::uint32_t ScriptObjectJsapiSource::getUInt32(int index) const {
+    throw ScriptObjectJsapiSourceInvalidFieldTypeException{};
+}
+
+std::int64_t ScriptObjectJsapiSource::getInt64(int index) const {
+    throw ScriptObjectJsapiSourceInvalidFieldTypeException{};
+}
+
+std::uint64_t ScriptObjectJsapiSource::getUInt64(int index) const {
+    throw ScriptObjectJsapiSourceInvalidFieldTypeException{};
 }
 
 double ScriptObjectJsapiSource::getDouble(int index) const {

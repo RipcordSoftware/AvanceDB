@@ -28,3 +28,6 @@
 [submodule "externals/gperftools"]
 	path = externals/gperftools
 	url = https://github.com/gperftools/gperftools.git
+[submodule "externals/ConstTimeEncoding"]
+	path = externals/ConstTimeEncoding
+	url = https://github.com/RipcordSoftware/ConstTimeEncoding.git

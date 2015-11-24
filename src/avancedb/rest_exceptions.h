@@ -91,4 +91,9 @@ public:
     BadRangeError();
 };
 
+class BadRequestBodyError final : public HttpServerException {
+public:
+    BadRequestBodyError();
+};
+
 #endif	/* REST_EXCEPTIONS_H */

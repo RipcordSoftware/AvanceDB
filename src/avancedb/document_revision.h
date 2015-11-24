@@ -39,6 +39,9 @@ public:
     DocumentRevision& FormatRevision(RevString& rev);
     static void FormatRevision(version_type version, const Digest& digest, RevString& rev);
     
+    version_type getVersion() const;
+    void getDigest(Digest&) const;
+    
 private:    
         
     DocumentRevision(uint64_t version, const Digest& digest);

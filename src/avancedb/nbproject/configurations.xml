@@ -4,6 +4,8 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>../../externals/ConstTimeEncoding/base64.h</itemPath>
+      <itemPath>base64_helper.h</itemPath>
       <itemPath>bulk_documents_result.h</itemPath>
       <itemPath>../../externals/cityhash/src/city.h</itemPath>
       <itemPath>config.h</itemPath>
@@ -39,6 +41,7 @@
       <itemPath>rest_server.h</itemPath>
       <itemPath>script_array_jsapi_key_value_source.h</itemPath>
       <itemPath>script_array_jsapi_source.h</itemPath>
+      <itemPath>script_object_jsapi_exceptions.h</itemPath>
       <itemPath>script_object_jsapi_source.h</itemPath>
       <itemPath>script_object_response_stream.h</itemPath>
       <itemPath>set_thread_name.h</itemPath>
@@ -52,6 +55,8 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <itemPath>../../externals/ConstTimeEncoding/base64.cpp</itemPath>
+      <itemPath>base64_helper.cpp</itemPath>
       <itemPath>../../externals/cityhash/src/city.cc</itemPath>
       <itemPath>config.cpp</itemPath>
       <itemPath>database.cpp</itemPath>
@@ -142,6 +147,7 @@
             <pElem>../../externals/libjsapi/externals/installed/include/mozjs-</pElem>
             <pElem>../../externals/thread-pool-cpp/thread_pool</pElem>
             <pElem>../../externals/libscriptobject/externals/msgpack-c/include</pElem>
+            <pElem>../../externals/ConstTimeEncoding</pElem>
           </incDir>
           <commandLine>--coverage</commandLine>
         </ccTool>
@@ -223,6 +229,16 @@
           <commandLine>--coverage `if test "$$(uname)" = "Linux"; then echo "-lrt"; fi;` </commandLine>
         </linkerTool>
       </compileType>
+      <item path="../../externals/ConstTimeEncoding/base64.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../externals/ConstTimeEncoding/base64.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../../externals/cityhash/src/city.cc"
             ex="false"
             tool="1"
@@ -237,6 +253,10 @@
             ex="false"
             tool="1"
             flavor2="0">
+      </item>
+      <item path="base64_helper.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="base64_helper.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="bulk_documents_result.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -428,6 +448,8 @@
       </item>
       <item path="script_array_jsapi_source.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="script_object_jsapi_exceptions.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="script_object_jsapi_source.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="script_object_jsapi_source.h" ex="false" tool="3" flavor2="0">
@@ -478,6 +500,7 @@
             <pElem>../../externals/libjsapi/externals/installed/include/mozjs-</pElem>
             <pElem>../../externals/thread-pool-cpp/thread_pool</pElem>
             <pElem>../../externals/libscriptobject/externals/msgpack-c/include</pElem>
+            <pElem>../../externals/ConstTimeEncoding</pElem>
           </incDir>
         </ccTool>
         <fortranCompilerTool>
@@ -564,6 +587,16 @@
           <commandLine>`if test "$$(uname)" = "Linux"; then echo "-lrt ../../externals/installed/lib/libtcmalloc_minimal.a"; fi;` </commandLine>
         </linkerTool>
       </compileType>
+      <item path="../../externals/ConstTimeEncoding/base64.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../externals/ConstTimeEncoding/base64.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../../externals/cityhash/src/city.cc"
             ex="false"
             tool="1"
@@ -578,6 +611,10 @@
             ex="false"
             tool="1"
             flavor2="0">
+      </item>
+      <item path="base64_helper.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="base64_helper.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="bulk_documents_result.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -767,6 +804,8 @@
       <item path="script_array_jsapi_source.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="script_array_jsapi_source.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="script_object_jsapi_exceptions.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="script_object_jsapi_source.cpp" ex="false" tool="1" flavor2="0">
       </item>

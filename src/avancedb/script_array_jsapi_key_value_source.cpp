@@ -20,6 +20,7 @@
 
 #include "map_reduce_script_object_state.h"
 #include "map_reduce.h"
+#include "script_object_jsapi_exceptions.h"
 
 ScriptArrayJsapiKeyValueSource ScriptArrayJsapiKeyValueSource::Create(const rs::jsapi::Value& key, const rs::jsapi::Value& value) {
     ScriptArrayJsapiKeyValueSource source{key, value};
@@ -84,6 +85,18 @@ bool ScriptArrayJsapiKeyValueSource::getBoolean(int index) const {
 
 std::int32_t ScriptArrayJsapiKeyValueSource::getInt32(int index) const {
     return values_[index].toInt32();
+}
+
+std::uint32_t ScriptArrayJsapiKeyValueSource::getUInt32(int index) const {
+    throw ScriptObjectJsapiSourceInvalidFieldTypeException{};
+}
+
+std::int64_t ScriptArrayJsapiKeyValueSource::getInt64(int index) const {
+    throw ScriptObjectJsapiSourceInvalidFieldTypeException{};
+}
+
+std::uint64_t ScriptArrayJsapiKeyValueSource::getUInt64(int index) const {
+    throw ScriptObjectJsapiSourceInvalidFieldTypeException{};
 }
 
 double ScriptArrayJsapiKeyValueSource::getDouble(int index) const {

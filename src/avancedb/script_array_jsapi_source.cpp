@@ -18,6 +18,7 @@
 
 #include "script_array_jsapi_source.h"
 #include "map_reduce.h"
+#include "script_object_jsapi_exceptions.h"
 
 #include "script_array_factory.h"
 #include "script_object_factory.h"
@@ -95,6 +96,18 @@ bool ScriptArrayJsapiSource::getBoolean(int index) const {
 
 std::int32_t ScriptArrayJsapiSource::getInt32(int index) const {
     return values_[index].toInt32();
+}
+
+std::uint32_t ScriptArrayJsapiSource::getUInt32(int index) const {
+    throw ScriptObjectJsapiSourceInvalidFieldTypeException{};
+}
+
+std::int64_t ScriptArrayJsapiSource::getInt64(int index) const {
+    throw ScriptObjectJsapiSourceInvalidFieldTypeException{};
+}
+
+std::uint64_t ScriptArrayJsapiSource::getUInt64(int index) const {
+    throw ScriptObjectJsapiSourceInvalidFieldTypeException{};
 }
 
 double ScriptArrayJsapiSource::getDouble(int index) const {

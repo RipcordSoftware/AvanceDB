@@ -69,11 +69,7 @@ public:
     const char* getRev() const;
     sequence_type getUpdateSequence() const;
     
-    const script_object_ptr getObject() const;
-    
-    document_attachment_ptr getAttachment(const char*) const;
-    void putAttachment(const char*, const char*, const document_attachment_ptr::element_type::value_type*, document_attachment_ptr::element_type::size_type);
-    attachment_collection getAttachments() const;
+    const script_object_ptr getObject() const;   
         
 private:
     

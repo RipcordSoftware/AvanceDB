@@ -41,13 +41,15 @@
 class Database;
 
 class Documents final : public boost::enable_shared_from_this<Documents>, private boost::noncopyable {
-public:        
-
+public:
     static documents_ptr Create(database_ptr db);
     
     document_ptr GetDocument(const char* id, bool throwOnFail = true);
     document_ptr DeleteDocument(const char* id, const char* rev);
     document_ptr SetDocument(const char* id, script_object_ptr obj);
+    
+    document_ptr SetDocumentAttachment(const char* id, const char* rev, const char* name, const char* contentType, const std::vector<unsigned char>& attachment);
+    document_attachment_ptr GetDocumentAttachment(const char* id, const char* attName);
     
     document_ptr GetDesignDocument(const char* id, bool throwOnFail = true);
     document_ptr DeleteDesignDocument(const char* id, const char* rev);

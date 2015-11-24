@@ -34,6 +34,12 @@
 #include "config.h"
 #include "uuid_helper.h"
 #include "map_reduce_result.h"
+#include "base64_helper.h"
+#include "document_attachment.h"
+
+#include "script_object_vector_source.h"
+
+#include "md5.h"
 
 Documents::Documents(database_ptr db) : db_(db), docCount_(0),
         dataSize_(0), updateSeq_(0), localUpdateSeq_(0),
@@ -109,7 +115,7 @@ document_ptr Documents::DeleteDocument(const char* id, const char* rev) {
 document_ptr Documents::SetDocument(const char* id, script_object_ptr obj) {
     auto coll = GetDocumentCollectionIndex(id);
     
-    boost::lock_guard<DocumentCollection> guard{*docs_[coll]};
+    boost::unique_lock<DocumentCollection> lock{*docs_[coll]};
     
     Document::Compare compare{id};
     auto oldDoc = docs_[coll]->find_fn(compare);
@@ -130,6 +136,8 @@ document_ptr Documents::SetDocument(const char* id, script_object_ptr obj) {
 
     docs_[coll]->insert(newDoc);
     
+    lock.unlock();
+    
     if (!oldDoc) {
         docCount_.fetch_add(1, boost::memory_order_relaxed);
     } else {
@@ -139,6 +147,98 @@ document_ptr Documents::SetDocument(const char* id, script_object_ptr obj) {
     dataSize_.fetch_add(newDoc->getObject()->getSize(true), boost::memory_order_relaxed);
 
     return newDoc;
+}
+
+document_ptr Documents::SetDocumentAttachment(const char* id, const char* rev, const char* name, const char* contentType, const std::vector<unsigned char>& attachment) {
+    auto coll = GetDocumentCollectionIndex(id);
+    
+    boost::unique_lock<DocumentCollection> lock{*docs_[coll]};
+    
+    Document::Compare compare{id};
+    auto oldDoc = docs_[coll]->find_fn(compare);
+    if (!oldDoc) {
+        throw DocumentMissing{};
+    }
+    
+    if (std::strcmp(rev, oldDoc->getRev()) != 0) {
+        throw DocumentConflict{};
+    }        
+    
+    auto oldRev = DocumentRevision::Parse(rev);
+    
+    auto encodedAttachment = Base64Helper::Encode(attachment);
+    
+    MD5 md5;
+    md5.update(attachment.data(), attachment.size());
+    md5.finalize();
+    std::vector<unsigned char> digest(16);
+    md5.bindigest(digest.data());
+    auto encodedDigest = std::string("md5-") + Base64Helper::Encode(digest).data();
+    
+    rs::scriptobject::utils::ScriptObjectVectorSource newAttachmentSource({
+        std::make_pair("content_type", contentType),
+        std::make_pair("revpos", oldRev.getVersion() + 1),
+        std::make_pair("digest", encodedDigest.data()),
+        std::make_pair("data", encodedAttachment.c_str()),
+        std::make_pair("length", attachment.size())
+    });
+    
+    auto newAttachmentObj = rs::scriptobject::ScriptObjectFactory::CreateObject(newAttachmentSource, true);
+    
+    rs::scriptobject::utils::ScriptObjectVectorSource newNamedAttachmentSource{
+        { std::make_pair(name, newAttachmentObj) }
+    };
+    
+    auto newNamedAttachmentObj = rs::scriptobject::ScriptObjectFactory::CreateObject(newNamedAttachmentSource, false);
+     
+    auto attachmentsObj = oldDoc->getObject()->getObject("_attachments", false);
+    if (!!attachmentsObj) {
+        attachmentsObj = rs::scriptobject::ScriptObject::Merge(attachmentsObj, newNamedAttachmentObj, rs::scriptobject::ScriptObject::MergeStrategy::Back);
+    } else {                
+        attachmentsObj = newNamedAttachmentObj;
+    }
+    
+    rs::scriptobject::utils::ScriptObjectVectorSource newAttachmentsObjSource{
+        { std::make_pair("_attachments", attachmentsObj) }
+    };
+    
+    auto newAttachmentsObj = rs::scriptobject::ScriptObjectFactory::CreateObject(newAttachmentsObjSource, true);
+    
+    newAttachmentsObj = rs::scriptobject::ScriptObject::Merge(oldDoc->getObject(), newAttachmentsObj, rs::scriptobject::ScriptObject::MergeStrategy::Back);
+    
+    auto newDoc = Document::Create(id, newAttachmentsObj, ++updateSeq_);
+
+    docs_[coll]->insert(newDoc);
+    
+    lock.unlock();
+
+    dataSize_.fetch_sub(oldDoc->getObject()->getSize(true), boost::memory_order_relaxed);    
+    dataSize_.fetch_add(newDoc->getObject()->getSize(true), boost::memory_order_relaxed);
+
+    return newDoc;
+}
+
+document_attachment_ptr Documents::GetDocumentAttachment(const char* id, const char* attName) {    
+    auto doc = GetDocument(id, true);
+    
+    auto attachments = doc->getObject()->getObject("_attachments", false);
+    if (!attachments) {
+        throw DocumentAttachmentMissing{};
+    }
+
+    auto attachment = attachments->getObject(attName, false);
+    if (!attachment) {
+        throw DocumentAttachmentMissing{};
+    }
+    
+    auto contentType = attachment->getString("content_type");
+    auto digest = attachment->getString("digest");
+    
+    auto encodedData = attachment->getString("data");
+    auto encodedDataSize = attachment->getStringFieldLength("data");
+    auto data = Base64Helper::Decode(encodedData, encodedDataSize > 0 ? encodedDataSize - 1 : 0);
+    
+    return DocumentAttachment::Create(attName, contentType, std::move(data), digest);    
 }
 
 document_ptr Documents::GetDesignDocument(const char* id, bool throwOnFail) {

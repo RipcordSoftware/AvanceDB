@@ -122,3 +122,12 @@ unsigned char DocumentRevision::GetCharNumericValue(char ch) {
         return (ch | 0x20) - 0x61 + 10;
     }
 }
+
+DocumentRevision::version_type DocumentRevision::getVersion() const {
+    return version_;
+}
+
+void DocumentRevision::getDigest(Digest& digest) const {
+    static_assert(digestLength_ == sizeof(digest), "Mismatch in digest size");
+    std::memcpy(digest, digest_, digestLength_);
+}
