@@ -78,6 +78,7 @@ private:
     
     bool PutDocumentAttachment(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response);
     bool GetDocumentAttachment(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response);
+    bool DeleteDocumentAttachment(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response);
     
     database_ptr GetDatabase(const rs::httpserver::RequestRouter::CallbackArgs&);
     const char* GetDatabaseName(const rs::httpserver::RequestRouter::CallbackArgs&);

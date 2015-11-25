@@ -65,6 +65,7 @@ RestServer::RestServer() {
     AddRoute("DELETE", REGEX_DBNAME_GROUP "/+_local" REGEX_DOCID_GROUP, &RestServer::DeleteLocalDocument);
     AddRoute("DELETE", REGEX_DBNAME_GROUP "/{0,}$", &RestServer::DeleteDatabase);
     AddRoute("DELETE", REGEX_DBNAME_GROUP "/+_design" REGEX_DESIGNID_GROUP, &RestServer::DeleteDesignDocument);
+    AddRoute("DELETE", REGEX_DBNAME_GROUP REGEX_DOCID_GROUP REGEX_ATTACHMENT_NAME_GROUP, &RestServer::DeleteDocumentAttachment);
     AddRoute("DELETE", REGEX_DBNAME_GROUP REGEX_DOCID_GROUP, &RestServer::DeleteDocument);
     
     AddRoute("PUT", REGEX_DBNAME_GROUP "/+_local" REGEX_DOCID_GROUP, &RestServer::PutLocalDocument);
@@ -853,7 +854,7 @@ bool RestServer::PutDocumentAttachment(rs::httpserver::request_ptr request, cons
             throw DocumentConflict{};
         }
 
-        auto attName = GetParameter("attname", args);
+        auto name = GetParameter("attname", args);
         auto contentType = request->getContentType();
         auto contentLength = request->getContentLength();
         auto& requestStream = request->getRequestStream();
@@ -872,7 +873,7 @@ bool RestServer::PutDocumentAttachment(rs::httpserver::request_ptr request, cons
             offset += bytesRead;
         }
         
-        auto newDoc = db->SetDocumentAttachment(id, oldRev.c_str(), attName, contentType.c_str(), buffer);
+        auto newDoc = db->SetDocumentAttachment(id, oldRev.c_str(), name, contentType.c_str(), buffer);
         auto newRev = newDoc->getRev();
 
         JsonStream stream;
@@ -880,7 +881,7 @@ bool RestServer::PutDocumentAttachment(rs::httpserver::request_ptr request, cons
         stream.Append("id", id);
         stream.Append("rev", newRev);
 
-        response->setStatusCode(201).setContentType(ContentTypes::Utf8::applicationJson).setETag(newRev).Send(stream.Flush());
+        response->setStatusCode(201).setContentType(ContentTypes::applicationJson).setETag(newRev).Send(stream.Flush());
 
         created = true;
     }
@@ -893,9 +894,9 @@ bool RestServer::GetDocumentAttachment(rs::httpserver::request_ptr request, cons
     auto db = GetDatabase(args);
     if (!!db) {
         auto id = GetParameter("id", args);        
-        auto attName = GetParameter("attname", args);
+        auto name = GetParameter("attname", args);
         
-        auto attachment = db->GetDocumentAttachment(id, attName);
+        auto attachment = db->GetDocumentAttachment(id, name);
 
         auto& contentType = attachment->ContentType();
         auto& digest = attachment->Digest();
@@ -944,6 +945,30 @@ bool RestServer::GetDocumentAttachment(rs::httpserver::request_ptr request, cons
     }
     
     return found;
+}
+
+bool RestServer::DeleteDocumentAttachment(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
+    bool deleted = false;
+    auto db = GetDatabase(args);
+    if (!!db) {
+        auto id = GetParameter("id", args);        
+        auto oldRev = GetParameter("rev", request->getQueryString());
+        auto name = GetParameter("attname", args);
+        
+        auto newDoc = db->DeleteDocumentAttachment(id, oldRev.c_str(), name);
+        auto newRev = newDoc->getRev();
+
+        JsonStream stream;
+        stream.Append("ok", true);
+        stream.Append("id", id);
+        stream.Append("rev", newRev);
+
+        response->setStatusCode(200).setContentType(ContentTypes::applicationJson).setETag(newRev).Send(stream.Flush());
+        
+        deleted = true;
+    }
+    
+    return deleted;
 }
 
 database_ptr RestServer::GetDatabase(const rs::httpserver::RequestRouter::CallbackArgs& args) {

@@ -162,7 +162,7 @@ document_ptr Documents::SetDocumentAttachment(const char* id, const char* rev, c
     
     if (std::strcmp(rev, oldDoc->getRev()) != 0) {
         throw DocumentConflict{};
-    }        
+    }
     
     auto oldRev = DocumentRevision::Parse(rev);
     
@@ -218,7 +218,7 @@ document_ptr Documents::SetDocumentAttachment(const char* id, const char* rev, c
     return newDoc;
 }
 
-document_attachment_ptr Documents::GetDocumentAttachment(const char* id, const char* attName) {    
+document_attachment_ptr Documents::GetDocumentAttachment(const char* id, const char* name) {    
     auto doc = GetDocument(id, true);
     
     auto attachments = doc->getObject()->getObject("_attachments", false);
@@ -226,7 +226,7 @@ document_attachment_ptr Documents::GetDocumentAttachment(const char* id, const c
         throw DocumentAttachmentMissing{};
     }
 
-    auto attachment = attachments->getObject(attName, false);
+    auto attachment = attachments->getObject(name, false);
     if (!attachment) {
         throw DocumentAttachmentMissing{};
     }
@@ -238,7 +238,60 @@ document_attachment_ptr Documents::GetDocumentAttachment(const char* id, const c
     auto encodedDataSize = attachment->getStringFieldLength("data");
     auto data = Base64Helper::Decode(encodedData, encodedDataSize > 0 ? encodedDataSize - 1 : 0);
     
-    return DocumentAttachment::Create(attName, contentType, std::move(data), digest);    
+    return DocumentAttachment::Create(name, contentType, std::move(data), digest);
+}
+
+document_ptr Documents::DeleteDocumentAttachment(const char* id, const char* rev, const char* name) {
+    auto coll = GetDocumentCollectionIndex(id);
+    
+    boost::unique_lock<DocumentCollection> lock{*docs_[coll]};
+    
+    Document::Compare compare{id};
+    auto oldDoc = docs_[coll]->find_fn(compare);
+    if (!oldDoc) {
+        throw DocumentMissing{};
+    }
+    
+    if (std::strcmp(rev, oldDoc->getRev()) != 0) {
+        throw DocumentConflict{};
+    }
+    
+    auto oldDocObj = oldDoc->getObject();
+    auto oldAttachmentsObj = oldDocObj->getObject("_attachments", false);
+    if (!oldAttachmentsObj) {
+        throw DocumentAttachmentMissing{};
+    }
+
+    auto oldAttachmentObj = oldAttachmentsObj->getObject(name, false);
+    if (!oldAttachmentObj) {
+        throw DocumentAttachmentMissing{};
+    }
+    
+    decltype(oldDocObj) newDocObj;
+    if (oldAttachmentsObj->getCount() == 1) {
+        newDocObj = rs::scriptobject::ScriptObject::DeleteField(oldDoc->getObject(), "_attachments");
+    } else {
+        auto newAttachmentsObj = rs::scriptobject::ScriptObject::DeleteField(oldAttachmentsObj, name);
+
+        rs::scriptobject::utils::ScriptObjectVectorSource newAttachmentsSource{
+            { std::make_pair("_attachments", newAttachmentsObj) }
+        };
+
+        newAttachmentsObj = rs::scriptobject::ScriptObjectFactory::CreateObject(newAttachmentsSource, true);
+
+        newDocObj = rs::scriptobject::ScriptObject::Merge(oldDoc->getObject(), newAttachmentsObj, rs::scriptobject::ScriptObject::MergeStrategy::Back);
+    }
+    
+    auto newDoc = Document::Create(id, newDocObj, ++updateSeq_);
+
+    docs_[coll]->insert(newDoc);
+    
+    lock.unlock();
+
+    dataSize_.fetch_sub(oldDocObj->getSize(true), boost::memory_order_relaxed);
+    dataSize_.fetch_add(newDoc->getObject()->getSize(true), boost::memory_order_relaxed);
+
+    return newDoc;    
 }
 
 document_ptr Documents::GetDesignDocument(const char* id, bool throwOnFail) {

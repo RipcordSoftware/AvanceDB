@@ -68,8 +68,12 @@ document_ptr Database::SetDocumentAttachment(const char* id, const char* rev, co
     return docs_->SetDocumentAttachment(id, rev, name, contentType, attachment);
 }
 
-document_attachment_ptr Database::GetDocumentAttachment(const char* id, const char* attName) {
-    return docs_->GetDocumentAttachment(id, attName);
+document_attachment_ptr Database::GetDocumentAttachment(const char* id, const char* name) {
+    return docs_->GetDocumentAttachment(id, name);
+}
+
+document_ptr Database::DeleteDocumentAttachment(const char* id, const char* rev, const char* name) {
+    return docs_->DeleteDocumentAttachment(id, rev, name);
 }
 
 document_ptr Database::GetDesignDocument(const char* id, bool throwOnFail) {

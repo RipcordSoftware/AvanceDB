@@ -52,7 +52,8 @@ public:
     document_ptr SetDocument(const char* id, script_object_ptr);
     
     document_ptr SetDocumentAttachment(const char* id, const char* rev, const char* name, const char* contentType, const std::vector<unsigned char>& attachment);
-    document_attachment_ptr GetDocumentAttachment(const char* id, const char* attName);
+    document_attachment_ptr GetDocumentAttachment(const char* id, const char* name);
+    document_ptr DeleteDocumentAttachment(const char* id, const char* rev, const char* name);
     
     document_ptr GetDesignDocument(const char* id, bool throwOnFail = true);
     document_ptr DeleteDesignDocument(const char* id, const char* rev);
