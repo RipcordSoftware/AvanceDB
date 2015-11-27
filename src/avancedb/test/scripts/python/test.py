@@ -48,7 +48,6 @@ class FutonTestCase(unittest.TestCase):
     def test_not_valid_response(self):
         r = requests.get(url + '/_utils/nothing_to_see_here')
         self.assertEqual(r.status_code, 404)
-        self.assertEqual(r.headers['content-length'], '0')
 
 class ConfigTestCase(unittest.TestCase):
 

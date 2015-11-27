@@ -104,7 +104,6 @@ describe('avancedb -- futon --', function() {
     it('shouldn\'t get a valid response', function(done) {
         http.get(url + '/_utils/nothing_to_see_here', function(res) {
             assert.equal(404, res.statusCode);
-            assert.equal(0, res.headers['content-length']);
             res.on('data', function(){});
             done();
         });
