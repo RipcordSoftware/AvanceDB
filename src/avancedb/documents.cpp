@@ -237,7 +237,7 @@ document_attachment_ptr Documents::GetDocumentAttachment(const char* id, const c
     if (includeBody) {
         auto encodedData = attachment->getString("data");
         auto encodedDataSize = attachment->getStringFieldLength("data");
-        auto data = std::move(Base64Helper::Decode(encodedData, encodedDataSize > 0 ? encodedDataSize - 1 : 0));
+        auto data = Base64Helper::Decode(encodedData, encodedDataSize > 0 ? encodedDataSize - 1 : 0);
         return DocumentAttachment::Create(name, contentType, digest, std::move(data));
     } else {
         int lengthIndex = -1;

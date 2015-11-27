@@ -21,11 +21,12 @@
 #include <utility>
 
 DocumentAttachment::DocumentAttachment(const char* name, const char* contentType, const char* digest, std::vector<value_type>&& data, size_type size) :
-    name_(name), contentType_(contentType), digest_(ParseDigest(digest)), data_(std::move(data)), size_(size > 0 ? size : data.size()) {
+    name_(name), contentType_(contentType), digest_(ParseDigest(digest)), data_(std::move(data)), size_(size) {
 
 }
 
 document_attachment_ptr DocumentAttachment::Create(const char* name, const char* contentType, const char* digest, std::vector<value_type>&& data, size_type size) {
+    size = size > 0 ? size : data.size();
     return boost::make_shared<document_attachment_ptr::element_type>(name, contentType, digest, std::forward<decltype(data)>(data), size);
 }
 

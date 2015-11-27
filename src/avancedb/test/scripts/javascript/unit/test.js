@@ -4733,6 +4733,94 @@ describe('avancedb -- temp views --', function() {
     });
 });
 
+describe('avancedb -- doc attachments --', function() {
+    var testDbName = 'avancedb-doc-attachments-test';
+    var db = conn.database(testDbName);
+    var testId = 'test0';
+    var attachment = {
+        name: 'test.txt',
+        'Content-Type': 'text/plain',
+        body: '0123456789'
+    };
+
+    it('should create a database', function(done) {
+        db.create(function(err, res) {
+            assert.equal(null, err);
+            assert.notEqual(null, res);
+            assert.notEqual(res.ok, 'true');
+            done();
+        });
+    });
+    
+    it('create a document with an id', function(done) {
+        db.save(testId, testDocument, function(err, doc) {
+            assert.equal(null, err);
+            assert.notEqual(null, doc);
+            assert.equal('test0', doc._id);
+            assert(isValidRevision(doc._rev));
+            done();
+        });
+    });
+
+    it('save an attachment to an existing doc', function(done) {
+        db.get(testId, function(err, doc) {
+            assert.equal(null, err);
+            assert.equal(testId, doc.id);
+            assert(isValidRevision(doc.rev));
+            assert.equal(1, doc.rev[0]);
+            
+            db.saveAttachment({id: doc._id, rev: doc._rev}, attachment, function(err, doc) {
+                assert.equal(null, err);
+                assert.notEqual(null, doc);
+                assert.equal(testId, doc.id);
+                assert(isValidRevision(doc.rev));
+                assert.equal(2, doc.rev[0]);
+
+                db.getAttachment(testId, attachment.name, function(err, res, buffer) {
+                    assert.equal(null, err);
+                    assert.notEqual(null, res);
+                    assert.notEqual(null, buffer);
+                    assert.equal(attachment['Content-Type'], res.headers['content-type']);
+                    assert.equal(attachment.body.length, buffer.length);
+                    assert.equal(attachment.body, buffer.toString('ascii'));
+                    done();
+                });
+            });
+        });
+    });
+
+    it('remove an attachment from an existing doc', function(done) {
+        db.get(testId, function(err, doc) {
+            assert.equal(null, err);
+            assert.equal(testId, doc.id);
+            assert(isValidRevision(doc.rev));
+            assert.equal(2, doc.rev[0]);
+            
+            db.removeAttachment({id: doc._id, rev: doc._rev}, attachment.name, function(err, doc) {
+                assert.equal(null, err);
+                assert.notEqual(null, doc);
+                assert.equal(testId, doc.id);
+                assert(isValidRevision(doc.rev));
+                assert.equal(3, doc.rev[0]);
+
+                db.getAttachment(testId, attachment.name, function(err, res, buffer) {
+                    assert.notEqual(null, res);
+                    assert.equal(404, res.statusCode);
+                    done();
+                });
+            });
+        });
+    });
+
+    it('delete the database', function(done) {
+        db.destroy(function(err, res) {
+            assert.equal(null, err);
+            assert.notEqual(null, res);
+            done();
+        });
+    });
+});
+
 describe('avancedb -- fuzz -- ', function() {        
     it('sends an empty header', function(done) {
         var response = '';
