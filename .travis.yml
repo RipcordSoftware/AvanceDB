@@ -16,7 +16,6 @@ addons:
     - ruby
     - rubygems
     - doxygen
-    - npm
     - libtool
 
 services:
@@ -40,4 +39,4 @@ before_script:
   - export GCC=gcc-4.9
   - export GXX=g++-4.9
 
-script: make all CXX=g++-4.9 && make test CXX=g++-4.9 && ./coverage.sh gcov-4.9
+script: make -j 2 CXX=g++-4.9 && make -j 2 test CXX=g++-4.9 && ./coverage.sh gcov-4.9
