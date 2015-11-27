@@ -1,0 +1,38 @@
+language: cpp
+compiler: gcc
+script: make && make test && ./coverage.sh
+
+services:
+- couchdb
+
+before_script:
+- curl -X PUT http://127.0.0.1:5984/travisci_test
+
+before_install:
+- sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+- sudo apt-get update -qq
+
+install:
+- sudo apt-get install -qq g++-4.9 zlib1g-dev doxygen npm lcov ruby rubygems libtool
+- export CC="gcc-4.9"
+- export CXX="g++-4.9"
+- pushd ~
+- mkdir Downloads
+- cd Downloads
+- curl ftp://ftp.ripcordsoftware.com/pub/boost_1_57_0-travis-ci.tar.bz2 -O
+- tar xfj boost_1_57_0-travis-ci.tar.bz2
+- pushd boost_1_57_0
+- sudo ./b2 --prefix=/usr -d0 install
+- popd
+- curl http://ftp.uk.debian.org/debian/pool/main/l/lcov/lcov_1.11.orig.tar.gz -O
+- tar xfz lcov_1.11.orig.tar.gz
+- sudo make -C lcov-1.11/ install
+- popd
+- gem install coveralls-lcov
+- sudo pip install json_tools
+- sudo rm -f /usr/bin/g++
+- sudo rm -f /usr/bin/gcc
+- sudo rm -f /usr/bin/gcov
+- sudo ln -s /usr/bin/g++-4.9 /usr/bin/g++
+- sudo ln -s /usr/bin/gcc-4.9 /usr/bin/gcc
+- sudo ln -s /usr/bin/gcov-4.9 /usr/bin/gcov
