@@ -218,7 +218,7 @@ document_ptr Documents::SetDocumentAttachment(const char* id, const char* rev, c
     return newDoc;
 }
 
-document_attachment_ptr Documents::GetDocumentAttachment(const char* id, const char* name) {    
+document_attachment_ptr Documents::GetDocumentAttachment(const char* id, const char* name, bool includeBody) {    
     auto doc = GetDocument(id, true);
     
     auto attachments = doc->getObject()->getObject("_attachments", false);
@@ -233,12 +233,19 @@ document_attachment_ptr Documents::GetDocumentAttachment(const char* id, const c
     
     auto contentType = attachment->getString("content_type");
     auto digest = attachment->getString("digest");
-    
-    auto encodedData = attachment->getString("data");
-    auto encodedDataSize = attachment->getStringFieldLength("data");
-    auto data = Base64Helper::Decode(encodedData, encodedDataSize > 0 ? encodedDataSize - 1 : 0);
-    
-    return DocumentAttachment::Create(name, contentType, std::move(data), digest);
+        
+    if (includeBody) {
+        auto encodedData = attachment->getString("data");
+        auto encodedDataSize = attachment->getStringFieldLength("data");
+        auto data = std::move(Base64Helper::Decode(encodedData, encodedDataSize > 0 ? encodedDataSize - 1 : 0));
+        return DocumentAttachment::Create(name, contentType, digest, std::move(data));
+    } else {
+        int lengthIndex = -1;
+        auto size = attachment->getType("length", lengthIndex) == rs::scriptobject::ScriptObjectType::UInt32 ? 
+            attachment->getUInt32(lengthIndex) : attachment->getUInt64(lengthIndex);
+
+        return DocumentAttachment::Create(name, contentType, digest, Base64Helper::buffer_type{}, size);
+    }
 }
 
 document_ptr Documents::DeleteDocumentAttachment(const char* id, const char* rev, const char* name) {

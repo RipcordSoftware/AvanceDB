@@ -34,7 +34,7 @@ public:
     using value_type = unsigned char;
     using size_type = std::size_t;        
     
-    static document_attachment_ptr Create(const char* name, const char* contentType, std::vector<value_type>&& data, const char* digest);
+    static document_attachment_ptr Create(const char* name, const char* contentType, const char* digest, std::vector<value_type>&& data, size_type size = 0);
     
     const std::string& Name() const;
     const std::string& ContentType() const;
@@ -43,13 +43,16 @@ public:
     const std::string& Digest() const;
     
 private:
-    friend document_attachment_ptr boost::make_shared<document_attachment_ptr::element_type>(const char*&, const char*&, std::vector<value_type>&&, const char*&);
+    friend document_attachment_ptr boost::make_shared<document_attachment_ptr::element_type>(const char*&, const char*&, const char*&, std::vector<value_type>&&, size_type&);
     
-    DocumentAttachment(const char* name, const char* contentType, std::vector<value_type>&& data, const char* digest);
+    DocumentAttachment(const char* name, const char* contentType, const char* digest, std::vector<value_type>&& data, size_type size);
+
+    static const char* ParseDigest(const std::string&);
     
     const std::string name_;
     const std::string contentType_;
     const std::vector<value_type> data_;
+    const size_type size_;
     const std::string digest_;
 };
 

@@ -22,7 +22,7 @@
 
 #include "../../externals/ConstTimeEncoding/base64.h"
 
-std::string Base64Helper::Encode(const std::vector<unsigned char>& data) {
+std::string Base64Helper::Encode(const buffer_type& data) {
     auto encodedSize = data.size() * 4;
     encodedSize = (encodedSize + 3) / 3;
     encodedSize += 4 - (encodedSize % 4);   
@@ -35,8 +35,8 @@ std::string Base64Helper::Encode(const std::vector<unsigned char>& data) {
     return text;
 }
 
-std::vector<unsigned char> Base64Helper::Decode(const char* text, std::size_t size) {
-    std::vector<unsigned char> data;
+Base64Helper::buffer_type Base64Helper::Decode(const char* text, std::size_t size) {
+    buffer_type data;
     
     if (size > 0) {
         auto decodedSize = size;

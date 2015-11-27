@@ -60,6 +60,7 @@ RestServer::RestServer() {
     AddRoute("HEAD", REGEX_DBNAME_GROUP "/{0,}$", &RestServer::HeadDatabase);   
     AddRoute("HEAD", REGEX_DBNAME_GROUP REGEX_DOCID_GROUP, &RestServer::HeadDocument);
     AddRoute("HEAD", REGEX_DBNAME_GROUP "/+_design" REGEX_DESIGNID_GROUP, &RestServer::HeadDesignDocument);
+    AddRoute("HEAD", REGEX_DBNAME_GROUP REGEX_DOCID_GROUP REGEX_ATTACHMENT_NAME_GROUP, &RestServer::HeadDocumentAttachment);
     AddRoute("HEAD", "/+", &RestServer::HeadServer);
     
     AddRoute("DELETE", REGEX_DBNAME_GROUP "/+_local" REGEX_DOCID_GROUP, &RestServer::DeleteLocalDocument);
@@ -889,6 +890,27 @@ bool RestServer::PutDocumentAttachment(rs::httpserver::request_ptr request, cons
     return created;
 }
 
+bool RestServer::HeadDocumentAttachment(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
+    bool found = false;
+    auto db = GetDatabase(args);
+    if (!!db) {
+        auto id = GetParameter("id", args);        
+        auto name = GetParameter("attname", args);
+        
+        auto attachment = db->GetDocumentAttachment(id, name, false);
+
+        auto& contentType = attachment->ContentType();
+        auto& digest = attachment->Digest();       
+        auto size = attachment->Size();
+        
+        response->setContentType(contentType).setETag(digest).setContentLength(size).Send();
+        
+        found = true;
+    }
+    
+    return found;
+}
+
 bool RestServer::GetDocumentAttachment(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
     bool found = false;
     auto db = GetDatabase(args);
@@ -896,7 +918,7 @@ bool RestServer::GetDocumentAttachment(rs::httpserver::request_ptr request, cons
         auto id = GetParameter("id", args);        
         auto name = GetParameter("attname", args);
         
-        auto attachment = db->GetDocumentAttachment(id, name);
+        auto attachment = db->GetDocumentAttachment(id, name, true);
 
         auto& contentType = attachment->ContentType();
         auto& digest = attachment->Digest();

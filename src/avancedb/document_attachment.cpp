@@ -20,13 +20,13 @@
 
 #include <utility>
 
-DocumentAttachment::DocumentAttachment(const char* name, const char* contentType, std::vector<value_type>&& data, const char* digest) :
-    name_(name), contentType_(contentType), data_(std::move(data)), digest_(digest) {
+DocumentAttachment::DocumentAttachment(const char* name, const char* contentType, const char* digest, std::vector<value_type>&& data, size_type size) :
+    name_(name), contentType_(contentType), digest_(ParseDigest(digest)), data_(std::move(data)), size_(size > 0 ? size : data.size()) {
 
 }
 
-document_attachment_ptr DocumentAttachment::Create(const char* name, const char* contentType, std::vector<value_type>&& data, const char* digest) {
-    return boost::make_shared<document_attachment_ptr::element_type>(name, contentType, std::forward<decltype(data)>(data), digest);
+document_attachment_ptr DocumentAttachment::Create(const char* name, const char* contentType, const char* digest, std::vector<value_type>&& data, size_type size) {
+    return boost::make_shared<document_attachment_ptr::element_type>(name, contentType, digest, std::forward<decltype(data)>(data), size);
 }
 
 const std::string& DocumentAttachment::Name() const {
@@ -38,7 +38,7 @@ const std::string& DocumentAttachment::ContentType() const {
 }
 
 DocumentAttachment::size_type DocumentAttachment::Size() const {
-    return data_.size();
+    return size_;
 }
 
 const DocumentAttachment::value_type* DocumentAttachment::Data() const {
@@ -47,4 +47,12 @@ const DocumentAttachment::value_type* DocumentAttachment::Data() const {
 
 const std::string& DocumentAttachment::Digest() const {
     return digest_;
+}
+
+const char* DocumentAttachment::ParseDigest(const std::string& digest) {
+    if (digest.find("md5-") == 0) {
+        return digest.c_str() + 4;
+    } else {
+        return digest.c_str();
+    }    
 }

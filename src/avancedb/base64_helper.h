@@ -24,10 +24,12 @@
 
 class Base64Helper final {
 public:
+    using buffer_type = std::vector<unsigned char>;
+    
     Base64Helper() = delete;
     
-    static std::string Encode(const std::vector<unsigned char>& data);
-    static std::vector<unsigned char> Decode(const char* text, std::size_t size);
+    static std::string Encode(const buffer_type& data);
+    static buffer_type Decode(const char* text, std::size_t size);
     
 private:
 
