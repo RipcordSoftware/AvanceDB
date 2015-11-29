@@ -7,12 +7,13 @@ var http = require('http');
 var net = require('net');
 var faker = require('faker');
 
-var host = 'http://127.0.0.1';
+var protocol = 'http://';
+var host = '127.0.0.1';
 var port = 15994;
 //var port = 5994;
-var url = host + ':' + port;
-var conn = new cradle.Connection(host, port, { cache: false });
-var couch_conn = new cradle.Connection(host, 5984, { cache: false });
+var url = protocol + host + ':' + port;
+var conn = new cradle.Connection(protocol + host, port, { cache: false });
+var couch_conn = new cradle.Connection(protocol + host, 5984, { cache: false });
 
 var longStringData =
     '0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789' + 
@@ -44,6 +45,8 @@ var isValidRevision = function(rev) {
 var isRevisionVersion = function(rev, ver) {
     return rev[0] == ('' + ver) && rev[1] == '-';
 }
+
+var badRev = '0-abcdabcdabcdabcdabcdabcdabcdabcd';
 
 describe('avancedb -- server info --', function() {
     it('should validate server signature', function(done) {
@@ -4737,11 +4740,11 @@ describe('avancedb -- doc attachments --', function() {
     var testDbName = 'avancedb-doc-attachments-test';
     var db = conn.database(testDbName);
     var testId = 'test0';
-    var attachment = {
-        name: 'test.txt',
-        'Content-Type': 'text/plain',
-        body: '0123456789'
-    };
+    var attachments = [
+        { name: 'test.txt', 'Content-Type': 'text/plain', body: '0123456789' },
+        { name: 'test.html', 'Content-Type': 'text/html', body: '<html><body><div>hello world</div></body></html>' }
+    ];
+    var connectOptions = {host: host, port: port};
 
     it('should create a database', function(done) {
         db.create(function(err, res) {
@@ -4769,23 +4772,40 @@ describe('avancedb -- doc attachments --', function() {
             assert(isValidRevision(doc.rev));
             assert.equal(1, doc.rev[0]);
             
-            db.saveAttachment({id: doc._id, rev: doc._rev}, attachment, function(err, doc) {
+            db.saveAttachment({id: doc._id, rev: doc._rev}, attachments[0], function(err, doc) {
                 assert.equal(null, err);
                 assert.notEqual(null, doc);
                 assert.equal(testId, doc.id);
                 assert(isValidRevision(doc.rev));
                 assert.equal(2, doc.rev[0]);
 
-                db.getAttachment(testId, attachment.name, function(err, res, buffer) {
+                db.getAttachment(testId, attachments[0].name, function(err, res, buffer) {
                     assert.equal(null, err);
                     assert.notEqual(null, res);
                     assert.notEqual(null, buffer);
-                    assert.equal(attachment['Content-Type'], res.headers['content-type']);
-                    assert.equal(attachment.body.length, buffer.length);
-                    assert.equal(attachment.body, buffer.toString('ascii'));
+                    assert.equal(attachments[0]['Content-Type'], res.headers['content-type']);
+                    assert.equal(attachments[0].body.length, buffer.length);
+                    assert.equal(attachments[0].body, buffer.toString('ascii'));
                     done();
                 });
             });
+        });
+    });
+
+    it('get the doc and attachment', function(done) {
+        db.get(testId, function(err, doc) {
+            assert.equal(null, err);
+            assert.equal(testId, doc.id);
+            assert(isValidRevision(doc.rev));
+            assert.equal(2, doc.rev[0]);
+            assert.notEqual(null, doc._attachments);
+            var name = attachments[0].name;
+            assert.notEqual(null, doc._attachments[name]);
+            assert.equal(attachments[0]['Content-Type'], doc._attachments[name].content_type);
+            assert.equal(2, doc._attachments[name].revpos);
+            assert.equal(0, doc._attachments[name].digest.indexOf('md5-'));
+            assert.equal(attachments[0].body.length, doc._attachments[name].length);
+            done();
         });
     });
 
@@ -4793,17 +4813,15 @@ describe('avancedb -- doc attachments --', function() {
         db.get(testId, function(err, doc) {
             assert.equal(null, err);
             assert.equal(testId, doc.id);
-            assert(isValidRevision(doc.rev));
-            assert.equal(2, doc.rev[0]);
             
-            db.removeAttachment({id: doc._id, rev: doc._rev}, attachment.name, function(err, doc) {
+            db.removeAttachment({id: doc._id, rev: doc._rev}, attachments[0].name, function(err, doc) {
                 assert.equal(null, err);
                 assert.notEqual(null, doc);
                 assert.equal(testId, doc.id);
                 assert(isValidRevision(doc.rev));
                 assert.equal(3, doc.rev[0]);
 
-                db.getAttachment(testId, attachment.name, function(err, res, buffer) {
+                db.getAttachment(testId, attachments[0].name, function(err, res, buffer) {
                     assert.notEqual(null, res);
                     assert.equal(404, res.statusCode);
                     done();
@@ -4811,6 +4829,273 @@ describe('avancedb -- doc attachments --', function() {
             });
         });
     });
+
+    it('get the doc -- 1', function(done) {
+        db.get(testId, function(err, doc) {
+            assert.equal(null, err);
+            assert.equal(testId, doc.id);
+            assert(isValidRevision(doc.rev));
+            assert.equal(3, doc.rev[0]);            
+            assert.equal(null, doc._attachments);
+            done();
+        });
+    });
+
+    it('save two attachments to an existing doc', function(done) {
+        db.get(testId, function(err, doc) {
+            assert.equal(null, err);
+            assert.equal(testId, doc.id);
+            assert(isValidRevision(doc.rev));
+            assert.equal(3, doc.rev[0]);
+            
+            db.saveAttachment({id: doc._id, rev: doc._rev}, attachments[0], function(err, doc) {
+                assert.equal(null, err);
+                assert.notEqual(null, doc);
+                assert.equal(testId, doc.id);
+                assert(isValidRevision(doc.rev));
+                assert.equal(4, doc.rev[0]);
+
+                db.saveAttachment({id: doc.id, rev: doc.rev}, attachments[1], function(err, doc) {
+                    assert.equal(null, err);
+                    assert.notEqual(null, doc);
+                    assert.equal(testId, doc.id);
+                    assert(isValidRevision(doc.rev));
+                    assert.equal(5, doc.rev[0]);
+
+                    db.getAttachment(testId, attachments[0].name, function(err, res, buffer) {
+                        assert.equal(null, err);
+                        assert.notEqual(null, res);
+                        assert.notEqual(null, buffer);
+                        assert.equal(attachments[0]['Content-Type'], res.headers['content-type']);
+                        assert.equal(attachments[0].body.length, buffer.length);
+                        assert.equal(attachments[0].body, buffer.toString('ascii'));
+
+                        db.getAttachment(testId, attachments[1].name, function(err, res, buffer) {
+                            assert.equal(null, err);
+                            assert.notEqual(null, res);
+                            assert.notEqual(null, buffer);
+                            assert.equal(attachments[1]['Content-Type'], res.headers['content-type']);
+                            assert.equal(attachments[1].body.length, buffer.length);
+                            assert.equal(attachments[1].body, buffer.toString('ascii'));                            
+                            done();
+                        });
+                    });
+                });                
+            });
+        });
+    });
+
+    it('get the doc and attachments', function(done) {
+        db.get(testId, function(err, doc) {
+            assert.equal(null, err);
+            assert.equal(testId, doc.id);
+            assert(isValidRevision(doc.rev));
+            assert.equal(5, doc.rev[0]);
+            assert.notEqual(null, doc._attachments);
+            var name = attachments[0].name;
+            assert.notEqual(null, doc._attachments[name]);
+            assert.equal(attachments[0]['Content-Type'], doc._attachments[name].content_type);
+            assert.equal(4, doc._attachments[name].revpos);
+            assert.equal(0, doc._attachments[name].digest.indexOf('md5-'));
+            assert.equal(attachments[0].body.length, doc._attachments[name].length);
+            name = attachments[1].name;
+            assert.notEqual(null, doc._attachments[name]);
+            assert.equal(attachments[1]['Content-Type'], doc._attachments[name].content_type);
+            assert.equal(5, doc._attachments[name].revpos);
+            assert.equal(0, doc._attachments[name].digest.indexOf('md5-'));
+            assert.equal(attachments[1].body.length, doc._attachments[name].length);
+            done();
+        });
+    });
+
+    it('HEAD an attachment -- 1', function(done) {
+        var options = {
+            hostname: host,
+            port: port,
+            path: '/' + testDbName + '/' + testId + '/' + attachments[0].name,
+            method: 'HEAD'
+        };
+
+        var req = http.request(options, function(res) {
+            assert.equal(200, res.statusCode);
+            assert.equal(attachments[0]['Content-Type'], res.headers['content-type']);
+            assert.equal(attachments[0].body.length, res.headers['content-length']);
+            done();
+        });
+
+        req.end();
+    });
+
+    it('HEAD an attachment -- 2', function(done) {
+        var options = {
+            hostname: host,
+            port: port,
+            path: '/' + testDbName + '/' + testId + '/' + attachments[1].name,
+            method: 'HEAD'
+        };
+
+        var req = http.request(options, function(res) {
+            assert.equal(200, res.statusCode);
+            assert.equal(attachments[1]['Content-Type'], res.headers['content-type']);
+            assert.equal(attachments[1].body.length, res.headers['content-length']);
+            done();
+        });
+
+        req.end();
+    });
+
+    it('HEAD a bad attachment name', function(done) {
+        var options = {
+            hostname: host,
+            port: port,
+            path: '/' + testDbName + '/' + testId + '/' + attachments[0].name + 'x',
+            method: 'HEAD'
+        };
+
+        var req = http.request(options, function(res) {
+            assert.equal(404, res.statusCode);
+            done();
+        });
+
+        req.end();
+    });
+
+    it('HEAD a bad doc id', function(done) {
+        var options = {
+            hostname: host,
+            port: port,
+            path: '/' + testDbName + '/' + testId + 'x' + '/' + attachments[0].name,
+            method: 'HEAD'
+        };
+
+        var req = http.request(options, function(res) {
+            assert.equal(404, res.statusCode);
+            done();
+        });
+
+        req.end();
+    });
+
+    it('get bad attachment name', function(done) {
+        db.getAttachment(testId, 'xyz', function(err, res, buffer) {
+            assert.notEqual(null, res);
+            assert.equal(404, res.statusCode);
+            done();
+        });
+    });
+
+    it('save an attachment with a bad rev', function(done) {            
+        db.saveAttachment({id: testId, rev: badRev}, attachments[0], function(err, doc) {
+            assert.notEqual(null, err);
+            assert.equal(409, err.headers.status);
+            assert.equal('conflict', err.error);
+            assert.equal('Document update conflict.', err.reason);
+            done();
+        });
+    });
+
+    it('remove an attachment with a bad rev', function(done) {
+        db.removeAttachment({id: testId, rev: badRev}, attachments[0].name, function(err, doc) {
+            assert.notEqual(null, err);
+            assert.equal(409, err.headers.status);
+            assert.equal('conflict', err.error);
+            assert.equal('Document update conflict.', err.reason);
+            done();
+        });
+    });
+
+    it('remove an attachment with a bad id', function(done) {            
+        db.removeAttachment({id: testId + 'x', rev: badRev}, attachments[0].name, function(err, doc) {
+            assert.notEqual(null, err);
+            assert.equal(404, err.headers.status);
+            assert.equal('not_found', err.error);
+            assert.equal('missing', err.reason);
+            done();
+        });
+    });
+
+    it('remove an attachment with a bad name -- 1', function(done) {
+        db.get(testId, function(err, doc) {
+            assert.equal(null, err);
+            assert.equal(testId, doc.id);
+            
+            db.removeAttachment({id: doc._id, rev: doc._rev}, attachments[0].name + 'x', function(err, doc) {
+                assert.notEqual(null, err);
+                assert.equal(404, err.headers.status);
+                assert.equal('not_found', err.error);
+                assert.equal('Document is missing attachment', err.reason);
+                done();
+            });
+        });
+    });
+
+    it('remove the attachments from the doc', function(done) {
+        db.get(testId, function(err, doc) {
+            assert.equal(null, err);
+            assert.equal(testId, doc.id);
+            
+            db.removeAttachment({id: doc._id, rev: doc._rev}, attachments[0].name, function(err, doc) {
+                assert.equal(null, err);
+                assert.notEqual(null, doc);
+                assert.equal(testId, doc.id);
+                assert(isValidRevision(doc.rev));
+                assert.equal(6, doc.rev[0]);
+
+                db.get(testId, function(err, doc) {
+                    assert.equal(null, err);
+                    assert.equal(testId, doc.id);
+                    assert(isValidRevision(doc.rev));
+                    assert.equal(6, doc.rev[0]);            
+                    assert.notEqual(null, doc._attachments);
+
+                    db.removeAttachment({id: doc.id, rev: doc.rev}, attachments[1].name, function(err, doc) {
+                        assert.equal(null, err);
+                        assert.notEqual(null, doc);
+                        assert.equal(testId, doc.id);
+                        assert(isValidRevision(doc.rev));
+                        assert.equal(7, doc.rev[0]);
+
+                        db.getAttachment(testId, attachments[0].name, function(err, res, buffer) {
+                            assert.notEqual(null, res);
+                            assert.equal(404, res.statusCode);
+
+                            db.getAttachment(testId, attachments[1].name, function(err, res, buffer) {
+                                assert.notEqual(null, res);
+                                assert.equal(404, res.statusCode);
+                                done();
+                            });
+                        });
+                    });
+                });
+            });            
+        });
+    });
+
+    it('get the doc -- 2', function(done) {
+        db.get(testId, function(err, doc) {
+            assert.equal(null, err);
+            assert.equal(testId, doc.id);
+            assert(isValidRevision(doc.rev));
+            assert.equal(7, doc.rev[0]);            
+            assert.equal(null, doc._attachments);
+            done();
+        });
+    });
+
+    it('remove an attachment with a bad name -- 2', function(done) {
+        db.get(testId, function(err, doc) {
+            assert.equal(null, err);
+            assert.equal(testId, doc.id);
+            
+            db.removeAttachment({id: doc._id, rev: doc._rev}, attachments[0].name + 'x', function(err, doc) {
+                assert.notEqual(null, err);
+                assert.equal(404, err.headers.status);
+                assert.equal('not_found', err.error);
+                assert.equal('Document is missing attachment', err.reason);
+                done();
+            });
+        });
+    });    
 
     it('delete the database', function(done) {
         db.destroy(function(err, res) {
@@ -4821,11 +5106,13 @@ describe('avancedb -- doc attachments --', function() {
     });
 });
 
-describe('avancedb -- fuzz -- ', function() {        
+describe('avancedb -- fuzz -- ', function() {
+    var connectOptions = {host: host, port: port};
+    
     it('sends an empty header', function(done) {
         var response = '';
         
-        var client = net.connect({port: port}, function() {
+        var client = net.connect(connectOptions, function() {
             client.write('\r\n\r\n');
         });
         
@@ -4842,7 +5129,7 @@ describe('avancedb -- fuzz -- ', function() {
     it('sends a malformed header -- bad HTTP Version', function(done) {
         var response = '';
         
-        var client = net.connect({port: port}, function() {
+        var client = net.connect(connectOptions, function() {
             client.write('GET / HTTP/\r\n\r\n');
         });    
         
@@ -4859,7 +5146,7 @@ describe('avancedb -- fuzz -- ', function() {
     it('sends a malformed header -- bad directive', function(done) {
         var response = '';
         
-        var client = net.connect({port: port}, function() {
+        var client = net.connect(connectOptions, function() {
             client.write('GET / HTTP/1.1\r\nBad-Header\r\n\r\n');
         });    
         
@@ -4876,7 +5163,7 @@ describe('avancedb -- fuzz -- ', function() {
     it('sends a malformed header -- bad method', function(done) {
         var response = '';
         
-        var client = net.connect({port: port}, function() {
+        var client = net.connect(connectOptions, function() {
             client.write('XXX / HTTP/1.1\r\n\r\n');
         });    
         
@@ -4894,7 +5181,7 @@ describe('avancedb -- fuzz -- ', function() {
     it('sends a malformed header -- oversized uri', function(done) {
         var response = '';
         
-        var client = net.connect({port: port}, function() {
+        var client = net.connect(connectOptions, function() {
             var uri = '/this_is_a_long_uri';
             for (var i = 0; i < 10; ++i) { uri += uri; }
             client.write('GET ' + uri + ' HTTP/1.1\r\n\r\n');
@@ -4913,7 +5200,7 @@ describe('avancedb -- fuzz -- ', function() {
     it('sends a malformed header -- oversized directive', function(done) {
         var response = '';
         
-        var client = net.connect({port: port}, function() {
+        var client = net.connect(connectOptions, function() {
             var directive = 'i_am_a_directive;';
             for (var i = 0; i < 10; ++i) { directive += directive; }
             client.write('GET / HTTP/1.1\r\nDirective: ' + directive + '\r\n\r\n');
@@ -4932,7 +5219,7 @@ describe('avancedb -- fuzz -- ', function() {
     it('sends a malformed header -- too many directives', function(done) {
         var response = '';
         
-        var client = net.connect({port: port}, function() {
+        var client = net.connect(connectOptions, function() {
             var directives = '';
             for (var i = 0; i < 1000; ++i) { directives += 'Directive' + i + ': i_am_a_directive\r\n'; }
             client.write('GET / HTTP/1.1\r\n' + directives + '\r\n');
@@ -4953,7 +5240,7 @@ describe('avancedb -- fuzz -- ', function() {
         this.timeout(40000);
         var response = '';
         
-        var client = net.connect({port: port}, function() {
+        var client = net.connect(connectOptions, function() {
             client.write('GET / HTTP/1.1\r\r');
         });    
         
@@ -4970,7 +5257,7 @@ describe('avancedb -- fuzz -- ', function() {
     it('requests a sensitive file -- ~/.profile', function(done) {
         var response = '';
         
-        var client = net.connect({port: port}, function() {
+        var client = net.connect(connectOptions, function() {
             client.write('GET /~/.profile HTTP/1.1\r\n\r\n');
         });    
         
@@ -4988,7 +5275,7 @@ describe('avancedb -- fuzz -- ', function() {
     it('requests a sensitive file (encoded) -- ~%2f.profile', function(done) {
         var response = '';
         
-        var client = net.connect({port: port}, function() {
+        var client = net.connect(connectOptions, function() {
             client.write('GET /~%2f.profile HTTP/1.1\r\n\r\n');
         });    
         
@@ -5006,7 +5293,7 @@ describe('avancedb -- fuzz -- ', function() {
     it('requests a sensitive file -- /etc/passwd', function(done) {
         var response = '';
         
-        var client = net.connect({port: port}, function() {
+        var client = net.connect(connectOptions, function() {
             client.write('GET //etc/passwd HTTP/1.1\r\n\r\n');
         });    
         
@@ -5024,7 +5311,7 @@ describe('avancedb -- fuzz -- ', function() {
     it('requests a sensitive file (encoded) -- %2fetc%2fpasswd', function(done) {
         var response = '';
         
-        var client = net.connect({port: port}, function() {
+        var client = net.connect(connectOptions, function() {
             client.write('GET /%2fetc%2fpasswd HTTP/1.1\r\n\r\n');
         });    
         
@@ -5042,7 +5329,7 @@ describe('avancedb -- fuzz -- ', function() {
     it('requests a sensitive file -- ../avancedb', function(done) {
         var response = '';
         
-        var client = net.connect({port: port}, function() {
+        var client = net.connect(connectOptions, function() {
             client.write('GET /../avancedb HTTP/1.1\r\n\r\n');
         });    
         
@@ -5060,7 +5347,7 @@ describe('avancedb -- fuzz -- ', function() {
     it('requests a sensitive file (encoded) -- %2e%2e%2favancedb', function(done) {
         var response = '';
         
-        var client = net.connect({port: port}, function() {
+        var client = net.connect(connectOptions, function() {
             client.write('GET /%2e%2e%2favancedb HTTP/1.1\r\n\r\n');
         });    
         
@@ -5078,7 +5365,7 @@ describe('avancedb -- fuzz -- ', function() {
     it('requests a sensitive file (malformed encoded) -- %2x%2y%2zavancedb', function(done) {
         var response = '';
         
-        var client = net.connect({port: port}, function() {
+        var client = net.connect(connectOptions, function() {
             client.write('GET /%2x%2y%2zavancedb HTTP/1.1\r\n\r\n');
         });    
         
