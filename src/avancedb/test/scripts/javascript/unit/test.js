@@ -4742,7 +4742,8 @@ describe('avancedb -- doc attachments --', function() {
     var testId = 'test0';
     var attachments = [
         { name: 'test.txt', 'Content-Type': 'text/plain', body: '0123456789' },
-        { name: 'test.html', 'Content-Type': 'text/html', body: '<html><body><div>hello world</div></body></html>' }
+        { name: 'test.html', 'Content-Type': 'text/html', body: '<html><body><div>hello world</div></body></html>' },
+        { name: 'stream.txt', 'Content-Type': 'application/octet-stream', body: '0123456789012345678901234567890123456789' }
     ];
     var connectOptions = {host: host, port: port};
 
@@ -4841,7 +4842,7 @@ describe('avancedb -- doc attachments --', function() {
         });
     });
 
-    it('save two attachments to an existing doc', function(done) {
+    it('save three attachments to an existing doc', function(done) {
         db.get(testId, function(err, doc) {
             assert.equal(null, err);
             assert.equal(testId, doc.id);
@@ -4861,23 +4862,40 @@ describe('avancedb -- doc attachments --', function() {
                     assert.equal(testId, doc.id);
                     assert(isValidRevision(doc.rev));
                     assert.equal(5, doc.rev[0]);
-
-                    db.getAttachment(testId, attachments[0].name, function(err, res, buffer) {
+                    
+                    db.saveAttachment({id: doc.id, rev: doc.rev}, attachments[2], function(err, doc) {
                         assert.equal(null, err);
-                        assert.notEqual(null, res);
-                        assert.notEqual(null, buffer);
-                        assert.equal(attachments[0]['Content-Type'], res.headers['content-type']);
-                        assert.equal(attachments[0].body.length, buffer.length);
-                        assert.equal(attachments[0].body, buffer.toString('ascii'));
+                        assert.notEqual(null, doc);
+                        assert.equal(testId, doc.id);
+                        assert(isValidRevision(doc.rev));
+                        assert.equal(6, doc.rev[0]);
 
-                        db.getAttachment(testId, attachments[1].name, function(err, res, buffer) {
+                        db.getAttachment(testId, attachments[0].name, function(err, res, buffer) {
                             assert.equal(null, err);
                             assert.notEqual(null, res);
                             assert.notEqual(null, buffer);
-                            assert.equal(attachments[1]['Content-Type'], res.headers['content-type']);
-                            assert.equal(attachments[1].body.length, buffer.length);
-                            assert.equal(attachments[1].body, buffer.toString('ascii'));                            
-                            done();
+                            assert.equal(attachments[0]['Content-Type'], res.headers['content-type']);
+                            assert.equal(attachments[0].body.length, buffer.length);
+                            assert.equal(attachments[0].body, buffer.toString('ascii'));
+
+                            db.getAttachment(testId, attachments[1].name, function(err, res, buffer) {
+                                assert.equal(null, err);
+                                assert.notEqual(null, res);
+                                assert.notEqual(null, buffer);
+                                assert.equal(attachments[1]['Content-Type'], res.headers['content-type']);
+                                assert.equal(attachments[1].body.length, buffer.length);
+                                assert.equal(attachments[1].body, buffer.toString('ascii'));                            
+                                
+                                db.getAttachment(testId, attachments[2].name, function(err, res, buffer) {
+                                    assert.equal(null, err);
+                                    assert.notEqual(null, res);
+                                    assert.notEqual(null, buffer);
+                                    assert.equal(attachments[2]['Content-Type'], res.headers['content-type']);
+                                    assert.equal(attachments[2].body.length, buffer.length);
+                                    assert.equal(attachments[2].body, buffer.toString('ascii'));
+                                    done();
+                                });
+                            });
                         });
                     });
                 });                
@@ -4890,7 +4908,7 @@ describe('avancedb -- doc attachments --', function() {
             assert.equal(null, err);
             assert.equal(testId, doc.id);
             assert(isValidRevision(doc.rev));
-            assert.equal(5, doc.rev[0]);
+            assert.equal(6, doc.rev[0]);
             assert.notEqual(null, doc._attachments);
             var name = attachments[0].name;
             assert.notEqual(null, doc._attachments[name]);
@@ -4904,8 +4922,248 @@ describe('avancedb -- doc attachments --', function() {
             assert.equal(5, doc._attachments[name].revpos);
             assert.equal(0, doc._attachments[name].digest.indexOf('md5-'));
             assert.equal(attachments[1].body.length, doc._attachments[name].length);
+            name = attachments[2].name;
+            assert.notEqual(null, doc._attachments[name]);
+            assert.equal(attachments[2]['Content-Type'], doc._attachments[name].content_type);
+            assert.equal(6, doc._attachments[name].revpos);
+            assert.equal(0, doc._attachments[name].digest.indexOf('md5-'));
+            assert.equal(attachments[2].body.length, doc._attachments[name].length);            
             done();
         });
+    });
+    
+    it('Get attachment by range -- 1', function(done) {
+        var options = {
+            hostname: host,
+            port: port,
+            path: '/' + testDbName + '/' + testId + '/' + attachments[0].name,
+            method: 'GET',
+            headers: { 'Range': 'bytes=0-9' }            
+        };
+        
+        var req = http.request(options, function(res) {
+            var data = '';
+            
+            res.on('data', function(chunk) {
+                data += chunk;
+            });
+            
+            res.on('end', function() {
+                // the content-type must be application/octet-stream, otherwise we will get the whole attachment
+                assert.equal(attachments[0].body.length, data.length);
+                done();
+            });
+        });
+        
+        req.end();
+    });
+
+    it('Get attachment by range -- 2', function(done) {
+        var options = {
+            hostname: host,
+            port: port,
+            path: '/' + testDbName + '/' + testId + '/' + attachments[2].name,
+            method: 'GET',
+            headers: { 'Range': 'bytes=0-9' }            
+        };
+        
+        var req = http.request(options, function(res) {
+            var data = '';
+            
+            res.on('data', function(chunk) {
+                data += chunk;
+            });
+            
+            res.on('end', function() {
+                assert.equal(10, data.length);
+                assert.equal(0, attachments[2].body.indexOf(data));
+                done();
+            });
+        });
+        
+        req.end();
+    });
+    
+    it('Get attachment by range -- 3', function(done) {
+        var options = {
+            hostname: host,
+            port: port,
+            path: '/' + testDbName + '/' + testId + '/' + attachments[2].name,
+            method: 'GET',
+            headers: { 'Range': 'bytes=3-12' }            
+        };
+        
+        var req = http.request(options, function(res) {
+            var data = '';
+            
+            res.on('data', function(chunk) {
+                data += chunk;
+            });
+            
+            res.on('end', function() {
+                assert.equal(10, data.length);
+                assert.equal(3, attachments[2].body.indexOf(data));
+                done();
+            });
+        });
+        
+        req.end();
+    });
+    
+    it('Get attachment by range -- 4', function(done) {
+        var options = {
+            hostname: host,
+            port: port,
+            path: '/' + testDbName + '/' + testId + '/' + attachments[2].name,
+            method: 'GET',
+            headers: { 'Range': 'bytes=10-' }            
+        };
+        
+        var req = http.request(options, function(res) {
+            var data = '';
+            
+            res.on('data', function(chunk) {
+                data += chunk;
+            });
+            
+            res.on('end', function() {
+                assert.equal(attachments[2].body.length - 10, data.length);
+                assert.equal(10, attachments[2].body.indexOf(data, 10));
+                done();
+            });
+        });
+        
+        req.end();
+    });
+    
+    it('Get attachment by range -- 5', function(done) {
+        var options = {
+            hostname: host,
+            port: port,
+            path: '/' + testDbName + '/' + testId + '/' + attachments[2].name,
+            method: 'GET',
+            headers: { 'Range': 'bytes=-5' }            
+        };
+        
+        var req = http.request(options, function(res) {
+            var data = '';
+            
+            res.on('data', function(chunk) {
+                data += chunk;
+            });
+            
+            res.on('end', function() {
+                assert.equal(5, data.length);
+                assert.equal(35, attachments[2].body.indexOf(data, 30));
+                done();
+            });
+        });
+        
+        req.end();
+    });
+    
+    it('Get attachment by range -- 6', function(done) {
+        var options = {
+            hostname: host,
+            port: port,
+            path: '/' + testDbName + '/' + testId + '/' + attachments[2].name,
+            method: 'GET',
+            headers: { 'Range': 'bytes=3-1000' }            
+        };
+        
+        var req = http.request(options, function(res) {
+            var data = '';
+            
+            res.on('data', function(chunk) {
+                data += chunk;
+            });
+            
+            res.on('end', function() {
+                assert.equal(attachments[2].body.length - 3, data.length);
+                assert.equal(3, attachments[2].body.indexOf(data));
+                done();
+            });
+        });
+        
+        req.end();
+    });
+    
+    it('Get attachment by range -- 7', function(done) {
+        var options = {
+            hostname: host,
+            port: port,
+            path: '/' + testDbName + '/' + testId + '/' + attachments[2].name,
+            method: 'GET',
+            headers: { 'Range': 'bytes=0-9,20-29' }            
+        };
+        
+        var req = http.request(options, function(res) {
+            var data = '';
+            
+            res.on('data', function(chunk) {
+                data += chunk;
+            });
+            
+            res.on('end', function() {
+                // only single ranges are supported
+                assert.equal(attachments[2].body.length, data.length);
+                done();
+            });
+        });
+        
+        req.end();
+    });
+    
+    it('Get attachment by range -- 8', function(done) {
+        var options = {
+            hostname: host,
+            port: port,
+            path: '/' + testDbName + '/' + testId + '/' + attachments[2].name,
+            method: 'GET',
+            headers: { 'Range': 'bytes=' }            
+        };
+        
+        var req = http.request(options, function(res) {
+            var data = '';
+            
+            res.on('data', function(chunk) {
+                data += chunk;
+            });
+            
+            res.on('end', function() {
+                // an empty range should get the whole body
+                assert.equal(attachments[2].body.length, data.length);
+                done();
+            });
+        });
+        
+        req.end();
+    });
+    
+    it('Get attachment by range -- 9', function(done) {
+        var options = {
+            hostname: host,
+            port: port,
+            path: '/' + testDbName + '/' + testId + '/' + attachments[2].name,
+            method: 'GET',
+            headers: { 'Range': 'bytes=10' }            
+        };
+        
+        var req = http.request(options, function(res) {
+            var data = '';
+            
+            res.on('data', function(chunk) {
+                data += chunk;
+            });
+            
+            res.on('end', function() {
+                assert.equal(attachments[2].body.length - 10, data.length);
+                assert.equal(10, attachments[2].body.indexOf(data, 10));
+                done();
+            });
+        });
+        
+        req.end();
     });
 
     it('HEAD an attachment -- 1', function(done) {
@@ -5039,13 +5297,13 @@ describe('avancedb -- doc attachments --', function() {
                 assert.notEqual(null, doc);
                 assert.equal(testId, doc.id);
                 assert(isValidRevision(doc.rev));
-                assert.equal(6, doc.rev[0]);
+                assert.equal(7, doc.rev[0]);
 
                 db.get(testId, function(err, doc) {
                     assert.equal(null, err);
                     assert.equal(testId, doc.id);
                     assert(isValidRevision(doc.rev));
-                    assert.equal(6, doc.rev[0]);            
+                    assert.equal(7, doc.rev[0]);            
                     assert.notEqual(null, doc._attachments);
 
                     db.removeAttachment({id: doc.id, rev: doc.rev}, attachments[1].name, function(err, doc) {
@@ -5053,16 +5311,37 @@ describe('avancedb -- doc attachments --', function() {
                         assert.notEqual(null, doc);
                         assert.equal(testId, doc.id);
                         assert(isValidRevision(doc.rev));
-                        assert.equal(7, doc.rev[0]);
+                        assert.equal(8, doc.rev[0]);
+                        
+                        db.get(testId, function(err, doc) {
+                            assert.equal(null, err);
+                            assert.equal(testId, doc.id);
+                            assert(isValidRevision(doc.rev));
+                            assert.equal(8, doc.rev[0]);
+                            assert.notEqual(null, doc._attachments);
+                            
+                            db.removeAttachment({id: doc.id, rev: doc.rev}, attachments[2].name, function(err, doc) {
+                                assert.equal(null, err);
+                                assert.notEqual(null, doc);
+                                assert.equal(testId, doc.id);
+                                assert(isValidRevision(doc.rev));
+                                assert.equal(9, doc.rev[0]);
 
-                        db.getAttachment(testId, attachments[0].name, function(err, res, buffer) {
-                            assert.notEqual(null, res);
-                            assert.equal(404, res.statusCode);
+                                db.getAttachment(testId, attachments[0].name, function(err, res, buffer) {
+                                    assert.notEqual(null, res);
+                                    assert.equal(404, res.statusCode);
 
-                            db.getAttachment(testId, attachments[1].name, function(err, res, buffer) {
-                                assert.notEqual(null, res);
-                                assert.equal(404, res.statusCode);
-                                done();
+                                    db.getAttachment(testId, attachments[1].name, function(err, res, buffer) {
+                                        assert.notEqual(null, res);
+                                        assert.equal(404, res.statusCode);
+                                        
+                                        db.getAttachment(testId, attachments[2].name, function(err, res, buffer) {
+                                            assert.notEqual(null, res);
+                                            assert.equal(404, res.statusCode);
+                                            done();
+                                        });
+                                    });
+                                });
                             });
                         });
                     });
@@ -5076,7 +5355,7 @@ describe('avancedb -- doc attachments --', function() {
             assert.equal(null, err);
             assert.equal(testId, doc.id);
             assert(isValidRevision(doc.rev));
-            assert.equal(7, doc.rev[0]);            
+            assert.equal(9, doc.rev[0]);            
             assert.equal(null, doc._attachments);
             done();
         });
