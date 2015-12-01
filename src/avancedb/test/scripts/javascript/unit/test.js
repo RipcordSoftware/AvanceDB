@@ -4793,7 +4793,7 @@ describe('avancedb -- doc attachments --', function() {
         });
     });
 
-    it('get the doc and attachment', function(done) {
+    it('get the doc and attachment stub', function(done) {
         db.get(testId, function(err, doc) {
             assert.equal(null, err);
             assert.equal(testId, doc.id);
@@ -4806,8 +4806,57 @@ describe('avancedb -- doc attachments --', function() {
             assert.equal(2, doc._attachments[name].revpos);
             assert.equal(0, doc._attachments[name].digest.indexOf('md5-'));
             assert.equal(attachments[0].body.length, doc._attachments[name].length);
+            assert(doc._attachments[name].stub);
             done();
         });
+    });
+
+    it('get the doc and multipart attachment', function(done) {
+        var options = {
+            hostname: host,
+            port: port,
+            path: '/' + testDbName + '/' + testId + '?attachments=true',
+            method: 'GET'            
+        };
+        
+        var req = http.request(options, function(res) {
+            var data = '';
+            
+            res.on('data', function(chunk) {
+                data += chunk;
+            });
+            
+            res.on('end', function() {
+                var re = /^--[a-fA-F\d]{32}\r\nContent-Type:\sapplication\/json\;\scharset=utf-8\r\n\r\n({.*?})\r\n--[a-fA-F\d]{32}\r\nContent-Type:\s(\w+\/\w+)\r\nContent-Disposition:\sattachment\;\sfilename=\"([\w\d\.]*?)\"\r\nContent-Length:\s(\d*?)\r\n\r\n(.*?)\r\n--[a-fA-F\d]{32}--$/m;
+                var result = re.exec(data);
+                assert.notEqual(null, result);
+                assert.equal(6, result.length);
+                var doc = JSON.parse(result[1]);
+                assert.equal(testId, doc._id);
+                assert(isValidRevision(doc._rev));
+                assert.equal(2, doc._rev[0]);
+                assert.notEqual(null, doc._attachments);                
+                var name = attachments[0].name;
+                assert.notEqual(null, doc._attachments[name]);
+                assert.equal(attachments[0]['Content-Type'], doc._attachments[name].content_type);
+                assert.equal(2, doc._attachments[name].revpos);
+                assert.equal(0, doc._attachments[name].digest.indexOf('md5-'));
+                assert.equal(attachments[0].body.length, doc._attachments[name].length);
+                assert(doc._attachments[name].follows);
+                var docAttachments = doc._attachments;
+                delete doc._id;
+                delete doc._rev;
+                delete doc._attachments;
+                assert.deepEqual(testDocument, doc);
+                assert.equal(attachments[0]['Content-Type'], result[2]);
+                assert.equal(attachments[0].name, result[3]);
+                assert.equal(attachments[0].body.length, Number(result[4]));
+                assert.equal(attachments[0].body, result[5]);                
+                done();
+            });
+        });
+        
+        req.end();
     });
 
     it('remove an attachment from an existing doc', function(done) {
@@ -4916,18 +4965,21 @@ describe('avancedb -- doc attachments --', function() {
             assert.equal(4, doc._attachments[name].revpos);
             assert.equal(0, doc._attachments[name].digest.indexOf('md5-'));
             assert.equal(attachments[0].body.length, doc._attachments[name].length);
+            assert(doc._attachments[name].stub);
             name = attachments[1].name;
             assert.notEqual(null, doc._attachments[name]);
             assert.equal(attachments[1]['Content-Type'], doc._attachments[name].content_type);
             assert.equal(5, doc._attachments[name].revpos);
             assert.equal(0, doc._attachments[name].digest.indexOf('md5-'));
             assert.equal(attachments[1].body.length, doc._attachments[name].length);
+            assert(doc._attachments[name].stub);
             name = attachments[2].name;
             assert.notEqual(null, doc._attachments[name]);
             assert.equal(attachments[2]['Content-Type'], doc._attachments[name].content_type);
             assert.equal(6, doc._attachments[name].revpos);
             assert.equal(0, doc._attachments[name].digest.indexOf('md5-'));
-            assert.equal(attachments[2].body.length, doc._attachments[name].length);            
+            assert.equal(attachments[2].body.length, doc._attachments[name].length);
+            assert(doc._attachments[name].stub);
             done();
         });
     });
