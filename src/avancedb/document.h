@@ -27,14 +27,13 @@
 #include <map>
 #include <string>
 #include <cstring>
+#include <vector>
 
 #include "types.h"
 #include "document_attachment.h"
 
 class Document final : public boost::enable_shared_from_this<Document>, private boost::noncopyable {
 public:
-    using attachment_collection = std::map<std::string, document_attachment_ptr>;
-
     class Less {
     public:
         bool operator()(const document_ptr& a, const document_ptr& b) {
@@ -69,7 +68,10 @@ public:
     const char* getRev() const;
     sequence_type getUpdateSequence() const;
     
-    const script_object_ptr getObject() const;   
+    const script_object_ptr getObject() const;
+
+    document_attachment_ptr getAttachment(const char* name, bool includeBody);
+    std::vector<document_attachment_ptr> getAttachments();
         
 private:
     
@@ -83,8 +85,6 @@ private:
     const char* id_;
     const char* rev_;
     const sequence_type seqNum_;
-
-    attachment_collection attachments_;
 };
 
 #endif	/* DOCUMENT_H */

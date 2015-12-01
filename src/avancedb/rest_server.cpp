@@ -300,16 +300,36 @@ bool RestServer::GetDocument(rs::httpserver::request_ptr request, const rs::http
     auto db = GetDatabase(args);
     if (!!db) {
         auto id = GetParameter("id", args);
+        auto multiPartAttachments = GetParameter("attachments", request->getQueryString(), false) == "true";
         
         auto doc = db->GetDocument(id);
         auto obj = doc->getObject();
         
         auto rev = doc->getRev();
+        
+        response->setStatusCode(200).setETag(rev);
 
-        auto& stream = response->setStatusCode(200).setContentType(ContentTypes::Utf8::applicationJson).setETag(rev).getResponseStream();
-        ScriptObjectResponseStream<> objStream{stream};
-        objStream << obj;
-        objStream.Flush();
+        if (multiPartAttachments) {
+            auto& stream = response->getMultiResponseStream();
+            
+            stream.EmitPart(ContentTypes::Utf8::applicationJson);
+            ScriptObjectResponseStream<> objStream{stream};
+            objStream.Serialize(obj, ScriptObjectResponseStreamAttachmentMode::Follows);
+            objStream.Flush(false);
+            
+            auto attachments = doc->getAttachments();
+            for (auto& attachment : attachments) {
+                stream.EmitPart(attachment->ContentType().c_str(), attachment->Name().c_str(), attachment->Size());
+                stream.Write(attachment->Data(), 0, attachment->Size());
+            }
+
+            stream.Flush();
+        } else {
+            auto& stream = response->setContentType(ContentTypes::Utf8::applicationJson).getResponseStream();
+            ScriptObjectResponseStream<> objStream{stream};
+            objStream.Serialize(obj, ScriptObjectResponseStreamAttachmentMode::Stub);
+            objStream.Flush();
+        }
         
         gotDoc = true;
     }

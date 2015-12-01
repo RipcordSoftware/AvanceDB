@@ -28,19 +28,27 @@
 #include "types.h"
 #include "json_helper.h"
 
+enum class ScriptObjectResponseStreamAttachmentMode {
+    Default,
+    Stub,
+    Follows
+};
+
 template <unsigned SIZE = 2048>
 class ScriptObjectResponseStream final {
 public:
-    ScriptObjectResponseStream(rs::httpserver::Stream& stream) : 
+    using AttachmentMode = ScriptObjectResponseStreamAttachmentMode;
+
+    ScriptObjectResponseStream(rs::httpserver::Stream& stream) :
         pos_(0), stream_(stream) {}
     
-    template <typename T>    
-    void Serialize(T obj, typename std::enable_if<std::is_same<T, script_object_ptr>::value>::type* = nullptr) {
-        AppendObject(obj, false);
+    template <typename T, typename std::enable_if<std::is_same<T, script_object_ptr>::value>::type* = nullptr>
+    void Serialize(T obj, ScriptObjectResponseStreamAttachmentMode attachmentMode = AttachmentMode::Default) {
+        AppendObject(obj, false, attachmentMode);
     }
 
-    template <typename T>    
-    void Serialize(T arr, unsigned index, typename std::enable_if<std::is_same<T, script_array_ptr>::value || std::is_same<T, script_object_ptr>::value>::type* = nullptr) {
+    template <typename T, typename std::enable_if<std::is_same<T, script_array_ptr>::value || std::is_same<T, script_object_ptr>::value>::type* = nullptr>    
+    void Serialize(T arr, unsigned index) {
         auto type = index < arr->getCount() ? arr->getType(index) : rs::scriptobject::ScriptObjectType::Unknown;
         switch (type) {
             case rs::scriptobject::ScriptObjectType::Array: Serialize(arr->getArray(index)); break;
@@ -57,45 +65,48 @@ public:
         }
     }
     
-    template <typename T>
-    void Serialize(T arr, typename std::enable_if<std::is_same<T, script_array_ptr>::value>::type* = nullptr) {
+    template <typename T, typename std::enable_if<std::is_same<T, script_array_ptr>::value>::type* = nullptr>
+    void Serialize(T arr) {
         AppendArray(arr, false);
     }
     
-    template <typename T>
-    void Serialize(T str, typename std::enable_if<std::is_same<T, const char*>::value>::type* = nullptr) {
+    template <typename T, typename std::enable_if<std::is_same<T, const char*>::value>::type* = nullptr>
+    void Serialize(T str) {
         AppendLiteralString(str);        
     }
     
-    template <typename T>
-    void Serialize(T value, bool comma = false, typename std::enable_if<!std::is_same<T, bool>::value && !std::is_same<T, char>::value && std::is_integral<T>::value && std::is_signed<T>::value>::type* = nullptr) {
+    template <typename T, typename std::enable_if<!std::is_same<T, bool>::value && !std::is_same<T, char>::value && std::is_integral<T>::value && std::is_signed<T>::value>::type* = nullptr>
+    void Serialize(T value, bool comma = false) {
         AppendInt64(value, comma);
     }
     
-    template <typename T>
-    void Serialize(T value, bool comma = false, typename std::enable_if<!std::is_same<T, bool>::value && !std::is_same<T, char>::value && std::is_integral<T>::value && std::is_unsigned<T>::value>::type* = nullptr) {
+    template <typename T, typename std::enable_if<!std::is_same<T, bool>::value && !std::is_same<T, char>::value && std::is_integral<T>::value && std::is_unsigned<T>::value>::type* = nullptr>
+    void Serialize(T value, bool comma = false) {
         AppendUInt64(value, comma);
     }    
 
-    template <typename T>
-    void Serialize(T value, bool comma = false, typename std::enable_if<std::is_floating_point<T>::value>::type* = nullptr) {
+    template <typename T, typename std::enable_if<std::is_floating_point<T>::value>::type* = nullptr>
+    void Serialize(T value, bool comma = false) {
         AppendDouble(value, comma);
     }
 
-    template <typename T>
-    void Serialize(T value, bool comma = false, typename std::enable_if<std::is_same<T, bool>::value>::type* = nullptr) {
+    template <typename T, typename std::enable_if<std::is_same<T, bool>::value>::type* = nullptr>
+    void Serialize(T value, bool comma = false) {
         AppendBool(value, comma);
     }
     
-    template <typename T>
-    void Serialize(T ch, typename std::enable_if<std::is_same<T, char>::value>::type* = nullptr) {
+    template <typename T, typename std::enable_if<std::is_same<T, char>::value>::type* = nullptr>
+    void Serialize(T ch) {
         char chars[2] = { ch, 0 };
         AppendLiteralString(&chars[0]);
     }
     
-    void Flush() {
+    void Flush(bool streamFlush = true) {
         FlushBuffer();
-        stream_.Flush();
+
+        if (streamFlush) {
+            stream_.Flush();
+        }
     }
     
     template <typename T>
@@ -106,7 +117,7 @@ public:
     
 private:
 
-    void AppendObject(script_object_ptr obj, bool comma = false) {
+    void AppendObject(script_object_ptr obj, bool comma = false, AttachmentMode attachmentMode = AttachmentMode::Default) {
         if (comma) {
             if (getRemainingBytes() == 0) {
                 FlushBuffer();
@@ -124,20 +135,91 @@ private:
         auto count = obj->getCount();
         for (decltype(count) i = 0; i < count; ++i) {
             auto name = obj->getName(i);
-            AppendName(name, i > 0);
-            
             auto type = obj->getType(i);
-            switch (type) {
-                case rs::scriptobject::ScriptObjectType::Array: AppendArray(obj->getArray(i)); break;
-                case rs::scriptobject::ScriptObjectType::Boolean: AppendBool(obj->getBoolean(i)); break;
-                case rs::scriptobject::ScriptObjectType::Double: AppendDouble(obj->getDouble(i)); break;
-                case rs::scriptobject::ScriptObjectType::Int32: AppendInt64(obj->getInt32(i)); break;
-                case rs::scriptobject::ScriptObjectType::UInt32: AppendInt64(obj->getUInt32(i)); break;
-                case rs::scriptobject::ScriptObjectType::Int64: AppendInt64(obj->getInt64(i)); break;
-                case rs::scriptobject::ScriptObjectType::UInt64: AppendInt64(obj->getUInt64(i)); break;
-                case rs::scriptobject::ScriptObjectType::Null: AppendNull(); break;
-                case rs::scriptobject::ScriptObjectType::Object: AppendObject(obj->getObject(i)); break;
-                case rs::scriptobject::ScriptObjectType::String: AppendString(obj->getString(i)); break;
+            
+            AppendName(name, i > 0);
+                        
+            if (attachmentMode != AttachmentMode::Default && type == rs::scriptobject::ScriptObjectType::Object && std::strcmp("_attachments", name) == 0) {
+                AppendAttachments(obj->getObject(i), attachmentMode);
+            } else {                        
+                switch (type) {
+                    case rs::scriptobject::ScriptObjectType::Array: AppendArray(obj->getArray(i)); break;
+                    case rs::scriptobject::ScriptObjectType::Boolean: AppendBool(obj->getBoolean(i)); break;
+                    case rs::scriptobject::ScriptObjectType::Double: AppendDouble(obj->getDouble(i)); break;
+                    case rs::scriptobject::ScriptObjectType::Int32: AppendInt64(obj->getInt32(i)); break;
+                    case rs::scriptobject::ScriptObjectType::UInt32: AppendInt64(obj->getUInt32(i)); break;
+                    case rs::scriptobject::ScriptObjectType::Int64: AppendInt64(obj->getInt64(i)); break;
+                    case rs::scriptobject::ScriptObjectType::UInt64: AppendInt64(obj->getUInt64(i)); break;
+                    case rs::scriptobject::ScriptObjectType::Null: AppendNull(); break;
+                    case rs::scriptobject::ScriptObjectType::Object: AppendObject(obj->getObject(i)); break;
+                    case rs::scriptobject::ScriptObjectType::String: AppendString(obj->getString(i)); break;
+                }
+            }
+        }
+        
+        if (getRemainingBytes() == 0) {
+            FlushBuffer();
+        }
+        
+        buffer_[pos_++] = '}';
+    }
+    
+    void AppendAttachments(script_object_ptr obj, AttachmentMode attachmentMode) {
+        if (getRemainingBytes() == 0) {
+            FlushBuffer();
+        }
+        
+        buffer_[pos_++] = '{';       
+        
+        auto count = obj->getCount();
+        for (decltype(count) i = 0, attachments = 0; i < count; ++i) {            
+            auto type = obj->getType(i);                        
+                        
+            if (type == rs::scriptobject::ScriptObjectType::Object) {
+                auto name = obj->getName(i);
+                AppendName(name, attachments > 0); 
+                AppendAttachment(obj->getObject(i), attachmentMode);
+                ++attachments;
+            }
+        }
+        
+        if (getRemainingBytes() == 0) {
+            FlushBuffer();
+        }
+        
+        buffer_[pos_++] = '}';
+    }
+    
+    void AppendAttachment(script_object_ptr obj, AttachmentMode attachmentMode) {
+        if (getRemainingBytes() == 0) {
+            FlushBuffer();
+        }
+        
+        buffer_[pos_++] = '{';       
+        
+        auto count = obj->getCount();
+        for (decltype(count) i = 0; i < count; ++i) {
+            auto name = obj->getName(i);
+            auto type = obj->getType(i);                       
+            
+            if (type == rs::scriptobject::ScriptObjectType::String && std::strcmp("data", name) == 0) {
+                switch (attachmentMode) {
+                    case AttachmentMode::Follows: AppendName("follows", i > 0); AppendBool(true); break;
+                    case AttachmentMode::Stub: AppendName("stub", i > 0); AppendBool(true); break;
+                }
+            } else {
+                AppendName(name, i > 0);
+                
+                switch (type) {
+                    case rs::scriptobject::ScriptObjectType::Boolean: AppendBool(obj->getBoolean(i)); break;
+                    case rs::scriptobject::ScriptObjectType::Double: AppendDouble(obj->getDouble(i)); break;
+                    case rs::scriptobject::ScriptObjectType::Int32: AppendInt64(obj->getInt32(i)); break;
+                    case rs::scriptobject::ScriptObjectType::UInt32: AppendInt64(obj->getUInt32(i)); break;
+                    case rs::scriptobject::ScriptObjectType::Int64: AppendInt64(obj->getInt64(i)); break;
+                    case rs::scriptobject::ScriptObjectType::UInt64: AppendInt64(obj->getUInt64(i)); break;
+                    case rs::scriptobject::ScriptObjectType::Null: AppendNull(); break;
+                    case rs::scriptobject::ScriptObjectType::String: AppendString(obj->getString(i)); break;
+                }
             }
         }
         
