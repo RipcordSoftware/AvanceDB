@@ -31,6 +31,8 @@ public:
     static std::string Encode(const buffer_type& data);
     static buffer_type Decode(const char* text, std::size_t size);
     
+    static std::size_t GetDecodedSize(const char* text, std::size_t size);
+    
 private:
 
 };

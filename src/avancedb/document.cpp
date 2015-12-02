@@ -111,8 +111,8 @@ document_attachment_ptr Document::getAttachment(const char* name, bool includeBo
 
             if (includeBody) {
                 auto encodedData = attachmentObj->getString("data");
-                auto encodedDataSize = attachmentObj->getStringFieldLength("data");
-                auto data = Base64Helper::Decode(encodedData, encodedDataSize > 0 ? encodedDataSize - 1 : 0);
+                auto encodedDataSize = attachmentObj->getStringLength("data");
+                auto data = Base64Helper::Decode(encodedData, encodedDataSize);
                 attachment = DocumentAttachment::Create(name, contentType, digest, std::move(data));
             } else {
                 int lengthIndex = -1;
@@ -145,8 +145,8 @@ std::vector<document_attachment_ptr> Document::getAttachments() {
                 auto digest = attachmentObj->getString("digest");
                 
                 auto encodedData = attachmentObj->getString("data");
-                auto encodedDataSize = attachmentObj->getStringFieldLength("data");
-                auto data = Base64Helper::Decode(encodedData, encodedDataSize > 0 ? encodedDataSize - 1 : 0);
+                auto encodedDataSize = attachmentObj->getStringLength("data");
+                auto data = Base64Helper::Decode(encodedData, encodedDataSize);
                 
                 auto attachment = DocumentAttachment::Create(name, contentType, digest, std::move(data));
                 attachments.push_back(attachment);

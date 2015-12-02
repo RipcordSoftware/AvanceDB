@@ -27,6 +27,7 @@
 
 #include "types.h"
 #include "json_helper.h"
+#include "base64_helper.h"
 
 enum class ScriptObjectResponseStreamAttachmentMode {
     Default,
@@ -147,9 +148,9 @@ private:
                     case rs::scriptobject::ScriptObjectType::Boolean: AppendBool(obj->getBoolean(i)); break;
                     case rs::scriptobject::ScriptObjectType::Double: AppendDouble(obj->getDouble(i)); break;
                     case rs::scriptobject::ScriptObjectType::Int32: AppendInt64(obj->getInt32(i)); break;
-                    case rs::scriptobject::ScriptObjectType::UInt32: AppendInt64(obj->getUInt32(i)); break;
+                    case rs::scriptobject::ScriptObjectType::UInt32: AppendUInt64(obj->getUInt32(i)); break;
                     case rs::scriptobject::ScriptObjectType::Int64: AppendInt64(obj->getInt64(i)); break;
-                    case rs::scriptobject::ScriptObjectType::UInt64: AppendInt64(obj->getUInt64(i)); break;
+                    case rs::scriptobject::ScriptObjectType::UInt64: AppendUInt64(obj->getUInt64(i)); break;
                     case rs::scriptobject::ScriptObjectType::Null: AppendNull(); break;
                     case rs::scriptobject::ScriptObjectType::Object: AppendObject(obj->getObject(i)); break;
                     case rs::scriptobject::ScriptObjectType::String: AppendString(obj->getString(i)); break;
@@ -195,10 +196,13 @@ private:
             FlushBuffer();
         }
         
-        buffer_[pos_++] = '{';       
+        buffer_[pos_++] = '{';
         
-        auto count = obj->getCount();
-        for (decltype(count) i = 0; i < count; ++i) {
+        auto gotLength = false;
+        std::uint64_t dataLength = 0;
+        auto count = obj->getCount();        
+        decltype(count) i = 0;
+        for (; i < count; ++i) {
             auto name = obj->getName(i);
             auto type = obj->getType(i);                       
             
@@ -207,6 +211,10 @@ private:
                     case AttachmentMode::Follows: AppendName("follows", i > 0); AppendBool(true); break;
                     case AttachmentMode::Stub: AppendName("stub", i > 0); AppendBool(true); break;
                 }
+                                
+                auto data = obj->getString(i);
+                auto encodedDataLength = obj->getStringLength(i);
+                dataLength = Base64Helper::GetDecodedSize(data, encodedDataLength);
             } else {
                 AppendName(name, i > 0);
                 
@@ -214,13 +222,20 @@ private:
                     case rs::scriptobject::ScriptObjectType::Boolean: AppendBool(obj->getBoolean(i)); break;
                     case rs::scriptobject::ScriptObjectType::Double: AppendDouble(obj->getDouble(i)); break;
                     case rs::scriptobject::ScriptObjectType::Int32: AppendInt64(obj->getInt32(i)); break;
-                    case rs::scriptobject::ScriptObjectType::UInt32: AppendInt64(obj->getUInt32(i)); break;
+                    case rs::scriptobject::ScriptObjectType::UInt32: AppendUInt64(obj->getUInt32(i)); break;
                     case rs::scriptobject::ScriptObjectType::Int64: AppendInt64(obj->getInt64(i)); break;
-                    case rs::scriptobject::ScriptObjectType::UInt64: AppendInt64(obj->getUInt64(i)); break;
+                    case rs::scriptobject::ScriptObjectType::UInt64: AppendUInt64(obj->getUInt64(i)); break;
                     case rs::scriptobject::ScriptObjectType::Null: AppendNull(); break;
                     case rs::scriptobject::ScriptObjectType::String: AppendString(obj->getString(i)); break;
                 }
+                
+                gotLength = gotLength || std::strcmp(name, "length") == 0;
             }
+        }
+        
+        if (!gotLength) {
+            AppendName("length", i > 0);
+            AppendUInt64(dataLength);
         }
         
         if (getRemainingBytes() == 0) {
@@ -253,9 +268,9 @@ private:
                 case rs::scriptobject::ScriptObjectType::Boolean: AppendBool(arr->getBoolean(i), i > 0); break;
                 case rs::scriptobject::ScriptObjectType::Double: AppendDouble(arr->getDouble(i), i > 0); break;
                 case rs::scriptobject::ScriptObjectType::Int32: AppendInt64(arr->getInt32(i), i > 0); break;
-                case rs::scriptobject::ScriptObjectType::UInt32: AppendInt64(arr->getUInt32(i), i > 0); break;
+                case rs::scriptobject::ScriptObjectType::UInt32: AppendUInt64(arr->getUInt32(i), i > 0); break;
                 case rs::scriptobject::ScriptObjectType::Int64: AppendInt64(arr->getInt64(i), i > 0); break;
-                case rs::scriptobject::ScriptObjectType::UInt64: AppendInt64(arr->getUInt64(i), i > 0); break;
+                case rs::scriptobject::ScriptObjectType::UInt64: AppendUInt64(arr->getUInt64(i), i > 0); break;
                 case rs::scriptobject::ScriptObjectType::Null: AppendNull(i > 0); break;
                 case rs::scriptobject::ScriptObjectType::Object: AppendObject(arr->getObject(i), i > 0); break;
                 case rs::scriptobject::ScriptObjectType::String: { auto str = arr->getString(i); AppendString(str, i > 0); break; }

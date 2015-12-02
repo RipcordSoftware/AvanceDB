@@ -18,8 +18,6 @@
 
 #include "base64_helper.h"
 
-#include <algorithm>
-
 #include "../../externals/ConstTimeEncoding/base64.h"
 
 std::string Base64Helper::Encode(const buffer_type& data) {
@@ -38,18 +36,28 @@ std::string Base64Helper::Encode(const buffer_type& data) {
 Base64Helper::buffer_type Base64Helper::Decode(const char* text, std::size_t size) {
     buffer_type data;
     
-    if (size > 0) {
-        auto decodedSize = size;
-        while (text[decodedSize - 1] == '=') {
-            --decodedSize;
-        }
-        
-        decodedSize *= 3;
-        decodedSize /= 4;
+    if (size > 0) {        
+        auto decodedSize = GetDecodedSize(text, size);
         data.resize(decodedSize);
 
         base64Decode(data.data(), text, size);
     }
     
     return data;
+}
+
+std::size_t Base64Helper::GetDecodedSize(const char* text, std::size_t size) {
+    std::size_t decodedSize = 0;
+    
+    if (size > 0) {
+        decodedSize = size;
+        while (text[decodedSize - 1] == '=') {
+            --decodedSize;
+        }
+        
+        decodedSize *= 3;
+        decodedSize /= 4;
+    }
+    
+    return decodedSize;
 }
