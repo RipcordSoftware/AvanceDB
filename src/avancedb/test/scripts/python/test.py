@@ -21,7 +21,7 @@ class ServerInfoTestCase(unittest.TestCase):
                 "uuid":"a2db86472466bcd02e84ac05a6c86185",
                 "version":"1.6.1",
                 "vendor":{
-                    "version":"0.0.1", "name":"Ripcord Software"
+                    "version":"0.2.0", "name":"Ripcord Software"
                 }
             })
 

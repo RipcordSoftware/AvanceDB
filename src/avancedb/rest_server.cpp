@@ -137,7 +137,7 @@ bool RestServer::GetAllDbs(rs::httpserver::request_ptr request, const rs::httpse
 }
 
 bool RestServer::GetSignature(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs&, rs::httpserver::response_ptr response) {
-    response->setContentType(ContentTypes::applicationJson).Send(R"({"couchdb":"Welcome","avancedb":"Welcome","uuid":"a2db86472466bcd02e84ac05a6c86185","version":"1.6.1","vendor":{"version":"0.0.1","name":"Ripcord Software"}})");
+    response->setContentType(ContentTypes::applicationJson).Send(R"({"couchdb":"Welcome","avancedb":"Welcome","uuid":"a2db86472466bcd02e84ac05a6c86185","version":"1.6.1","vendor":{"version":"0.2.0","name":"Ripcord Software"}})");
     return true;
 }
 
