@@ -19,12 +19,20 @@ program
   .option('-p, --port [port=5994]', 'The port number to connect to', Number, 5994)
   .option('-h, --host [name=127.0.0.1]', 'The IP or hostname to connect to', '127.0.0.1')
   .option('-m, --msgpack', 'Use msgpack instead of JSON for bulk POSTs', false)
+  .option('-U, --user [user name]', 'Username for CouchDB')
+  .option('-P, --pass [password]', 'Password for CouchDB')
   .parse(process.argv);
 
 var host = 'http://' + program.host;
 var port = program.port;
 var url = host + ':' + port;
-var conn = new cradle.Connection(host, port, { cache: false });
+var options = { cache: false };
+
+if (program.user && program.pass) {
+    options.auth = { username: program.user, password: program.pass };
+}
+
+var conn = new cradle.Connection(host, port, options);
 
 var testDocument = { 'lorem' : 'ipsum', pi: 3.14159, sunny: true, free_lunch: false, the_answer: 42, 
     taxRate: null, fibonnaci: [0, 1, 1, 2, 3, 5, 8, 13 ], child: { 'hello': 'world' }, 
@@ -149,4 +157,9 @@ init.then(function() {
     };
     
     save(save);
+}).catch(function(err) {
+    if (err.message)
+        console.log(err.message);
+    else
+        console.log(err)
 });
