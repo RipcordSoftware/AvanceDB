@@ -361,6 +361,32 @@ describe('avancedb -- db --', function() {
             done();
         });
     });
+
+    it('should get database rev limits', function(done) {
+        var options = {
+            hostname: host,
+            port: port,
+            path: '/' + testDbName + '/_revs_limit',
+            method: 'GET'
+        };
+
+        var req = http.request(options, function(res) {
+            assert.equal(200, res.statusCode);
+            assert.equal('application/json', res.headers['content-type']);
+
+            var body = '';
+            res.on('data', function(chunk) {
+                body += chunk;
+            });
+
+            res.on('end', function() {
+                assert('1', body);
+                done();
+            });
+        });
+
+        req.end();
+    });
     
     it('should delete a database', function(done) {
         var db = conn.database(testDbName);

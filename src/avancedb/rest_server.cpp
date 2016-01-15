@@ -95,7 +95,8 @@ RestServer::RestServer() {
     AddRoute("GET", REGEX_DBNAME_GROUP REGEX_DOCID_GROUP REGEX_ATTACHMENT_NAME_GROUP, &RestServer::GetDocumentAttachment);
     AddRoute("GET", REGEX_DBNAME_GROUP REGEX_DOCID_GROUP, &RestServer::GetDocument);
     AddRoute("GET", REGEX_DBNAME_GROUP "/+_all_docs/{0,}$", &RestServer::GetDatabaseAllDocs);
-    AddRoute("GET", REGEX_DBNAME_GROUP "/{0,}$", &RestServer::GetDatabase);    
+    AddRoute("GET", REGEX_DBNAME_GROUP "/+_revs_limit/{0,}$", &RestServer::GetDatabaseRevsLimit);
+    AddRoute("GET", REGEX_DBNAME_GROUP "/{0,}$", &RestServer::GetDatabase);
     AddRoute("GET", "/{0,}$", &RestServer::GetSignature);
     
     databases_.AddDatabase("_replicator");
@@ -796,6 +797,13 @@ bool RestServer::PostDatabaseAllDocs(rs::httpserver::request_ptr request, const 
         
         objStream << "]}";
         objStream.Flush();
+    }
+}
+
+bool RestServer::GetDatabaseRevsLimit(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
+    auto db = GetDatabase(args);
+    if (!!db) {
+        response->setStatusCode(200).setContentType(ContentTypes::applicationJson).Send("1");
     }
 }
 
