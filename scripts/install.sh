@@ -10,6 +10,11 @@ if [ ! -d "/etc/systemd" ]; then
     exit 2
 fi
 
+grep avancedb /etc/passwd > /dev/null
+if [ $? -ne 0 ]; then
+    adduser --system --no-create-home --group avancedb
+fi
+
 mkdir -p /usr/local/avancedb && \
 cp -Rf `dirname $0`/../src/avancedb/dist/Release/GNU-Linux-x86/* /usr/local/avancedb && \
 cp -f `dirname $0`/systemd/avancedb.service /etc/systemd/system/ && \
