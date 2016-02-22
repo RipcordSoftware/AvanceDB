@@ -15,15 +15,10 @@ all: force_true .googletest .gperftools
 	cd src/avancedb && $(MAKE) $(MFLAGS) $(MAKEOVERRIDES) all
 
 install:
-	mkdir -p /usr/local/avancedb/ && \
-	mkdir -p /usr/local/var/log/avancedb/ && \
-	pushd src/avancedb/dist/Release/GNU-Linux-x86 && \
-	cp -Rf * /usr/local/avancedb/ && \
-	popd && \
-	pushd scripts/init.d && \
-	cp -f avancedb /etc/init.d/ && \
-	update-rc.d avancedb defaults && \
-	popd	
+	@./scripts/install.sh
+
+uninstall:
+	@./scripts/uninstall.sh
 
 test: build ext_test
 	cd src/avancedb && $(MAKE) $(MFLAGS) $(MAKEOVERRIDES) test
