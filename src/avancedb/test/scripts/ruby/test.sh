@@ -31,25 +31,7 @@ if [ $? -ne 0 ]; then
     gem install ${USER_INSTALL} bundler
 fi
 
-gem list | grep rake > /dev/null
-if [ $? -ne 0 ]; then
-    gem install ${USER_INSTALL} rake
-fi
-
-gem list | grep rspec > /dev/null
-if [ $? -ne 0 ]; then
-    gem install ${USER_INSTALL} rspec
-fi
-
-gem list | grep faker > /dev/null
-if [ $? -ne 0 ]; then
-    gem install ${USER_INSTALL} faker
-fi
-
-gem list | grep airborne > /dev/null
-if [ $? -ne 0 ]; then
-    gem install ${USER_INSTALL} airborne
-fi
+bundle install
 
 CONFIGURATION=$1
 if [ "$CONFIGURATION" == "" ]; then
