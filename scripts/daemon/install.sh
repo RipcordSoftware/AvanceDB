@@ -5,7 +5,7 @@ if [ `id -u` -ne 0 ]; then
     exit 1
 fi
 
-if [ -d "/etc/systemd" ]; then
+if [[ -d "/etc/systemd" && `systemctl --version` ]]; then
     pushd `dirname $0` > /dev/null
     systemd/install.sh
     RETVAL=$?

@@ -13,5 +13,3 @@ fi
 mkdir -p /usr/local/avancedb && \
 cp -Rf `dirname $0`/../src/avancedb/dist/Release/GNU-Linux-x86/* /usr/local/avancedb && \
 daemon/install.sh
-
-echo $PWD

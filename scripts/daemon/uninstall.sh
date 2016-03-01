@@ -7,7 +7,7 @@ fi
 
 echo "AvanceDB may take a few seconds to stop..."
 
-if [ -d "/etc/systemd" ]; then
+if [[ -d "/etc/systemd" && `systemctl --version` ]]; then
     pushd `dirname $0` > /dev/null
     systemd/uninstall.sh
     RETVAL=$?
