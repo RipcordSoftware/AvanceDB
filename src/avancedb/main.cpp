@@ -23,6 +23,7 @@
 
 #include "http_server.h"
 #include "map_reduce_thread_pool.h"
+#include "daemon.h"
 #include "config.h"
 
 int main(int argc, char** argv) {
@@ -34,6 +35,7 @@ int main(int argc, char** argv) {
         ("help,h", "shows the program options")
         ("address,a", boost::program_options::value<std::string>(&addr)->default_value(addr), "the IP address to listen on")
         ("port,p", boost::program_options::value<unsigned>(&port)->default_value(port), "the TCP/IP port to listen on")
+        ("daemon", "daemonize the process")
     ;
 
     boost::program_options::variables_map vm;
@@ -44,6 +46,10 @@ int main(int argc, char** argv) {
         std::cout << desc << std::endl;
         return 1;
     } else {
+        if (vm.count("daemon")) {
+            Daemon::Daemonize();
+        }
+        
         MapReduceThreadPoolScope threadPool{Config::SpiderMonkey::GetHeapSize(), Config::SpiderMonkey::GetEnableBaselineCompiler(), Config::SpiderMonkey::GetEnableIonCompiler()};
 
         HttpServer server(addr.c_str(), port);

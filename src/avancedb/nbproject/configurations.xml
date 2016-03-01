@@ -9,6 +9,7 @@
       <itemPath>bulk_documents_result.h</itemPath>
       <itemPath>../../externals/cityhash/src/city.h</itemPath>
       <itemPath>config.h</itemPath>
+      <itemPath>daemon.h</itemPath>
       <itemPath>database.h</itemPath>
       <itemPath>databases.h</itemPath>
       <itemPath>document.h</itemPath>
@@ -59,6 +60,7 @@
       <itemPath>base64_helper.cpp</itemPath>
       <itemPath>../../externals/cityhash/src/city.cc</itemPath>
       <itemPath>config.cpp</itemPath>
+      <itemPath>daemon.cpp</itemPath>
       <itemPath>database.cpp</itemPath>
       <itemPath>databases.cpp</itemPath>
       <itemPath>document.cpp</itemPath>
@@ -263,6 +265,10 @@
       <item path="config.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="config.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="daemon.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="daemon.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="database.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -621,6 +627,10 @@
       <item path="config.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="config.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="daemon.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="daemon.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="database.cpp" ex="false" tool="1" flavor2="0">
       </item>
