@@ -5,14 +5,5 @@ if [ `id -u` -ne 0 ]; then
     exit 1
 fi
 
-if [ ! -d "/etc/systemd" ]; then
-    echo "Error: This script only supports systems running systemd"
-    exit 2
-fi
-
-echo "AvanceDB may take a few seconds to stop..."
-
-systemctl stop avancedb && \
-systemctl disable avancedb && \
-rm -f /etc/systemd/system/avancedb.service && \
-systemctl daemon-reload
+daemon/uninstall.sh && \
+rm -rf /usr/local/avancedb
