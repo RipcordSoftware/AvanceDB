@@ -19,19 +19,21 @@
 #ifndef DAEMON_H
 #define	DAEMON_H
 
+#include <string>
+
 class Daemon {
 public:
     Daemon() = delete;
     Daemon(const Daemon&) = delete;
     
-    static void Daemonize();
+    static bool Daemonize(const std::string& stdoutFile, const std::string& stderrFile);
     
-    static void RedirectStdout(const char* file);
-    static void RedirectStderr(const char* file);
+    static void RedirectStdout(const std::string& file);
+    static void RedirectStderr(const std::string& file);
     
-    static void WritePid(const char* file);
+    static void WritePid(const std::string& file);
     
-    static void ChangeDir(const char* dir);
+    static void ChangeDir(const std::string& dir);
     
 private:
 

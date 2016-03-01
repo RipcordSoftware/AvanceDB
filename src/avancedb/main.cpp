@@ -27,33 +27,50 @@
 #include "config.h"
 
 int main(int argc, char** argv) {
-    std::string addr = "0.0.0.0";
-    unsigned port = 5994;
-    
-    boost::program_options::options_description desc("Program options");
-    desc.add_options()
-        ("help,h", "shows the program options")
-        ("address,a", boost::program_options::value<std::string>(&addr)->default_value(addr), "the IP address to listen on")
-        ("port,p", boost::program_options::value<unsigned>(&port)->default_value(port), "the TCP/IP port to listen on")
-        ("daemon", "daemonize the process")
-    ;
+    try {
+        std::string addr = "0.0.0.0";
+        unsigned port = 5994;
+        std::string pidFile;
+        std::string stdoutFile;
+        std::string stderrFile;
+        std::string rootDirectory;
+        auto isUserProcess = false;
 
-    boost::program_options::variables_map vm;
-    boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
-    boost::program_options::notify(vm);
+        boost::program_options::options_description desc("Program options");
+        desc.add_options()
+            ("help,h", "shows the program options")
+            ("address,a", boost::program_options::value(&addr)->default_value(addr), "the IP address to listen on")
+            ("port,p", boost::program_options::value(&port)->default_value(port), "the TCP/IP port to listen on")
+            ("daemon,d", "daemonize the process")
+            ("pid", boost::program_options::value(&pidFile), "writes the process id to a file")
+            ("out,o", boost::program_options::value(&stdoutFile), "writes stdout to a file")
+            ("err,e", boost::program_options::value(&stderrFile), "writes stderr to a file")
+            ("dir", boost::program_options::value(&rootDirectory), "sets the working directory")
+        ;
 
-    if (vm.count("help")) {
-        std::cout << desc << std::endl;
-        return 1;
-    } else {
-        if (vm.count("daemon")) {
-            Daemon::Daemonize();
+        boost::program_options::variables_map vm;
+        boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
+        boost::program_options::notify(vm);
+
+        if (vm.count("help")) {
+            std::cout << desc << std::endl;
+        } else if ((isUserProcess = vm.count("daemon") == 0) || Daemon::Daemonize(stdoutFile, stderrFile)) {
+            Daemon::WritePid(pidFile);
+            Daemon::ChangeDir(rootDirectory);
+
+            if (isUserProcess) {
+                Daemon::RedirectStdout(stdoutFile);
+                Daemon::RedirectStderr(stderrFile);
+            }
+
+            MapReduceThreadPoolScope threadPool{Config::SpiderMonkey::GetHeapSize(), Config::SpiderMonkey::GetEnableBaselineCompiler(), Config::SpiderMonkey::GetEnableIonCompiler()};
+
+            HttpServer server(addr.c_str(), port);
+            server.Start();
         }
-        
-        MapReduceThreadPoolScope threadPool{Config::SpiderMonkey::GetHeapSize(), Config::SpiderMonkey::GetEnableBaselineCompiler(), Config::SpiderMonkey::GetEnableIonCompiler()};
-
-        HttpServer server(addr.c_str(), port);
-        server.Start();
-        return 0;
+    }
+    catch (const std::exception& ex) {
+        std::cerr << "ERROR: " << ex.what() << std::endl;
+        return 1;
     }
 }
