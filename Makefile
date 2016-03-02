@@ -15,10 +15,10 @@ all: force_true .googletest .gperftools
 	cd src/avancedb && $(MAKE) $(MFLAGS) $(MAKEOVERRIDES) all
 
 install:
-	@./scripts/install.sh
+	@pushd ./scripts; ./install.sh; popd
 
 uninstall:
-	@./scripts/uninstall.sh
+	@pushd ./scripts; ./uninstall.sh; popd
 
 test: build ext_test
 	cd src/avancedb && $(MAKE) $(MFLAGS) $(MAKEOVERRIDES) test

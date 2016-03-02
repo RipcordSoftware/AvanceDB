@@ -51,6 +51,9 @@ node_modules
 
 # ignore test output
 avance_test.log
+avancedb_test.log
+avancedb_test.err
+avancedb_test.pid
 
 # ignore the coverage output files
 coverage.info

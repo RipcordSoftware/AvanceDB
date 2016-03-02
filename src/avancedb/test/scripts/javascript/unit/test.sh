@@ -33,15 +33,13 @@ fi
 
 TEST_DIR=$PWD
 
-pushd ../../../../dist/${CONFIGURATION}/GNU-Linux-x86
-./avancedb -p 15994 &> ${TEST_DIR}/avance_test.log  &
-ADB_PID=$!
+APPROOT=../../../../dist/${CONFIGURATION}/GNU-Linux-x86
+${APPROOT}/avancedb --daemon -p 15994 --dir ${APPROOT} -o avancedb_test.log -e avancedb_test.err --pid avancedb_test.pid
 sleep ${DELAY}
-popd
 
 node_modules/mocha/bin/mocha -t `expr ${DELAY} \* 1000`
 STATUS=$?
 sleep ${DELAY}
-kill $ADB_PID
+kill `cat avancedb_test.pid`
 
 exit $STATUS
