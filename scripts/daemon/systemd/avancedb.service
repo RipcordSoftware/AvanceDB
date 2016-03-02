@@ -3,8 +3,8 @@ Description=Daemon for AvanceDB
 After=syslog.target
 
 [Service]
-WorkingDirectory=/usr/local/avancedb
-ExecStart=/usr/local/avancedb/avancedb
+WorkingDirectory=/usr/local/share/avancedb
+ExecStart=/usr/local/bin/avancedb
 Type=simple
 User=avancedb
 
