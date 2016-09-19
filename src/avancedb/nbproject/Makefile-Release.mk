@@ -98,7 +98,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=../../externals/libhttpserver/src/libhttpserver/dist/Release/GNU-Linux-x86/libhttpserver.a ../../externals/libscriptobject/src/libscriptobject_gason/dist/Release/GNU-Linux-x86/liblibscriptobject_gason.a ../../externals/libscriptobject/src/libscriptobject/dist/Release/GNU-Linux-x86/libscriptobject.a ../../externals/libjsapi/src/libjsapi/dist/Release/GNU-Linux-x86/libjsapi.a ../../externals/libscriptobject/src/libscriptobject_msgpack/dist/Release/GNU-Linux-x86/liblibscriptobject_msgpack.a ../../externals/libjsapi/externals/installed/lib/libjs_static.ajs -lboost_regex -lboost_filesystem -lboost_program_options -lboost_thread -lboost_date_time -lboost_chrono -lboost_atomic -lboost_system `pkg-config --libs zlib` -ldl  -lpthread   
+LDLIBSOPTIONS=../../externals/libhttpserver/src/libhttpserver/dist/Release/GNU-Linux-x86/libhttpserver.a ../../externals/libscriptobject/src/libscriptobject_gason/dist/Release/GNU-Linux-x86/libscriptobject_gason.a ../../externals/libscriptobject/src/libscriptobject/dist/Release/GNU-Linux-x86/libscriptobject.a ../../externals/libjsapi/src/libjsapi/dist/Release/GNU-Linux-x86/libjsapi.a ../../externals/libscriptobject/src/libscriptobject_msgpack/dist/Release/GNU-Linux-x86/libscriptobject_msgpack.a ../../externals/libjsapi/externals/installed/lib/libjs_static.ajs -lboost_regex -lboost_filesystem -lboost_program_options -lboost_thread -lboost_date_time -lboost_chrono -lboost_atomic -lboost_system `pkg-config --libs zlib` -ldl  -lpthread   
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
@@ -106,13 +106,13 @@ LDLIBSOPTIONS=../../externals/libhttpserver/src/libhttpserver/dist/Release/GNU-L
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb: ../../externals/libhttpserver/src/libhttpserver/dist/Release/GNU-Linux-x86/libhttpserver.a
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb: ../../externals/libscriptobject/src/libscriptobject_gason/dist/Release/GNU-Linux-x86/liblibscriptobject_gason.a
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb: ../../externals/libscriptobject/src/libscriptobject_gason/dist/Release/GNU-Linux-x86/libscriptobject_gason.a
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb: ../../externals/libscriptobject/src/libscriptobject/dist/Release/GNU-Linux-x86/libscriptobject.a
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb: ../../externals/libjsapi/src/libjsapi/dist/Release/GNU-Linux-x86/libjsapi.a
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb: ../../externals/libscriptobject/src/libscriptobject_msgpack/dist/Release/GNU-Linux-x86/liblibscriptobject_msgpack.a
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb: ../../externals/libscriptobject/src/libscriptobject_msgpack/dist/Release/GNU-Linux-x86/libscriptobject_msgpack.a
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb: ../../externals/libjsapi/externals/installed/lib/libjs_static.ajs
 

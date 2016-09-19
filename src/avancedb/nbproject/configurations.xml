@@ -176,7 +176,7 @@
                             WD="../../externals/libscriptobject/src/libscriptobject_gason"
                             BC="${MAKE}  -f Makefile CONF=Debug"
                             CC="${MAKE}  -f Makefile CONF=Debug clean"
-                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liblibscriptobject_gason.a">
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libscriptobject_gason.a">
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibProjectItem>
@@ -212,7 +212,7 @@
                             WD="../../externals/libscriptobject/src/libscriptobject_msgpack"
                             BC="${MAKE}  -f Makefile CONF=Debug"
                             CC="${MAKE}  -f Makefile CONF=Debug clean"
-                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liblibscriptobject_msgpack.a">
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libscriptobject_msgpack.a">
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibFileItem>../../externals/libjsapi/externals/installed/lib/libjs_static.ajs</linkerLibFileItem>
@@ -538,7 +538,7 @@
                             WD="../../externals/libscriptobject/src/libscriptobject_gason"
                             BC="${MAKE}  -f Makefile CONF=Release"
                             CC="${MAKE}  -f Makefile CONF=Release clean"
-                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liblibscriptobject_gason.a">
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libscriptobject_gason.a">
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibProjectItem>
@@ -574,7 +574,7 @@
                             WD="../../externals/libscriptobject/src/libscriptobject_msgpack"
                             BC="${MAKE}  -f Makefile CONF=Release"
                             CC="${MAKE}  -f Makefile CONF=Release clean"
-                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liblibscriptobject_msgpack.a">
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libscriptobject_msgpack.a">
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibFileItem>../../externals/libjsapi/externals/installed/lib/libjs_static.ajs</linkerLibFileItem>
