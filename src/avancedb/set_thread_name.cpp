@@ -18,7 +18,7 @@
 
 #include "set_thread_name.h"
 
-#if __GNUG__
+#if __GNUG__ && not defined(__clang__)
 #include <pthread.h>
 
 bool SetThreadName::Set(std::thread& thread, const char* name) {
@@ -31,11 +31,11 @@ bool SetThreadName::Set(const char* name) {
     return status;
 }
 #else
-bool SetThreadName::Set(std::thread& thread, const char* name) {
+bool SetThreadName::Set(std::thread&, const char*) {
     return false;
 }
 
-bool SetThreadName::Set(const char* name) {
+bool SetThreadName::Set(const char*) {
     return false;
 }
 #endif
