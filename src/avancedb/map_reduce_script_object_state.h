@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MAP_REDUCE_SCRIPT_OBJECT_STATE_H
-#define MAP_REDUCE_SCRIPT_OBJECT_STATE_H
+#ifndef RS_AVANCEDB_MAP_REDUCE_SCRIPT_OBJECT_STATE_H
+#define RS_AVANCEDB_MAP_REDUCE_SCRIPT_OBJECT_STATE_H
 
 #include "types.h"
 
@@ -29,5 +29,5 @@ struct MapReduceScriptArrayState final {
     script_array_ptr scriptArray_;
 };
 
-#endif	/* MAP_REDUCE_SCRIPT_OBJECT_STATE_H */
+#endif /* RS_AVANCEDB_MAP_REDUCE_SCRIPT_OBJECT_STATE_H */
 

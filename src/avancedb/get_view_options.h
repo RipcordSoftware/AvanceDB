@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GET_VIEW_OPTIONS_H
-#define GET_VIEW_OPTIONS_H
+#ifndef RS_AVANCEDB_GET_VIEW_OPTIONS_H
+#define RS_AVANCEDB_GET_VIEW_OPTIONS_H
 
 #include "get_all_documents_options.h"
 #include "map_reduce_query_key.h"
@@ -40,5 +40,5 @@ private:
     mutable boost::optional<uint64_t> groupLevel_;
 };
 
-#endif	/* GET_VIEW_OPTIONS_H */
+#endif /* RS_AVANCEDB_GET_VIEW_OPTIONS_H */
 

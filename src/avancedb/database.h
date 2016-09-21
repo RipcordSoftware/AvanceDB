@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATABASE_H
-#define DATABASE_H
+#ifndef RS_AVANCEDB_DATABASE_H
+#define RS_AVANCEDB_DATABASE_H
 
 #include <vector>
 
@@ -85,5 +85,5 @@ private:
     documents_ptr docs_;
 };
 
-#endif	/* DATABASE_H */
+#endif /* RS_AVANCEDB_DATABASE_H */
 

@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MAP_REDUCE_SHARD_RESULTS_H
-#define MAP_REDUCE_SHARD_RESULTS_H
+#ifndef RS_AVANCEDB_MAP_REDUCE_SHARD_RESULTS_H
+#define RS_AVANCEDB_MAP_REDUCE_SHARD_RESULTS_H
 
 #include <limits>
 
@@ -57,5 +57,5 @@ private:
     const size_type limit_;
 };
 
-#endif	/* MAP_REDUCE_SHARD_RESULTS_H */
+#endif /* RS_AVANCEDB_MAP_REDUCE_SHARD_RESULTS_H */
 

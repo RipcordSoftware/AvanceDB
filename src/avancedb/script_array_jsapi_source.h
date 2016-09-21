@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SCRIPT_ARRAY_JSAPI_SOURCE_H
-#define SCRIPT_ARRAY_JSAPI_SOURCE_H
+#ifndef RS_AVANCEDB_SCRIPT_ARRAY_JSAPI_SOURCE_H
+#define RS_AVANCEDB_SCRIPT_ARRAY_JSAPI_SOURCE_H
 
 #include <vector>
 #include <string>
@@ -59,4 +59,4 @@ private:
     
 };
 
-#endif	/* SCRIPT_ARRAY_JSAPI_SOURCE_H */
+#endif /* RS_AVANCEDB_SCRIPT_ARRAY_JSAPI_SOURCE_H */

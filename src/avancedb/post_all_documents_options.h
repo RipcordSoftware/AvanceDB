@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef POST_ALL_DOCUMENTS_OPTIONS_H
-#define POST_ALL_DOCUMENTS_OPTIONS_H
+#ifndef RS_AVANCEDB_POST_ALL_DOCUMENTS_OPTIONS_H
+#define RS_AVANCEDB_POST_ALL_DOCUMENTS_OPTIONS_H
 
 #include <string>
 #include <vector>
@@ -64,5 +64,5 @@ private:
     const std::string _emptyString;
 };
 
-#endif	/* POST_ALL_DOCUMENTS_OPTIONS_H */
+#endif /* RS_AVANCEDB_POST_ALL_DOCUMENTS_OPTIONS_H */
 

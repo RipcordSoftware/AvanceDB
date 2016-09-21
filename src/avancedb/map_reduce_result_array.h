@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MAP_REDUCE_RESULT_ARRAY_H
-#define MAP_REDUCE_RESULT_ARRAY_H
+#ifndef RS_AVANCEDB_MAP_REDUCE_RESULT_ARRAY_H
+#define RS_AVANCEDB_MAP_REDUCE_RESULT_ARRAY_H
 
 #include <vector>
 
@@ -64,5 +64,5 @@ private:
     std::vector<map_reduce_result_array_ptr> sources_;
 };
 
-#endif	/* MAP_REDUCE_RESULT_ARRAY_H */
+#endif /* RS_AVANCEDB_MAP_REDUCE_RESULT_ARRAY_H */
 

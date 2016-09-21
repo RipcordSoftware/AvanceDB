@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef HTTP_SERVER_EXCEPTION_H
-#define HTTP_SERVER_EXCEPTION_H
+#ifndef RS_AVANCEDB_HTTP_SERVER_EXCEPTION_H
+#define RS_AVANCEDB_HTTP_SERVER_EXCEPTION_H
 
 #include <exception>
 #include <string>
@@ -48,5 +48,5 @@ private:
         
 };
 
-#endif	/* HTTP_SERVER_EXCEPTION_H */
+#endif /* RS_AVANCEDB_HTTP_SERVER_EXCEPTION_H */
 

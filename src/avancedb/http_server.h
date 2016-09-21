@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef HTTP_SERVER_H
-#define HTTP_SERVER_H
+#ifndef RS_AVANCEDB_HTTP_SERVER_H
+#define RS_AVANCEDB_HTTP_SERVER_H
 
 #include "libhttpserver.h"
 #include "rest_server.h"
@@ -41,5 +41,5 @@ private:
 
 };
 
-#endif	/* HTTP_SERVER_H */
+#endif /* RS_AVANCEDB_HTTP_SERVER_H */
 

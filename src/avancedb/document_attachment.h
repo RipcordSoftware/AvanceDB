@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DOCUMENT_ATTACHMENT_H
-#define DOCUMENT_ATTACHMENT_H
+#ifndef RS_AVANCEDB_DOCUMENT_ATTACHMENT_H
+#define RS_AVANCEDB_DOCUMENT_ATTACHMENT_H
 
 #include <string>
 #include <vector>
@@ -56,4 +56,4 @@ private:
     const std::string digest_;
 };
 
-#endif	/* DOCUMENT_ATTACHMENT_H */
+#endif /* RS_AVANCEDB_DOCUMENT_ATTACHMENT_H */

@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SCRIPT_OBJECT_JSAPI_EXCEPTIONS_H
-#define SCRIPT_OBJECT_JSAPI_EXCEPTIONS_H
+#ifndef RS_AVANCEDB_SCRIPT_OBJECT_JSAPI_EXCEPTIONS_H
+#define RS_AVANCEDB_SCRIPT_OBJECT_JSAPI_EXCEPTIONS_H
 
 #include <string>
 #include <exception>
@@ -37,4 +37,4 @@ public:
     ScriptObjectJsapiSourceInvalidFieldTypeException() : ScriptObjectJsapiSourceException("Invalid field type") {}
 };
 
-#endif	/* SCRIPT_OBJECT_JSAPI_EXCEPTIONS_H */
+#endif /* RS_AVANCEDB_SCRIPT_OBJECT_JSAPI_EXCEPTIONS_H */

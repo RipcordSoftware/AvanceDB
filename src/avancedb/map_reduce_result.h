@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MAP_REDUCE_RESULT_H
-#define MAP_REDUCE_RESULT_H
+#ifndef RS_AVANCEDB_MAP_REDUCE_RESULT_H
+#define RS_AVANCEDB_MAP_REDUCE_RESULT_H
 
 #include <boost/noncopyable.hpp>
 
@@ -72,5 +72,5 @@ private:
 
 };
 
-#endif	/* MAP_REDUCE_RESULT_H */
+#endif /* RS_AVANCEDB_MAP_REDUCE_RESULT_H */
 

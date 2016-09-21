@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DOCUMENT_H
-#define DOCUMENT_H
+#ifndef RS_AVANCEDB_DOCUMENT_H
+#define RS_AVANCEDB_DOCUMENT_H
 
 #include <boost/noncopyable.hpp>
 #include <boost/enable_shared_from_this.hpp>
@@ -87,5 +87,5 @@ private:
     const sequence_type seqNum_;
 };
 
-#endif	/* DOCUMENT_H */
+#endif /* RS_AVANCEDB_DOCUMENT_H */
 

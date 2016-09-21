@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SCRIPT_OBJECT_RESPONSE_STREAM_H
-#define SCRIPT_OBJECT_RESPONSE_STREAM_H
+#ifndef RS_AVANCEDB_SCRIPT_OBJECT_RESPONSE_STREAM_H
+#define RS_AVANCEDB_SCRIPT_OBJECT_RESPONSE_STREAM_H
 
 #include <cstring>
 #include <type_traits>
@@ -439,5 +439,5 @@ private:
     rs::httpserver::Stream& stream_;
 };
 
-#endif	/* SCRIPT_OBJECT_RESPONSE_STREAM_H */
+#endif /* RS_AVANCEDB_SCRIPT_OBJECT_RESPONSE_STREAM_H */
 

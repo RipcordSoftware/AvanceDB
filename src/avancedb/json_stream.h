@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef JSON_STREAM_H
-#define JSON_STREAM_H
+#ifndef RS_AVANCEDB_JSON_STREAM_H
+#define RS_AVANCEDB_JSON_STREAM_H
 
 #include <sstream>
 #include <string>
@@ -103,4 +103,4 @@ private:
     std::stack<Context> contextStack_;
 };
 
-#endif	/* JSON_STREAM_H */
+#endif /* RS_AVANCEDB_JSON_STREAM_H */

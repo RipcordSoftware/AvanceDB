@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SET_THREAD_NAME_H
-#define	SET_THREAD_NAME_H
+#ifndef RS_AVANCEDB_SET_THREAD_NAME_H
+#define RS_AVANCEDB_SET_THREAD_NAME_H
 
 #include <thread>
 
@@ -31,5 +31,5 @@ private:
 
 };
 
-#endif	/* SET_THREAD_NAME_H */
+#endif /* RS_AVANCEDB_SET_THREAD_NAME_H */
 

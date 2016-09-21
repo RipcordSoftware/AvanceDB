@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MAP_REDUCE_QUERY_KEY_H
-#define MAP_REDUCE_QUERY_KEY_H
+#ifndef RS_AVANCEDB_MAP_REDUCE_QUERY_KEY_H
+#define RS_AVANCEDB_MAP_REDUCE_QUERY_KEY_H
 
 #include <string>
 
@@ -58,5 +58,5 @@ private:
     const std::string id_;
 };
 
-#endif	/* MAP_REDUCE_QUERY_KEY_H */
+#endif /* RS_AVANCEDB_MAP_REDUCE_QUERY_KEY_H */
 

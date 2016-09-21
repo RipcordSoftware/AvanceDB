@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef RS_AVANCEDB_CONFIG_H
+#define RS_AVANCEDB_CONFIG_H
 
 #include <cstdint>
 
@@ -46,5 +46,5 @@ private:
 
 };
 
-#endif	/* CONFIG_H */
+#endif /* RS_AVANCEDB_CONFIG_H */
 

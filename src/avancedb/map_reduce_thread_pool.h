@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MAP_REDUCE_THREAD_POOL_H
-#define MAP_REDUCE_THREAD_POOL_H
+#ifndef RS_AVANCEDB_MAP_REDUCE_THREAD_POOL_H
+#define RS_AVANCEDB_MAP_REDUCE_THREAD_POOL_H
 
 #include <boost/thread.hpp>
 #include <boost/enable_shared_from_this.hpp>
@@ -74,4 +74,4 @@ private:
     bool started{false};
 };
 
-#endif	/* MAP_REDUCE_THREAD_POOL_H */
+#endif /* RS_AVANCEDB_MAP_REDUCE_THREAD_POOL_H */

@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DOCUMENTS_H
-#define DOCUMENTS_H
+#ifndef RS_AVANCEDB_DOCUMENTS_H
+#define RS_AVANCEDB_DOCUMENTS_H
 
 #include <limits>
 #include <vector>
@@ -117,4 +117,4 @@ private:
     MapReduce mapReduce_;
 };
 
-#endif	/* DOCUMENTS_H */
+#endif /* RS_AVANCEDB_DOCUMENTS_H */

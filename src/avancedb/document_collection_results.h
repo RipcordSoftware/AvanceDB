@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DOCUMENT_COLLECTION_RESULTS_H
-#define DOCUMENT_COLLECTION_RESULTS_H
+#ifndef RS_AVANCEDB_DOCUMENT_COLLECTION_RESULTS_H
+#define RS_AVANCEDB_DOCUMENT_COLLECTION_RESULTS_H
 
 #include <limits>
 
@@ -54,5 +54,5 @@ private:
     const size_type limit_;
 };
 
-#endif	/* DOCUMENT_COLLECTION_RESULTS_H */
+#endif /* RS_AVANCEDB_DOCUMENT_COLLECTION_RESULTS_H */
 

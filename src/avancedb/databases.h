@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATABASES_H
-#define DATABASES_H
+#ifndef RS_AVANCEDB_DATABASES_H
+#define RS_AVANCEDB_DATABASES_H
 
 #include <map>
 #include <vector>
@@ -41,4 +41,4 @@ private:
     std::mutex databasesMutex_;
 };
 
-#endif	/* DATABASES_H */
+#endif /* RS_AVANCEDB_DATABASES_H */

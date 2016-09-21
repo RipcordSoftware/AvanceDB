@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DOCUMENT_COLLECTION_H
-#define DOCUMENT_COLLECTION_H
+#ifndef RS_AVANCEDB_DOCUMENT_COLLECTION_H
+#define RS_AVANCEDB_DOCUMENT_COLLECTION_H
 
 #include "types.h"
 #include "document.h"
@@ -66,5 +66,5 @@ private:
     char padding_[64];
 };
 
-#endif	/* DOCUMENT_COLLECTION_H */
+#endif /* RS_AVANCEDB_DOCUMENT_COLLECTION_H */
 

@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef JSON_HELPER_H
-#define JSON_HELPER_H
+#ifndef RS_AVANCEDB_JSON_HELPER_H
+#define RS_AVANCEDB_JSON_HELPER_H
 
 #include <array>
 #include <string>
@@ -100,5 +100,5 @@ private:
 };
 
 
-#endif	/* JSON_HELPER_H */
+#endif /* RS_AVANCEDB_JSON_HELPER_H */
 

@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TYPES_H
-#define TYPES_H
+#ifndef RS_AVANCEDB_TYPES_H
+#define RS_AVANCEDB_TYPES_H
 
 #include <boost/shared_ptr.hpp>
 
@@ -63,5 +63,5 @@ using script_array_ptr = rs::scriptobject::ScriptArrayPtr;
 
 using sequence_type = unsigned long;
 
-#endif	/* TYPES_H */
+#endif /* RS_AVANCEDB_TYPES_H */
 

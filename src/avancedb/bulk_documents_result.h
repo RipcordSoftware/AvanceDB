@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BULK_DOCUMENTS_RESULT_H
-#define BULK_DOCUMENTS_RESULT_H
+#ifndef RS_AVANCEDB_BULK_DOCUMENTS_RESULT_H
+#define RS_AVANCEDB_BULK_DOCUMENTS_RESULT_H
 
 #include <vector>
 
@@ -48,4 +48,4 @@ private:
 
 using BulkDocumentsResults = std::vector<BulkDocumentsResult>;
 
-#endif	/* BULK_DOCUMENTS_RESULT_H */
+#endif /* RS_AVANCEDB_BULK_DOCUMENTS_RESULT_H */

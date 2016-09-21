@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef REST_CONFIG_H
-#define REST_CONFIG_H
+#ifndef RS_AVANCEDB_REST_CONFIG_H
+#define RS_AVANCEDB_REST_CONFIG_H
 
 class RestConfig final {
 public:
@@ -32,4 +32,4 @@ private:
 
 };
 
-#endif	/* REST_CONFIG_H */
+#endif /* RS_AVANCEDB_REST_CONFIG_H */

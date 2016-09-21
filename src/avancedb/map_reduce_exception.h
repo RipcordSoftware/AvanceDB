@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MAP_REDUCE_EXCEPTION_H
-#define MAP_REDUCE_EXCEPTION_H
+#ifndef RS_AVANCEDB_MAP_REDUCE_EXCEPTION_H
+#define RS_AVANCEDB_MAP_REDUCE_EXCEPTION_H
 
 class MapReduceException final : public std::exception {
 public:
@@ -33,5 +33,5 @@ private:
     const std::string what_;
 };
 
-#endif	/* MAP_REDUCE_EXCEPTION_H */
+#endif /* RS_AVANCEDB_MAP_REDUCE_EXCEPTION_H */
 

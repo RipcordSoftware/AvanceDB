@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CONTENT_TYPES_H
-#define CONTENT_TYPES_H
+#ifndef RS_AVANCEDB_CONTENT_TYPES_H
+#define RS_AVANCEDB_CONTENT_TYPES_H
 
 struct ContentTypes final {
     static constexpr const char* textPlain{"text/plain"};
@@ -31,5 +31,5 @@ struct ContentTypes final {
     };
 };
 
-#endif	/* CONTENT_TYPE_H */
+#endif /* RS_AVANCEDB_CONTENT_TYPE_H */
 

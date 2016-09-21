@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GET_ALL_DOCUMENTS_OPTIONS_H
-#define GET_ALL_DOCUMENTS_OPTIONS_H
+#ifndef RS_AVANCEDB_GET_ALL_DOCUMENTS_OPTIONS_H
+#define RS_AVANCEDB_GET_ALL_DOCUMENTS_OPTIONS_H
 
 #include <string>
 #include <limits>
@@ -74,5 +74,5 @@ protected:
     const rs::httpserver::QueryString& qs_;
 };
 
-#endif	/* GET_ALL_DOCUMENTS_OPTIONS_H */
+#endif /* RS_AVANCEDB_GET_ALL_DOCUMENTS_OPTIONS_H */
 

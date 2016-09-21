@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef UUID_HELPER_H
-#define UUID_HELPER_H
+#ifndef RS_AVANCEDB_UUID_HELPER_H
+#define RS_AVANCEDB_UUID_HELPER_H
 
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/random_generator.hpp>
@@ -38,4 +38,4 @@ private:
 
 };
 
-#endif	/* UUID_HELPER_H */
+#endif /* RS_AVANCEDB_UUID_HELPER_H */

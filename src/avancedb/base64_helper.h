@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BASE64_HELPER_H
-#define BASE64_HELPER_H
+#ifndef RS_AVANCEDB_BASE64_HELPER_H
+#define RS_AVANCEDB_BASE64_HELPER_H
 
 #include <string>
 #include <vector>
@@ -37,5 +37,5 @@ private:
 
 };
 
-#endif	/* BASE64_HELPER_H */
+#endif /* RS_AVANCEDB_BASE64_HELPER_H */
 

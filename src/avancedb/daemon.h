@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DAEMON_H
-#define	DAEMON_H
+#ifndef RS_AVANCEDB_DAEMON_H
+#define RS_AVANCEDB_DAEMON_H
 
 #include <string>
 
@@ -39,5 +39,5 @@ private:
 
 };
 
-#endif	/* DAEMON_H */
+#endif /* RS_AVANCEDB_DAEMON_H */
 

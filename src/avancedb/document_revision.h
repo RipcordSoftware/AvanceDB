@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DOCUMENT_REVISION_H
-#define DOCUMENT_REVISION_H
+#ifndef RS_AVANCEDB_DOCUMENT_REVISION_H
+#define RS_AVANCEDB_DOCUMENT_REVISION_H
 
 #include <array>
 
@@ -52,4 +52,4 @@ private:
     Digest digest_;
 };
 
-#endif	/* DOCUMENT_REVISION_H */
+#endif /* RS_AVANCEDB_DOCUMENT_REVISION_H */

@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef REST_EXCEPTIONS_H
-#define REST_EXCEPTIONS_H
+#ifndef RS_AVANCEDB_REST_EXCEPTIONS_H
+#define RS_AVANCEDB_REST_EXCEPTIONS_H
 
 #include "http_server_exception.h"
 
@@ -96,4 +96,4 @@ public:
     BadRequestBodyError();
 };
 
-#endif	/* REST_EXCEPTIONS_H */
+#endif /* RS_AVANCEDB_REST_EXCEPTIONS_H */

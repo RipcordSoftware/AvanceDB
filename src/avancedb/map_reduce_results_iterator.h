@@ -16,8 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MAP_REDUCE_RESULTS_ITERATOR_H
-#define MAP_REDUCE_RESULTS_ITERATOR_H
+#ifndef RS_AVANCEDB_MAP_REDUCE_RESULTS_ITERATOR_H
+#define RS_AVANCEDB_MAP_REDUCE_RESULTS_ITERATOR_H
 
 #include "map_reduce_results.h"
 
@@ -42,5 +42,5 @@ private:
     const MapReduceResults::value_type null_{nullptr};
 };
 
-#endif	/* MAP_REDUCE_RESULTS_ITERATOR_H */
+#endif /* RS_AVANCEDB_MAP_REDUCE_RESULTS_ITERATOR_H */
 
