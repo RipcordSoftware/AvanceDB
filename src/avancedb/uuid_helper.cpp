@@ -18,7 +18,7 @@
 
 #include "uuid_helper.h"
 
-bool UuidHelper::FormatUuid(const boost::uuids::uuid& uuid, UuidString buffer) {
+bool UuidHelper::FormatUuid(const boost::uuids::uuid& uuid, UuidString& buffer) {
     auto status = false;
     
     auto size = uuid.size();

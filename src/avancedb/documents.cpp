@@ -471,7 +471,7 @@ BulkDocumentsResults Documents::PostBulkDocuments(script_array_ptr docs, bool ne
         if (id == nullptr) {
             auto uuid = gen();
             UuidHelper::FormatUuid(uuid, uuids[i]);
-            id = uuids[i];
+            id = uuids[i].data();
         }
         
         auto coll = GetDocumentCollectionIndex(id);

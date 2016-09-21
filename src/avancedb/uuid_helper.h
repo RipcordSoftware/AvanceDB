@@ -22,15 +22,17 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/random_generator.hpp>
 
+#include <array>
+
 class UuidHelper final {
 public:
-    using UuidString = char[33];
+    using UuidString = std::array<char, 33>;
     using UuidGenerator = boost::uuids::random_generator;
     
     UuidHelper() = delete;
     UuidHelper(const UuidHelper& orig) = delete;
     
-    static bool FormatUuid(const boost::uuids::uuid&, UuidString buffer);
+    static bool FormatUuid(const boost::uuids::uuid&, UuidString& buffer);
     
 private:
 

@@ -164,7 +164,7 @@ bool RestServer::GetUuids(rs::httpserver::request_ptr request, const rs::httpser
         UuidHelper::UuidString uuidString;
         UuidHelper::FormatUuid(gen(), uuidString);
         
-        stream.Append(uuidString);
+        stream.Append(uuidString.data());
     }
     
     response->setContentType(ContentTypes::applicationJson).Send(stream.Flush());    
@@ -254,7 +254,7 @@ bool RestServer::PostDatabase(rs::httpserver::request_ptr request, const rs::htt
             if (!id) {
                 UuidHelper::UuidGenerator gen;
                 UuidHelper::FormatUuid(gen(), uuidString);
-                id = uuidString;
+                id = uuidString.data();
             }
             
             auto doc = db->SetDocument(id, obj);
