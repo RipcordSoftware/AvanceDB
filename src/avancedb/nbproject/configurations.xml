@@ -151,7 +151,7 @@
             <pElem>../../externals/libscriptobject/externals/msgpack-c/include</pElem>
             <pElem>../../externals/ConstTimeEncoding</pElem>
           </incDir>
-          <commandLine>--coverage</commandLine>
+          <commandLine>$(COVERAGE_FLAGS)</commandLine>
         </ccTool>
         <linkerTool>
           <linkerLibItems>
@@ -225,10 +225,9 @@
             <linkerLibLibItem>boost_atomic</linkerLibLibItem>
             <linkerLibLibItem>boost_system</linkerLibLibItem>
             <linkerOptionItem>`pkg-config --libs zlib`</linkerOptionItem>
-            <linkerLibStdlibItem>DynamicLinking</linkerLibStdlibItem>
             <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
+            <linkerOptionItem>$(LDLIBS)</linkerOptionItem>
           </linkerLibItems>
-          <commandLine>--coverage `if test "$$(uname)" = "Linux"; then echo "-lrt"; fi;` </commandLine>
         </linkerTool>
       </compileType>
       <item path="../../externals/ConstTimeEncoding/base64.cpp"
@@ -307,10 +306,10 @@
           <incDir>
             <pElem>../../externals/installed/include</pElem>
           </incDir>
-          <commandLine>--coverage</commandLine>
+          <commandLine>$(COVERAGE_FLAGS)</commandLine>
         </ccTool>
         <linkerTool>
-          <commandLine>../../externals/installed/lib/libgtest_main.a ../../externals/installed/lib/libgtest.a --coverage</commandLine>
+          <commandLine>../../externals/installed/lib/libgtest_main.a ../../externals/installed/lib/libgtest.a $(COVERAGE_FLAGS)</commandLine>
         </linkerTool>
       </folder>
       <folder path="TestFiles/f2">
@@ -587,10 +586,9 @@
             <linkerLibLibItem>boost_atomic</linkerLibLibItem>
             <linkerLibLibItem>boost_system</linkerLibLibItem>
             <linkerOptionItem>`pkg-config --libs zlib`</linkerOptionItem>
-            <linkerLibStdlibItem>DynamicLinking</linkerLibStdlibItem>
             <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
+            <linkerOptionItem>$(LDLIBS)</linkerOptionItem>
           </linkerLibItems>
-          <commandLine>`if test "$$(uname)" = "Linux"; then echo "-lrt ../../externals/installed/lib/libtcmalloc_minimal.a"; fi;` </commandLine>
         </linkerTool>
       </compileType>
       <item path="../../externals/ConstTimeEncoding/base64.cpp"

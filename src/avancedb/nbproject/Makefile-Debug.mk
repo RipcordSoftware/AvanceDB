@@ -88,8 +88,8 @@ TESTFILES= \
 CFLAGS=
 
 # CC Compiler Flags
-CCFLAGS=--coverage
-CXXFLAGS=--coverage
+CCFLAGS=$(COVERAGE_FLAGS)
+CXXFLAGS=$(COVERAGE_FLAGS)
 
 # Fortran Compiler Flags
 FFLAGS=
@@ -98,7 +98,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=../../externals/libhttpserver/src/libhttpserver/dist/Debug/GNU-Linux-x86/libhttpserver.a ../../externals/libscriptobject/src/libscriptobject_gason/dist/Debug/GNU-Linux-x86/libscriptobject_gason.a ../../externals/libscriptobject/src/libscriptobject/dist/Debug/GNU-Linux-x86/libscriptobject.a ../../externals/libjsapi/src/libjsapi/dist/Debug/GNU-Linux-x86/libjsapi.a ../../externals/libscriptobject/src/libscriptobject_msgpack/dist/Debug/GNU-Linux-x86/libscriptobject_msgpack.a ../../externals/libjsapi/externals/installed/lib/libjs_static.ajs -lboost_regex -lboost_filesystem -lboost_program_options -lboost_thread -lboost_date_time -lboost_chrono -lboost_atomic -lboost_system `pkg-config --libs zlib` -ldl  -lpthread   
+LDLIBSOPTIONS=../../externals/libhttpserver/src/libhttpserver/dist/Debug/GNU-Linux-x86/libhttpserver.a ../../externals/libscriptobject/src/libscriptobject_gason/dist/Debug/GNU-Linux-x86/libscriptobject_gason.a ../../externals/libscriptobject/src/libscriptobject/dist/Debug/GNU-Linux-x86/libscriptobject.a ../../externals/libjsapi/src/libjsapi/dist/Debug/GNU-Linux-x86/libjsapi.a ../../externals/libscriptobject/src/libscriptobject_msgpack/dist/Debug/GNU-Linux-x86/libscriptobject_msgpack.a ../../externals/libjsapi/externals/installed/lib/libjs_static.ajs -lboost_regex -lboost_filesystem -lboost_program_options -lboost_thread -lboost_date_time -lboost_chrono -lboost_atomic -lboost_system `pkg-config --libs zlib` -lpthread  $(LDLIBS)  
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
@@ -118,7 +118,7 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb: ../../externals/libjsapi/ex
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
-	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb ${OBJECTFILES} ${LDLIBSOPTIONS} --coverage `if test "$$(uname)" = "Linux"; then echo "-lrt"; fi;` 
+	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avancedb ${OBJECTFILES} ${LDLIBSOPTIONS}
 
 ${OBJECTDIR}/_ext/527039428/base64.o: ../../externals/ConstTimeEncoding/base64.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/527039428
@@ -327,33 +327,33 @@ ${OBJECTDIR}/uuid_helper.o: uuid_helper.cpp
 .build-tests-conf: .build-conf ${TESTFILES}
 ${TESTDIR}/TestFiles/f3: ${TESTDIR}/tests/basic_database_tests.o ${OBJECTFILES:%.o=%_nomain.o}
 	${MKDIR} -p ${TESTDIR}/TestFiles
-	${LINK.cc} ../../externals/installed/lib/libgtest_main.a ../../externals/installed/lib/libgtest.a --coverage  -o ${TESTDIR}/TestFiles/f3 $^ ${LDLIBSOPTIONS} 
+	${LINK.cc} ../../externals/installed/lib/libgtest_main.a ../../externals/installed/lib/libgtest.a $(COVERAGE_FLAGS)  -o ${TESTDIR}/TestFiles/f3 $^ ${LDLIBSOPTIONS} 
 
 ${TESTDIR}/TestFiles/f2: ${TESTDIR}/tests/json_helper_tests.o ${OBJECTFILES:%.o=%_nomain.o}
 	${MKDIR} -p ${TESTDIR}/TestFiles
-	${LINK.cc} ../../externals/installed/lib/libgtest_main.a ../../externals/installed/lib/libgtest.a --coverage  -o ${TESTDIR}/TestFiles/f2 $^ ${LDLIBSOPTIONS} 
+	${LINK.cc} ../../externals/installed/lib/libgtest_main.a ../../externals/installed/lib/libgtest.a $(COVERAGE_FLAGS)  -o ${TESTDIR}/TestFiles/f2 $^ ${LDLIBSOPTIONS} 
 
 ${TESTDIR}/TestFiles/f4: ${TESTDIR}/tests/map_reduce_tests.o ${OBJECTFILES:%.o=%_nomain.o}
 	${MKDIR} -p ${TESTDIR}/TestFiles
-	${LINK.cc} ../../externals/installed/lib/libgtest_main.a ../../externals/installed/lib/libgtest.a --coverage  -o ${TESTDIR}/TestFiles/f4 $^ ${LDLIBSOPTIONS} 
+	${LINK.cc} ../../externals/installed/lib/libgtest_main.a ../../externals/installed/lib/libgtest.a $(COVERAGE_FLAGS)  -o ${TESTDIR}/TestFiles/f4 $^ ${LDLIBSOPTIONS} 
 
 
 ${TESTDIR}/tests/basic_database_tests.o: tests/basic_database_tests.cpp 
 	${MKDIR} -p ${TESTDIR}/tests
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/src/libscriptobject_msgpack -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- -I../../externals/thread-pool-cpp/thread_pool -I../../externals/libscriptobject/externals/msgpack-c/include -I../../externals/ConstTimeEncoding -I../../externals/installed/include -I. `pkg-config --cflags zlib` -std=c++11 --coverage -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/basic_database_tests.o tests/basic_database_tests.cpp
+	$(COMPILE.cc) -g -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/src/libscriptobject_msgpack -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- -I../../externals/thread-pool-cpp/thread_pool -I../../externals/libscriptobject/externals/msgpack-c/include -I../../externals/ConstTimeEncoding -I../../externals/installed/include -I. `pkg-config --cflags zlib` -std=c++11 $(COVERAGE_FLAGS) -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/basic_database_tests.o tests/basic_database_tests.cpp
 
 
 ${TESTDIR}/tests/json_helper_tests.o: tests/json_helper_tests.cpp 
 	${MKDIR} -p ${TESTDIR}/tests
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/src/libscriptobject_msgpack -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- -I../../externals/thread-pool-cpp/thread_pool -I../../externals/libscriptobject/externals/msgpack-c/include -I../../externals/ConstTimeEncoding -I../../externals/installed/include -I. `pkg-config --cflags zlib` -std=c++11 --coverage -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/json_helper_tests.o tests/json_helper_tests.cpp
+	$(COMPILE.cc) -g -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/src/libscriptobject_msgpack -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- -I../../externals/thread-pool-cpp/thread_pool -I../../externals/libscriptobject/externals/msgpack-c/include -I../../externals/ConstTimeEncoding -I../../externals/installed/include -I. `pkg-config --cflags zlib` -std=c++11 $(COVERAGE_FLAGS) -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/json_helper_tests.o tests/json_helper_tests.cpp
 
 
 ${TESTDIR}/tests/map_reduce_tests.o: tests/map_reduce_tests.cpp 
 	${MKDIR} -p ${TESTDIR}/tests
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/src/libscriptobject_msgpack -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- -I../../externals/thread-pool-cpp/thread_pool -I../../externals/libscriptobject/externals/msgpack-c/include -I../../externals/ConstTimeEncoding -I../../externals/installed/include -I. `pkg-config --cflags zlib` -std=c++11 --coverage -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/map_reduce_tests.o tests/map_reduce_tests.cpp
+	$(COMPILE.cc) -g -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/src/libscriptobject_msgpack -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- -I../../externals/thread-pool-cpp/thread_pool -I../../externals/libscriptobject/externals/msgpack-c/include -I../../externals/ConstTimeEncoding -I../../externals/installed/include -I. `pkg-config --cflags zlib` -std=c++11 $(COVERAGE_FLAGS) -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/map_reduce_tests.o tests/map_reduce_tests.cpp
 
 
 ${OBJECTDIR}/_ext/527039428/base64_nomain.o: ${OBJECTDIR}/_ext/527039428/base64.o ../../externals/ConstTimeEncoding/base64.cpp 
