@@ -224,8 +224,8 @@
             <linkerLibLibItem>boost_chrono</linkerLibLibItem>
             <linkerLibLibItem>boost_atomic</linkerLibLibItem>
             <linkerLibLibItem>boost_system</linkerLibLibItem>
-            <linkerOptionItem>`pkg-config --libs zlib`</linkerOptionItem>
             <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
+            <linkerLibLibItem>z</linkerLibLibItem>
             <linkerOptionItem>$(LDLIBS)</linkerOptionItem>
           </linkerLibItems>
         </linkerTool>
@@ -585,8 +585,8 @@
             <linkerLibLibItem>boost_chrono</linkerLibLibItem>
             <linkerLibLibItem>boost_atomic</linkerLibLibItem>
             <linkerLibLibItem>boost_system</linkerLibLibItem>
-            <linkerOptionItem>`pkg-config --libs zlib`</linkerOptionItem>
             <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
+            <linkerLibLibItem>z</linkerLibLibItem>
             <linkerOptionItem>$(LDLIBS)</linkerOptionItem>
           </linkerLibItems>
         </linkerTool>
