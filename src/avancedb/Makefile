@@ -53,7 +53,7 @@ LDLIBS:=$(shell echo 'int main(){}' | $(CXX) -x c++ -o /dev/null -ldl - > /dev/n
 LDLIBS+=$(shell echo 'int main(){}' | $(CXX) -x c++ -o /dev/null -lrt - > /dev/null 2>&1 && echo '-lrt')
 LDLIBS+=$(shell if test "$$(uname)" = "Linux" && test "$(CONF)" = "Release"; then echo "../../externals/installed/lib/libtcmalloc_minimal.a"; fi;)
 
-COVERAGE_FLAGS:=$(shell echo 'int main(){}' | $(CXX) -x c++ -o /dev/null --coverage - > /dev/null 2>&1 && echo '--coverage')
+COVERAGE_FLAGS:=$(shell cd /tmp; echo 'int main(){}' | $(CXX) -x c++ -o /dev/null --coverage - > /dev/null 2>&1 && echo '--coverage')
 
 # build
 build: .build-post
