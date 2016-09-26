@@ -172,7 +172,7 @@ bool RestServer::GetUuids(rs::httpserver::request_ptr request, const rs::httpser
 }
 
 bool RestServer::HeadDatabase(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
-    bool found = false;
+    auto found = false;
     
     auto name = GetDatabaseName(args);
     if (name != nullptr && databases_.IsDatabase(name)) {
@@ -189,7 +189,7 @@ bool RestServer::HeadServer(rs::httpserver::request_ptr request, const rs::https
 }
 
 bool RestServer::GetDatabase(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
-    bool found = false;
+    auto found = false;
 
     auto name = GetDatabaseName(args);
     if (name != nullptr) {
@@ -220,7 +220,7 @@ bool RestServer::GetDatabase(rs::httpserver::request_ptr request, const rs::http
 }
 
 bool RestServer::PutDatabase(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
-    bool created = false;
+    auto created = false;
     
     auto name = GetDatabaseName(args);
     if (name != nullptr) {
@@ -243,7 +243,7 @@ bool RestServer::PutDatabase(rs::httpserver::request_ptr request, const rs::http
 }
 
 bool RestServer::PostDatabase(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
-    bool created = false;
+    auto created = false;
     auto db = GetDatabase(args);
     if (!!db) {
         UuidHelper::UuidString uuidString;
@@ -276,7 +276,7 @@ bool RestServer::PostDatabase(rs::httpserver::request_ptr request, const rs::htt
 }
 
 bool RestServer::DeleteDatabase(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
-    bool deleted = false;
+    auto deleted = false;
     
     auto name = GetDatabaseName(args);    
     if (name != nullptr) {                
@@ -297,7 +297,7 @@ bool RestServer::DeleteDatabase(rs::httpserver::request_ptr request, const rs::h
 }
 
 bool RestServer::GetDocument(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
-    bool gotDoc = false;
+    auto gotDoc = false;
     auto db = GetDatabase(args);
     if (!!db) {
         auto id = GetParameter("id", args);
@@ -339,7 +339,7 @@ bool RestServer::GetDocument(rs::httpserver::request_ptr request, const rs::http
 }
 
 bool RestServer::GetDesignDocument(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
-    bool gotDoc = false;
+    auto gotDoc = false;
     auto db = GetDatabase(args);
     if (!!db) {
         auto id = GetParameter("designid", args);
@@ -362,14 +362,17 @@ bool RestServer::GetDesignDocument(rs::httpserver::request_ptr request, const rs
 
 
 bool RestServer::GetDesignDocumentView(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
+    auto gotView = false;
     auto db = GetDatabase(args);
     if (!!db) {
         response->setStatusCode(200).setContentType(ContentTypes::Utf8::applicationJson).Send(R"({"offset":0,"rows":[],"total_rows":0})");
-    }    
+        gotView = true;
+    }
+    return gotView;
 }
 
 bool RestServer::PutDocument(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
-    bool created = false;
+    auto created = false;
     auto db = GetDatabase(args);
     if (!!db) {
         auto id = GetParameter("id", args);
@@ -395,7 +398,7 @@ bool RestServer::PutDocument(rs::httpserver::request_ptr request, const rs::http
 }
 
 bool RestServer::PutDesignDocument(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
-    bool created = false;
+    auto created = false;
     auto db = GetDatabase(args);
     if (!!db) {
         auto id = GetParameter("designid", args);
@@ -421,7 +424,7 @@ bool RestServer::PutDesignDocument(rs::httpserver::request_ptr request, const rs
 }
 
 bool RestServer::PostDatabaseBulkDocs(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
-    bool created = false;
+    auto created = false;
     auto db = GetDatabase(args);
     if (!!db) {
         auto obj = GetRequestBody(request);
@@ -466,7 +469,7 @@ bool RestServer::PostDatabaseBulkDocs(rs::httpserver::request_ptr request, const
 }
 
 bool RestServer::PostDatabaseRevsDiff(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
-    bool handled = false;
+    auto handled = false;
     auto db = GetDatabase(args);
     if (!!db) {
         JsonStream stream;
@@ -519,7 +522,7 @@ bool RestServer::PostDatabaseRevsDiff(rs::httpserver::request_ptr request, const
 }
 
 bool RestServer::PostEnsureFullCommit(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
-    bool handled = false;
+    auto handled = false;
     auto db = GetDatabase(args);
     if (!!db) {
         JsonStream stream;
@@ -558,7 +561,7 @@ bool RestServer::GetLocalDocument(rs::httpserver::request_ptr request, const rs:
 }
 
 bool RestServer::PutLocalDocument(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
-    bool created = false;
+    auto created = false;
     auto db = GetDatabase(args);
     if (!!db) {
         auto id = GetParameter("id", args);
@@ -583,7 +586,7 @@ bool RestServer::PutLocalDocument(rs::httpserver::request_ptr request, const rs:
 }
 
 bool RestServer::DeleteDocument(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
-    bool deleted = false;
+    auto deleted = false;
     auto db = GetDatabase(args);
     if (!!db) {
         auto id = GetParameter("id", args);
@@ -608,7 +611,7 @@ bool RestServer::DeleteDocument(rs::httpserver::request_ptr request, const rs::h
 }
 
 bool RestServer::DeleteDesignDocument(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
-    bool deleted = false;
+    auto deleted = false;
     auto db = GetDatabase(args);
     if (!!db) {
         auto id = GetParameter("designid", args);
@@ -633,7 +636,7 @@ bool RestServer::DeleteDesignDocument(rs::httpserver::request_ptr request, const
 }
 
 bool RestServer::DeleteLocalDocument(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
-    bool deleted = false;
+    auto deleted = false;
     auto db = GetDatabase(args);
     if (!!db) {
         auto id = GetParameter("id", args);
@@ -658,7 +661,7 @@ bool RestServer::DeleteLocalDocument(rs::httpserver::request_ptr request, const 
 }
 
 bool RestServer::HeadDocument(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
-    bool gotHead = false;
+    auto gotHead = false;
     auto db = GetDatabase(args);
     if (!!db) {
         auto id = GetParameter("id", args);
@@ -675,7 +678,7 @@ bool RestServer::HeadDocument(rs::httpserver::request_ptr request, const rs::htt
 }
 
 bool RestServer::HeadDesignDocument(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
-    bool gotHead = false;
+    auto gotHead = false;
     auto db = GetDatabase(args);
     if (!!db) {
         auto id = GetParameter("designid", args);
@@ -692,6 +695,7 @@ bool RestServer::HeadDesignDocument(rs::httpserver::request_ptr request, const r
 }
 
 bool RestServer::GetDatabaseAllDocs(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
+    auto gotDocs = false;
     auto db = GetDatabase(args);
     if (!!db) {
         GetAllDocumentsOptions options(request->getQueryString());
@@ -735,11 +739,16 @@ bool RestServer::GetDatabaseAllDocs(rs::httpserver::request_ptr request, const r
         }
         
         objStream << "]}";
-        objStream.Flush();        
+        objStream.Flush();
+
+        gotDocs = true;
     }
+
+    return gotDocs;
 }
 
 bool RestServer::PostDatabaseAllDocs(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
+    auto posted = false;
     auto db = GetDatabase(args);
     if (!!db) {
         auto obj = GetRequestBody(request);
@@ -797,14 +806,21 @@ bool RestServer::PostDatabaseAllDocs(rs::httpserver::request_ptr request, const 
         
         objStream << "]}";
         objStream.Flush();
+
+        posted = true;
     }
+
+    return posted;
 }
 
 bool RestServer::GetDatabaseRevsLimit(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
+    auto gotRevs = false;
     auto db = GetDatabase(args);
     if (!!db) {
         response->setStatusCode(200).setContentType(ContentTypes::applicationJson).Send("1");
+        gotRevs = true;
     }
+    return gotRevs;
 }
 
 bool RestServer::PostTempView(rs::httpserver::request_ptr request, const rs::httpserver::RequestRouter::CallbackArgs& args, rs::httpserver::response_ptr response) {
