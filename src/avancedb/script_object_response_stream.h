@@ -394,7 +394,7 @@ private:
             buffer_[pos_++] = ',';
         }
         
-        pos_ += std::sprintf(reinterpret_cast<char*>(buffer_ + pos_), "%llu", value);
+        pos_ += std::sprintf(reinterpret_cast<char*>(buffer_ + pos_), "%" PRIu64, value);
     }
     
     void AppendInt64(std::int64_t value, bool comma = false) {
@@ -408,7 +408,7 @@ private:
             buffer_[pos_++] = ',';
         }
         
-        pos_ += std::sprintf(reinterpret_cast<char*>(buffer_ + pos_), "%lld", value);
+        pos_ += std::sprintf(reinterpret_cast<char*>(buffer_ + pos_), "%" PRId64, value);
     }
     
     // TODO: review
