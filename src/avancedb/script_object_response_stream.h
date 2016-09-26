@@ -23,6 +23,8 @@
 #include <type_traits>
 #include <string>
 
+#include <inttypes.h>
+
 #include "libhttpserver.h"
 
 #include "types.h"
