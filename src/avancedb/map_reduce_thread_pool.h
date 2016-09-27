@@ -45,7 +45,7 @@ public:
         threadPool_->post(handler);
     }   
     
-    rs::jsapi::Runtime& GetThreadRuntime();
+    rs::jsapi::Runtime& GetThreadRuntime(size_t id);
     
 private:
     friend map_reduce_thread_pool_ptr boost::make_shared<map_reduce_thread_pool_ptr::element_type>(std::uint32_t&, bool&, bool&);

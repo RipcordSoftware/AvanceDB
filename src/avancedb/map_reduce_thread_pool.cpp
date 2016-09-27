@@ -62,7 +62,6 @@ void MapReduceThreadPool::Stop() {
     mapReduceThreadPool_.reset();
 }
 
-rs::jsapi::Runtime& MapReduceThreadPool::GetThreadRuntime() {
-    auto id = Worker::getWorkerIdForCurrentThread();
-    return *(threadPoolRuntimes_[id]);
+rs::jsapi::Runtime& MapReduceThreadPool::GetThreadRuntime(size_t threadId) {
+    return *(threadPoolRuntimes_[threadId]);
 }

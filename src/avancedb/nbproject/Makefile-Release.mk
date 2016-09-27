@@ -37,7 +37,6 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 OBJECTFILES= \
 	${OBJECTDIR}/_ext/527039428/base64.o \
 	${OBJECTDIR}/_ext/1383664149/city.o \
-	${OBJECTDIR}/_ext/1845599792/worker.o \
 	${OBJECTDIR}/base64_helper.o \
 	${OBJECTDIR}/config.o \
 	${OBJECTDIR}/daemon.o \
@@ -129,11 +128,6 @@ ${OBJECTDIR}/_ext/1383664149/city.o: ../../externals/cityhash/src/city.cc
 	${MKDIR} -p ${OBJECTDIR}/_ext/1383664149
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/src/libscriptobject_msgpack -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- -I../../externals/thread-pool-cpp/thread_pool -I../../externals/libscriptobject/externals/msgpack-c/include -I../../externals/ConstTimeEncoding -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/1383664149/city.o ../../externals/cityhash/src/city.cc
-
-${OBJECTDIR}/_ext/1845599792/worker.o: ../../externals/thread-pool-cpp/thread_pool/worker.cpp 
-	${MKDIR} -p ${OBJECTDIR}/_ext/1845599792
-	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/src/libscriptobject_msgpack -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- -I../../externals/thread-pool-cpp/thread_pool -I../../externals/libscriptobject/externals/msgpack-c/include -I../../externals/ConstTimeEncoding -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/1845599792/worker.o ../../externals/thread-pool-cpp/thread_pool/worker.cpp
 
 ${OBJECTDIR}/base64_helper.o: base64_helper.cpp 
 	${MKDIR} -p ${OBJECTDIR}
@@ -380,19 +374,6 @@ ${OBJECTDIR}/_ext/1383664149/city_nomain.o: ${OBJECTDIR}/_ext/1383664149/city.o 
 	    $(COMPILE.cc) -O2 -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/src/libscriptobject_msgpack -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- -I../../externals/thread-pool-cpp/thread_pool -I../../externals/libscriptobject/externals/msgpack-c/include -I../../externals/ConstTimeEncoding -std=c++11 -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/1383664149/city_nomain.o ../../externals/cityhash/src/city.cc;\
 	else  \
 	    ${CP} ${OBJECTDIR}/_ext/1383664149/city.o ${OBJECTDIR}/_ext/1383664149/city_nomain.o;\
-	fi
-
-${OBJECTDIR}/_ext/1845599792/worker_nomain.o: ${OBJECTDIR}/_ext/1845599792/worker.o ../../externals/thread-pool-cpp/thread_pool/worker.cpp 
-	${MKDIR} -p ${OBJECTDIR}/_ext/1845599792
-	@NMOUTPUT=`${NM} ${OBJECTDIR}/_ext/1845599792/worker.o`; \
-	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
-	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
-	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
-	then  \
-	    ${RM} "$@.d";\
-	    $(COMPILE.cc) -O2 -I../../externals/libhttpserver/src/libhttpserver -I../../externals/libjsapi/src/libjsapi -I../../externals/termcolor/include -I../../externals/libscriptobject/src/libscriptobject -I../../externals/libscriptobject/src/libscriptobject_gason -I../../externals/libscriptobject/src/libscriptobject_msgpack -I../../externals/libscriptobject/externals/gason/src -I../../externals/cityhash/src -I../../externals/libjsapi/externals/installed/include/mozjs- -I../../externals/thread-pool-cpp/thread_pool -I../../externals/libscriptobject/externals/msgpack-c/include -I../../externals/ConstTimeEncoding -std=c++11 -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/1845599792/worker_nomain.o ../../externals/thread-pool-cpp/thread_pool/worker.cpp;\
-	else  \
-	    ${CP} ${OBJECTDIR}/_ext/1845599792/worker.o ${OBJECTDIR}/_ext/1845599792/worker_nomain.o;\
 	fi
 
 ${OBJECTDIR}/base64_helper_nomain.o: ${OBJECTDIR}/base64_helper.o base64_helper.cpp 

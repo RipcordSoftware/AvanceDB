@@ -69,12 +69,12 @@ map_reduce_results_ptr MapReduce::Execute(const GetViewOptions& options, const M
     
     // run the map
     for (auto& coll : colls) {
-        mapReduceThreadPool_->Post([&]() {
+        mapReduceThreadPool_->Post([&](size_t threadId) {
             std::unique_lock<std::mutex> lock{m, std::defer_lock};
             
             try {
                 BOOST_SCOPE_EXIT(&threads) { --threads; } BOOST_SCOPE_EXIT_END
-                auto& rt = mapReduceThreadPool_->GetThreadRuntime();
+                auto& rt = mapReduceThreadPool_->GetThreadRuntime(threadId);
                 
                 boost::unique_lock<document_collections_ptr_array::value_type::element_type> collLock{*coll};                
                 document_array docs;
@@ -161,7 +161,7 @@ map_reduce_results_ptr MapReduce::Execute(const GetViewOptions& options, const M
         
         for (decltype(collsSize) i = 0; i <= collsSize - step; i += step) {
             if (useThreadsForMerge) {
-                mapReduceThreadPool_->Post([=]() { mergeResultsWorker(i, step); });
+                mapReduceThreadPool_->Post([=](size_t) { mergeResultsWorker(i, step); });
             } else {
                 mergeResultsWorker(i, step);
             }
