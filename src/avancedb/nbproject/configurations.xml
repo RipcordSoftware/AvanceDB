@@ -261,6 +261,8 @@
       </item>
       <item path="bulk_documents_result.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="c99_formatters.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="config.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="config.h" ex="false" tool="3" flavor2="0">
@@ -621,6 +623,8 @@
       <item path="base64_helper.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="bulk_documents_result.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="c99_formatters.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="config.cpp" ex="false" tool="1" flavor2="0">
       </item>

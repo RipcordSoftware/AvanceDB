@@ -23,13 +23,12 @@
 #include <type_traits>
 #include <string>
 
-#include <inttypes.h>
-
 #include "libhttpserver.h"
 
 #include "types.h"
 #include "json_helper.h"
 #include "base64_helper.h"
+#include "c99_formatters.h"
 
 enum class ScriptObjectResponseStreamAttachmentMode {
     Default,
