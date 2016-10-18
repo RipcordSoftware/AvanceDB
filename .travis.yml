@@ -1,14 +1,24 @@
-sudo: false
-
 language: cpp
-compiler: gcc
+
+matrix:
+  include:
+    - os: linux
+      sudo: false
+      compiler: gcc
+      env: _CC=gcc-4.9 _CXX=g++-4.9 _COV=gcov-4.9
+    - os: linux
+      sudo: false
+      compiler: clang
+      env: _CC=clang-3.5 _CXX=clang++-3.5
 
 addons:
   apt:
     sources:
     - ubuntu-toolchain-r-test
+    - llvm-toolchain-precise-3.5
     packages:
     - g++-4.9
+    - clang-3.5
     - python-dev
     - libbz2-dev
     - zlib1g-dev
@@ -22,21 +32,7 @@ services:
 - couchdb
 
 before_script:
-  - ### install Boost
-  - wget https://github.com/Viq111/travis-container-packets/releases/download/boost-1.57.0/boost.tar.bz2
-  - tar -xjf boost.tar.bz2
-  - rm boost.tar.bz2
-  - export LIBRARY_PATH=$(pwd)/boost/lib:$LIBRARY_PATH
-  - export LD_LIBRARY_PATH=$(pwd)/boost/lib:$LD_LIBRARY_PATH
-  - export CPLUS_INCLUDE_PATH=$(pwd)/boost/include/:$CPLUS_INCLUDE_PATH
-  - ### install lcov and coveralls
-  - curl http://ftp.uk.debian.org/debian/pool/main/l/lcov/lcov_1.11.orig.tar.gz -O
-  - tar xfz lcov_1.11.orig.tar.gz
-  - mkdir -p lcov && make -C lcov-1.11/ install PREFIX=~/lcov
-  - export PATH=~/lcov/usr/bin:$PATH
-  - gem install coveralls-lcov
-  - ### fixup build env vars
-  - export GCC=gcc-4.9
-  - export GXX=g++-4.9
+    source .travis/before_script.sh
 
-script: make -j 2 CXX=g++-4.9 && make -j 2 test CXX=g++-4.9 && ./coverage.sh gcov-4.9
+script:
+    source .travis/script.sh
