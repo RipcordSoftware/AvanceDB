@@ -1,5 +1,7 @@
 language: cpp
 
+cache: ccache
+
 matrix:
   include:
     - os: linux
@@ -9,16 +11,18 @@ matrix:
     - os: linux
       sudo: false
       compiler: clang
-      env: _CC=clang-3.5 _CXX=clang++-3.5
+      env: _CC=clang-3.6 _CXX=clang++-3.6
 
 addons:
   apt:
     sources:
     - ubuntu-toolchain-r-test
-    - llvm-toolchain-precise-3.5
+    - llvm-toolchain-precise-3.6
     packages:
+    - binutils-gold    
+    - autoconf2.13    
     - g++-4.9
-    - clang-3.5
+    - clang-3.6
     - python-dev
     - libbz2-dev
     - zlib1g-dev
