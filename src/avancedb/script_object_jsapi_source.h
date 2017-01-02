@@ -1,6 +1,6 @@
 /*
  *  AvanceDB - an in-memory database similar to Apache CouchDB
- *  Copyright (C) 2015-2016 Ripcord Software
+ *  Copyright (C) 2015-2017 Ripcord Software
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
