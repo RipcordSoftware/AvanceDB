@@ -65,11 +65,12 @@ build: .build-post
 # Add your pre 'build' code here...
 
 .build-post: .build-impl
-# Copy Futon/Fauxton files into the build directory
-	mkdir -p ${CND_BASEDIR}/www/ && rsync -uv ../../externals/couchdb/LICENSE ${CND_BASEDIR}/www/
-	mkdir -p ${CND_BASEDIR}/www/_utils/ && rsync -ruv ../../externals/couchdb/share/www/* ${CND_BASEDIR}/www/_utils/
-	mkdir -p ${CND_DISTDIR}/${CONF}/${CND_PLATFORM_${CONF}}/www/ && rsync -ruv ${CND_BASEDIR}/www/* ${CND_DISTDIR}/${CONF}/${CND_PLATFORM_${CONF}}/www/
-
+	# Copy Futon/Fauxton files into the build directory
+	mkdir -p "${CND_BASEDIR}/www/" && rsync -uv "../../externals/couchdb/LICENSE" "${CND_BASEDIR}/www/"
+	mkdir -p "${CND_BASEDIR}/www/_utils/" && rsync -ruv ../../externals/couchdb/share/www/* "${CND_BASEDIR}/www/_utils/"
+	mkdir -p "${CND_DISTDIR}/${CONF}/${CND_PLATFORM_${CONF}}/www/" && rsync -ruv ${CND_BASEDIR}/www/* "${CND_DISTDIR}/${CONF}/${CND_PLATFORM_${CONF}}/www/"
+	# Copy libmozglue into the target dir
+	if [ "`uname`" == "Darwin" ]; then cp -f "../../externals/libjsapi/externals/installed/lib/libmozglue.dylib" "${CND_DISTDIR}/${CONF}/${CND_PLATFORM_${CONF}}"; fi
 
 # clean
 clean: .clean-post
