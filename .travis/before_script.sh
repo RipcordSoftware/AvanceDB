@@ -28,6 +28,9 @@ elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     test -d ~/.ccache && brew install ccache
     brew install couchdb
 
+    # start couchdb
+    brew services start couchdb
+
     # soft-link the boost libs so we can link to them
     BOOST_LIBS=/usr/local/lib
     ln -s ${BOOST_LIBS}/libboost_thread-mt.a ${BOOST_LIBS}/libboost_thread.a

@@ -70,7 +70,7 @@ build: .build-post
 	mkdir -p "${CND_BASEDIR}/www/_utils/" && rsync -ruv ../../externals/couchdb/share/www/* "${CND_BASEDIR}/www/_utils/"
 	mkdir -p "${CND_DISTDIR}/${CONF}/${CND_PLATFORM_${CONF}}/www/" && rsync -ruv ${CND_BASEDIR}/www/* "${CND_DISTDIR}/${CONF}/${CND_PLATFORM_${CONF}}/www/"
 	# Copy libmozglue into the target dir
-	if [ "`uname`" == "Darwin" ]; then cp -f "../../externals/libjsapi/externals/installed/lib/libmozglue.dylib" "${CND_DISTDIR}/${CONF}/${CND_PLATFORM_${CONF}}"; fi
+	if [ "`uname`" = "Darwin" ]; then cp -f "../../externals/libjsapi/externals/installed/lib/libmozglue.dylib" "${CND_DISTDIR}/${CONF}/${CND_PLATFORM_${CONF}}"; fi
 
 # clean
 clean: .clean-post
