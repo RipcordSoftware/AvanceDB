@@ -1,4 +1,4 @@
-SHELL := /usr/bin/env bash
+SHELL := bash
 
 GTEST_VER=1.7.0
 

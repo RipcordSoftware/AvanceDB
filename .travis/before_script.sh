@@ -17,12 +17,22 @@ if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
     gem install coveralls-lcov
 elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     brew update
+    brew tap homebrew/versions
+    brew install autoconf213
+    brew unlink autoconf213
+    brew install autoconf
+    brew install automake
+    brew install libtool
+    brew install pkg-config
     brew install boost
+    test -d ~/.ccache && brew install ccache
 
-    # rename the boost libs so we can link to them
-    BOOST_LIBS=$(echo /usr/local/Cellar/boost/?.??.*/lib)
+    # soft-link the boost libs so we can link to them
+    BOOST_LIBS=/usr/local/lib
     ln -s ${BOOST_LIBS}/libboost_thread-mt.a ${BOOST_LIBS}/libboost_thread.a
-    ln -s ${BOOST_LIBS}/libboost_thread-mt.dylib ${BOOST_LIBS}/libboost_thread.dylib    
+    ln -s ${BOOST_LIBS}/libboost_thread-mt.dylib ${BOOST_LIBS}/libboost_thread.dylib
+    ln -s ${BOOST_LIBS}/libboost_atomic-mt.a ${BOOST_LIBS}/libboost_atomic.a
+    ln -s ${BOOST_LIBS}/libboost_atomic-mt.dylib ${BOOST_LIBS}/libboost_atomic.dylib
 fi
 
 popd
