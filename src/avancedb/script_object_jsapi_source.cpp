@@ -27,9 +27,11 @@ ScriptObjectJsapiSource ScriptObjectJsapiSource::Create(const rs::jsapi::Value& 
     
     auto cx = obj.getContext();
     JSAutoRequest ar{cx};    
-    JS::AutoIdArray ids{cx, JS_Enumerate(cx, obj)};
     
-    if (!!ids) {        
+    JS::Rooted<JS::IdVector> ids{cx, JS::IdVector{cx}};
+    JS_Enumerate(cx, obj, &ids);
+
+    if (ids.length() > 0) {        
         source.stringValues_.resize(ids.length());
         
         for (decltype(ids.length()) i = 0, length = ids.length(); i < length; ++i) {

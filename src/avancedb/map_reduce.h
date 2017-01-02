@@ -67,7 +67,7 @@ public:
     
 private:
     
-    map_reduce_result_array_ptr Execute(rs::jsapi::Runtime& rt, const MapReduceTask& task, const document_array& docs);
+    map_reduce_result_array_ptr Execute(rs::jsapi::Context& cx, const MapReduceTask& task, const document_array& docs);
     
     static void GetFieldValue(script_object_ptr scriptObj, const char* name, rs::jsapi::Value& value);
     static void GetFieldValue(script_array_ptr scriptObj, int index, rs::jsapi::Value& value);

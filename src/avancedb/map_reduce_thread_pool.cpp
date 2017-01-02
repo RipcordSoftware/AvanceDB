@@ -23,28 +23,23 @@
 
 MapReduceThreadPool::map_reduce_thread_pool_ptr mapReduceThreadPool_;
 
-MapReduceThreadPool::MapReduceThreadPool(std::uint32_t jsapiHeapSize, bool enableBaselineCompiler, bool enableIonCompiler) :
-        defaultRuntime_(jsapiHeapSize, enableBaselineCompiler, enableIonCompiler) {
-    
-}
-
 MapReduceThreadPool::map_reduce_thread_pool_ptr MapReduceThreadPool::Start(std::uint32_t jsapiHeapSize, bool enableBaselineCompiler, bool enableIonCompiler) {
-    auto threadPool = boost::make_shared<map_reduce_thread_pool_ptr::element_type>(jsapiHeapSize, enableBaselineCompiler, enableIonCompiler);
+    auto threadPool = boost::make_shared<map_reduce_thread_pool_ptr::element_type>();
 
     ThreadPoolOptions threadPoolOptions;
     threadPoolOptions.threads_count = Config::GetCPUCount() * Config::MapReduce::GetCPUMultiplier();
 
-    threadPool->threadPoolRuntimes_.resize(threadPoolOptions.threads_count);
+    threadPool->threadPoolContexts_.resize(threadPoolOptions.threads_count);
 
     threadPoolOptions.onStart = [=](size_t id){
         SetThreadName::Set("MapReduceWorker");
 
-        auto rt = new rs::jsapi::Runtime(jsapiHeapSize, enableBaselineCompiler, enableIonCompiler);
-        threadPool->threadPoolRuntimes_[id].reset(rt);
+        auto rt = new rs::jsapi::Context(jsapiHeapSize, JS::DefaultNurseryBytes, enableBaselineCompiler, enableIonCompiler);
+        threadPool->threadPoolContexts_[id].reset(rt);
     };
 
     threadPoolOptions.onStop = [=](size_t id) {
-        threadPool->threadPoolRuntimes_[id].release();
+        threadPool->threadPoolContexts_[id].release();
     };
     
     threadPool->threadPool_.reset(new ThreadPool(threadPoolOptions));
@@ -62,6 +57,6 @@ void MapReduceThreadPool::Stop() {
     mapReduceThreadPool_.reset();
 }
 
-rs::jsapi::Runtime& MapReduceThreadPool::GetThreadRuntime(size_t threadId) {
-    return *(threadPoolRuntimes_[threadId]);
+rs::jsapi::Context& MapReduceThreadPool::GetThreadContext(size_t threadId) {
+    return *(threadPoolContexts_[threadId]);
 }

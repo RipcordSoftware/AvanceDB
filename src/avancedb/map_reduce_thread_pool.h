@@ -45,15 +45,14 @@ public:
         threadPool_->post(handler);
     }   
     
-    rs::jsapi::Runtime& GetThreadRuntime(size_t id);
+    rs::jsapi::Context& GetThreadContext(size_t id);
     
 private:
-    friend map_reduce_thread_pool_ptr boost::make_shared<map_reduce_thread_pool_ptr::element_type>(std::uint32_t&, bool&, bool&);
+    friend map_reduce_thread_pool_ptr boost::make_shared<map_reduce_thread_pool_ptr::element_type>();
     
-    MapReduceThreadPool(std::uint32_t jsapiHeapSize, bool enableBaselineCompiler, bool enableIonCompiler);
+    MapReduceThreadPool() {}
 
-    rs::jsapi::Runtime defaultRuntime_;
-    std::vector<std::unique_ptr<rs::jsapi::Runtime>> threadPoolRuntimes_;
+    std::vector<std::unique_ptr<rs::jsapi::Context>> threadPoolContexts_;
     std::unique_ptr<ThreadPool> threadPool_;
 };
 

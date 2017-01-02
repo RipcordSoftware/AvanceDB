@@ -74,14 +74,14 @@ map_reduce_results_ptr MapReduce::Execute(const GetViewOptions& options, const M
             
             try {
                 BOOST_SCOPE_EXIT(&threads) { --threads; } BOOST_SCOPE_EXIT_END
-                auto& rt = mapReduceThreadPool_->GetThreadRuntime(threadId);
+                auto& cx = mapReduceThreadPool_->GetThreadContext(threadId);
                 
                 boost::unique_lock<document_collections_ptr_array::value_type::element_type> collLock{*coll};                
                 document_array docs;
                 coll->copy(docs, false);
                 collLock.unlock();
                 
-                auto result = Execute(rt, task, docs);                                
+                auto result = Execute(cx, task, docs);                                
                 
                 auto filteredResult = boost::make_shared<map_reduce_shard_results_ptr::element_type>(
                     result, skip + std::min(limit, result->size()), startKey, endKey, inclusiveEnd, descending);               
@@ -183,7 +183,7 @@ map_reduce_results_ptr MapReduce::Execute(const GetViewOptions& options, const M
     return boost::make_shared<map_reduce_results_ptr::element_type>(results, offset, totalRows, skip, limit, descending);
 }
 
-map_reduce_result_array_ptr MapReduce::Execute(rs::jsapi::Runtime& rt, const MapReduceTask& task, const document_array& docs) {
+map_reduce_result_array_ptr MapReduce::Execute(rs::jsapi::Context& cx, const MapReduceTask& task, const document_array& docs) {
     map_reduce_result_array_ptr results = boost::make_shared<map_reduce_result_array_ptr::element_type>();
     
     // create the function script
@@ -195,7 +195,7 @@ map_reduce_result_array_ptr MapReduce::Execute(rs::jsapi::Runtime& rt, const Map
     auto doc = std::cref(empty);
 
     // define a function in global scope implemented by a C++ lambda
-    rs::jsapi::Global::DefineFunction(rt, "emit", 
+    rs::jsapi::Global::DefineFunction(cx, "emit", 
         [&](const std::vector<rs::jsapi::Value>& args, rs::jsapi::Value&) {
             auto source = ScriptArrayJsapiKeyValueSource::Create(args[0], args[1]);
             
@@ -205,14 +205,14 @@ map_reduce_result_array_ptr MapReduce::Execute(rs::jsapi::Runtime& rt, const Map
     });
 
     // execute the script in the context of the runtime, getting the resulting function
-    rs::jsapi::Value func(rt);
-    rt.Evaluate(mapScript.c_str(), func);
+    rs::jsapi::Value func(cx);
+    cx.Evaluate(mapScript.c_str(), func);
     
     auto state = new MapReduceScriptObjectState{};
 
     rs::scriptobject::ScriptObjectPtr scriptObj;
-    rs::jsapi::Value object(rt);
-    rs::jsapi::DynamicObject::Create(rt, 
+    rs::jsapi::Value object(cx);
+    rs::jsapi::DynamicObject::Create(cx, 
         [&](const char* name, rs::jsapi::Value& value) {
             return MapReduce::GetFieldValue(scriptObj, name, value);
         }, 
@@ -229,7 +229,7 @@ map_reduce_result_array_ptr MapReduce::Execute(rs::jsapi::Runtime& rt, const Map
 
     rs::jsapi::DynamicObject::SetPrivate(object, 0, state);
 
-    rs::jsapi::FunctionArguments args(rt);
+    rs::jsapi::FunctionArguments args(cx);
     args.Append(object);
 
     for (DocumentCollection::size_type i = 0, size = docs.size(); i < size; ++i) {

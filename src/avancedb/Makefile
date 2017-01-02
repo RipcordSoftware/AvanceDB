@@ -55,6 +55,9 @@ LDLIBS+=$(shell if test "$$(uname)" = "Linux" && test "$(CONF)" = "Release"; the
 
 COVERAGE_FLAGS:=$(shell cd /tmp; echo 'int main(){}' | $(CXX) -x c++ -o /dev/null --coverage - > /dev/null 2>&1 && echo '--coverage')
 
+include ../../externals/libjsapi/src/make/libmozglue.mk
+LDLIBS:=$(call LIBMOZGLUE, ../../externals/libjsapi/externals/installed/lib) $(LDLIBS)
+
 # build
 build: .build-post
 
