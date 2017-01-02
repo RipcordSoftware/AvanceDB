@@ -26,6 +26,7 @@ elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     brew install pkg-config
     brew install boost
     test -d ~/.ccache && brew install ccache
+    brew install couchdb
 
     # soft-link the boost libs so we can link to them
     BOOST_LIBS=/usr/local/lib
