@@ -49,6 +49,9 @@ MKDIR=mkdir
 CP=cp
 CCADMIN=CCadmin
 
+JSAPI_EXT_INSTALLED:="../../externals/libjsapi/externals/installed"
+JSAPI_EXT_INSTALLED_LIB:=$(JSAPI_EXT_INSTALLED)/lib
+
 LDLIBS:=$(shell echo 'int main(){}' | $(CXX) -x c++ -o /dev/null -ldl - > /dev/null 2>&1 && echo '-ldl')
 LDLIBS+=$(shell echo 'int main(){}' | $(CXX) -x c++ -o /dev/null -lrt - > /dev/null 2>&1 && echo '-lrt')
 LDLIBS+=$(shell if test "$$(uname)" = "Linux" && test "$(CONF)" = "Release"; then echo "../../externals/installed/lib/libtcmalloc_minimal.a"; fi;)
@@ -70,7 +73,7 @@ build: .build-post
 	mkdir -p "${CND_BASEDIR}/www/_utils/" && rsync -ruv ../../externals/couchdb/share/www/* "${CND_BASEDIR}/www/_utils/"
 	mkdir -p "${CND_DISTDIR}/${CONF}/${CND_PLATFORM_${CONF}}/www/" && rsync -ruv ${CND_BASEDIR}/www/* "${CND_DISTDIR}/${CONF}/${CND_PLATFORM_${CONF}}/www/"
 	# Copy libmozglue into the target dir
-	if [ "`uname`" = "Darwin" ]; then cp -f "../../externals/libjsapi/externals/installed/lib/libmozglue.dylib" "${CND_DISTDIR}/${CONF}/${CND_PLATFORM_${CONF}}"; fi
+	if [ "`uname`" = "Darwin" ]; then cp -f "$(JSAPI_EXT_INSTALLED_LIB)/libmozglue.dylib" "${CND_DISTDIR}/${CONF}/${CND_PLATFORM_${CONF}}"; fi
 
 # clean
 clean: .clean-post
@@ -117,6 +120,7 @@ test: .test-post
 
 .test-pre: build-tests
 # Add your pre 'test' code here...
+	if [ -e "$(JSAPI_EXT_INSTALLED_LIB)/libmozglue.dylib" ]; then cp -f "$(JSAPI_EXT_INSTALLED_LIB)/libmozglue.dylib" "$(CND_BUILDDIR)/${CONF}/${CND_PLATFORM_${CONF}}/tests/TestFiles"; fi
 
 .test-post: .test-impl
 # Add your post 'test' code here...
