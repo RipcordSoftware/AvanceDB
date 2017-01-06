@@ -22,7 +22,7 @@ GEM
     http-cookie (1.0.2)
       domain_name (~> 0.5)
     i18n (0.7.0)
-    json (1.8.1)
+    json (2.0.2)
     mime-types (2.6.1)
     minitest (5.8.0)
     netrc (0.10.3)
