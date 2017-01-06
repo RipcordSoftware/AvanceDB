@@ -51,6 +51,7 @@ GEM
     tzinfo (1.2.2)
       thread_safe (~> 0.1)
     unf (0.1.4)
+      unf_ext (~> 0.0.7.2)
 
 PLATFORMS
   ruby
