@@ -31,7 +31,11 @@ if [ $? -ne 0 ]; then
     gem install ${USER_INSTALL} bundler
 fi
 
-bundle install
+if [ $EUID -ne 0 ]; then
+    bundle install --path=~/.gem
+else
+    bundle install
+fi
 
 CONFIGURATION=$1
 if [ "$CONFIGURATION" == "" ]; then

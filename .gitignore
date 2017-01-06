@@ -61,3 +61,6 @@ coverage/*
 
 # ignore any site-packages directories
 site-packages
+
+# ruby files
+**/.bundle/
