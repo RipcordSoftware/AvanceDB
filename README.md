@@ -28,7 +28,7 @@ AvanceDB will run on Linux on a humble Raspberry Pi 2 or an enterprise server. V
 | Debian 8.6   | amd64              | [![debian-8.6-amd64](https://jenkins.ripcordsoftware.com/buildStatus/icon?job=avancedb-debian-8.6)](https://jenkins.ripcordsoftware.com/job/avancedb-debian-8.6/) |
 | Ubuntu 14.04 | amd64              | [![ubutu-14.04-amd64](https://jenkins.ripcordsoftware.com/buildStatus/icon?job=avancedb-ubuntu-14.04)](https://jenkins.ripcordsoftware.com/job/avancedb-ubuntu-14.04/) |
 | Ubuntu 16.04 | amd64              | [![ubuntu-16.04-amd64](https://jenkins.ripcordsoftware.com/buildStatus/icon?job=avancedb-ubuntu-16.04)](https://jenkins.ripcordsoftware.com/job/avancedb-ubuntu-16.04/) |
-| CentOS 6.8   | amd64              | [![centos-6.8-amd64](https://jenkins.ripcordsoftware.com/buildStatus/icon?job=avancedb-centos-7.3)](https://jenkins.ripcordsoftware.com/job/avancedb-centos-6.8/) |
+| CentOS 6.8   | amd64              | [![centos-6.8-amd64](https://jenkins.ripcordsoftware.com/buildStatus/icon?job=avancedb-centos-6.8)](https://jenkins.ripcordsoftware.com/job/avancedb-centos-6.8/) |
 | CentOS 7.3   | amd64              | [![centos-7.3-amd64](https://jenkins.ripcordsoftware.com/buildStatus/icon?job=avancedb-centos-7.3)](https://jenkins.ripcordsoftware.com/job/avancedb-centos-7.3/) |
 | Fedora 25    | amd64              | [![fedora-25-amd64](https://jenkins.ripcordsoftware.com/buildStatus/icon?job=avancedb-fedora-25)](https://jenkins.ripcordsoftware.com/job/avancedb-fedora-25/) |
 
