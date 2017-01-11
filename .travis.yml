@@ -15,7 +15,7 @@ matrix:
     - os: osx
       compiler: clang
       osx_image: xcode7.3
-      env: _CC=clang _CXX=clang++      
+      env: _CC=clang _CXX=clang++
 
 addons:
   apt:
@@ -23,8 +23,8 @@ addons:
     - ubuntu-toolchain-r-test
     - llvm-toolchain-precise-3.6
     packages:
-    - binutils-gold    
-    - autoconf2.13    
+    - binutils-gold
+    - autoconf2.13
     - g++-4.9
     - clang-3.6
     - python-dev
@@ -35,6 +35,7 @@ addons:
     - rubygems
     - doxygen
     - libtool
+    - net-tools
 
 services:
 - couchdb
