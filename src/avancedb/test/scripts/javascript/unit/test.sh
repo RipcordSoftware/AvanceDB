@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 npm --version &> /dev/null
 if [ $? -eq 127 ]; then

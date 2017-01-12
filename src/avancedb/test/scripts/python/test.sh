@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 PYTHON_BIN=`which python-2.7 || which python2.7 || which python27 || which python`
 

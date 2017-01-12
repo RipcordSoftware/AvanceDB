@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 whereis ruby > /dev/null
 if [ $? -ne 0 ]; then
