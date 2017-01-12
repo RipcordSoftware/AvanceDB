@@ -18,11 +18,9 @@ if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
     export PATH=~/lcov/usr/bin:$PATH
     gem install coveralls-lcov
 elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-    brew update
-    brew tap homebrew/versions
-    brew install autoconf213
-    brew unlink autoconf213
+    brew update    
     brew install autoconf
+    brew install autoconf@2.13
     brew install automake
     brew install libtool
     brew install pkg-config
