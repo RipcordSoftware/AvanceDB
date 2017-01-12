@@ -1,7 +1,8 @@
 #!/bin/bash
 
-python --version &> /dev/null
-if [ $? -eq 127 ]; then
+PYTHON_BIN=`which python-2.7 || which python2.7 || which python27 || which python`
+
+if [ "$PYTHON_BIN" = "" ]; then
     echo 'You should install python before running this test'
     exit 1
 fi
@@ -31,7 +32,7 @@ ADB_PID=$!
 sleep ${DELAY}
 popd
 
-PYTHONPATH=$PYTHONPATH:site-packages python test.py
+PYTHONPATH=$PYTHONPATH:site-packages $PYTHON_BIN test.py
 STATUS=$?
 sleep ${DELAY}
 kill $ADB_PID
