@@ -5464,6 +5464,7 @@ describe('avancedb -- doc attachments --', function() {
 });
 
 describe('avancedb -- fuzz -- ', function() {
+    var badRequest = '400 Bad Request\r\nConnection: close\r\n\r\n';
     var connectOptions = {host: host, port: port};
     
     it('sends an empty header', function(done) {
@@ -5478,7 +5479,7 @@ describe('avancedb -- fuzz -- ', function() {
         });    
         
         client.on('close', function() {
-            assert.equal(0, response.length);
+            assert.equal(badRequest, response);
             done();
         });
     });
@@ -5495,7 +5496,7 @@ describe('avancedb -- fuzz -- ', function() {
         });        
         
         client.on('close', function() {
-            assert.equal(0, response.length);
+            assert.equal(badRequest, response);
             done();
         });
     });
@@ -5512,7 +5513,7 @@ describe('avancedb -- fuzz -- ', function() {
         });        
         
         client.on('close', function() {
-            assert.equal(0, response.length);
+            assert.equal(badRequest, response);
             done();
         });
     });
@@ -5549,7 +5550,7 @@ describe('avancedb -- fuzz -- ', function() {
         });
         
         client.on('close', function() {
-            assert.equal(0, response.length);
+            assert.equal(badRequest, response);
             done();
         });
     });
@@ -5568,7 +5569,7 @@ describe('avancedb -- fuzz -- ', function() {
         });
         
         client.on('close', function() {
-            assert.equal(0, response.length);
+            assert.equal(badRequest, response);
             done();
         });
     });
@@ -5587,7 +5588,7 @@ describe('avancedb -- fuzz -- ', function() {
         });
         
         client.on('close', function() {
-            assert.equal(0, response.length);
+            assert.equal(badRequest, response);
             done();
         });
     });
