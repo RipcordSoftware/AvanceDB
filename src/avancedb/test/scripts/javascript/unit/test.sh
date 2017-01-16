@@ -27,7 +27,7 @@ if [ "$CONFIGURATION" == "" ]; then
 fi
 
 DELAY=2
-if [ "${CI}" = "true" ]; then
+if [ "${CI}" = "true" ] || [ "$JENKINS_HOME" != "" ] ; then
     DELAY=10
 fi
 

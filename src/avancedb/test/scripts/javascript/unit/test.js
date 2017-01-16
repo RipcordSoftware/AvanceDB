@@ -5464,7 +5464,7 @@ describe('avancedb -- doc attachments --', function() {
 });
 
 describe('avancedb -- fuzz -- ', function() {
-    var badRequest = '400 Bad Request\r\nConnection: close\r\n\r\n';
+    var badRequest = 'HTTP/1.1 400 Bad Request\r\nConnection: close\r\n\r\n';
     var connectOptions = {host: host, port: port};
     
     it('sends an empty header', function(done) {
