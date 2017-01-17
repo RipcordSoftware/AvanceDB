@@ -20,22 +20,21 @@ if [ "$CONFIGURATION" == "" ]; then
 fi
 
 DELAY=2
-if [ "${CI}" = "true" ]; then
+if [ "${CI}" = "true" ] || [ "$JENKINS_HOME" != "" ] ; then
     DELAY=10
 fi
 
 TEST_DIR=$PWD
 
 pushd ../../../dist/${CONFIGURATION}/GNU-Linux-x86
-./avancedb -p 15996 &> ${TEST_DIR}/avance_test.log  &
-ADB_PID=$!
+./avancedb --daemon -p 15996 -o "${TEST_DIR}/avancedb_test.log" -e "${TEST_DIR}/avancedb_test.err" --pid "${TEST_DIR}/avancedb_test.pid"
 sleep ${DELAY}
 popd
 
 PYTHONPATH=$PYTHONPATH:site-packages $PYTHON_BIN test.py
 STATUS=$?
 sleep ${DELAY}
-kill $ADB_PID
+kill `cat avancedb_test.pid`
 
 exit $STATUS
 
