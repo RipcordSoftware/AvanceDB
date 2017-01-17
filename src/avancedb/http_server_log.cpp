@@ -47,8 +47,10 @@ static LogRow logRows[maxLogRows];
 static boost::atomic<unsigned> writeRowIndex;
 static unsigned readRowIndex = 0;
 
-static void streamWriterThread() {
-    SetThreadName::Set("HttpServerLog");
+static boost::once_flag startThreadOnce = BOOST_ONCE_INIT;
+
+static void StreamWriterThread() {
+    SetThreadName::Set("avancedb-httplog");
     
     try {
         while (true) {
@@ -88,9 +90,14 @@ static void streamWriterThread() {
     }
 }
 
-static boost::thread logThread(streamWriterThread);
+static void StartStreamWriterThread() {
+    boost::thread logThread(StreamWriterThread);
+    logThread.detach();
+}
 
 void HttpServerLog::Append(rs::httpserver::socket_ptr socket, rs::httpserver::request_ptr request, rs::httpserver::response_ptr response, const std::time_t& start, long duration) {
+    // start the log thread if it isn't already running
+    boost::call_once(StartStreamWriterThread, startThreadOnce);
     
     int year, month, day, hour, min, sec;
     GetTimestamp(start, year, month, day, hour, min, sec);
