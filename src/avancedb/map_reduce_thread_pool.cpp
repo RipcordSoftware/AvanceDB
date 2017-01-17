@@ -32,7 +32,7 @@ MapReduceThreadPool::map_reduce_thread_pool_ptr MapReduceThreadPool::Start(std::
     threadPool->threadPoolContexts_.resize(threadPoolOptions.threads_count);
 
     threadPoolOptions.onStart = [=](size_t id){
-        SetThreadName::Set("MapReduceWorker");
+        SetThreadName::Set("avancedb-mapred");
 
         auto rt = new rs::jsapi::Context(jsapiHeapSize, JS::DefaultNurseryBytes, enableBaselineCompiler, enableIonCompiler);
         threadPool->threadPoolContexts_[id].reset(rt);
