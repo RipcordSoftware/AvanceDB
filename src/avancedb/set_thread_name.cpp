@@ -18,7 +18,7 @@
 
 #include "set_thread_name.h"
 
-#if __GNUG__ && not defined(__clang__)
+#if __GNUG__ && !defined(__clang__)
 #include <pthread.h>
 
 bool SetThreadName::Set(std::thread& thread, const char* name) {
