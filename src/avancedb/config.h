@@ -19,12 +19,61 @@
 #ifndef RS_AVANCEDB_CONFIG_H
 #define RS_AVANCEDB_CONFIG_H
 
+#include <string>
 #include <cstdint>
+
+#include <boost/program_options.hpp>
 
 class Config final {
 public:
     
-    static unsigned GetCPUCount();
+    Config() = delete;
+    Config(const Config&) = delete;
+    Config(Config&&) = delete;
+    
+    static void Parse(int argc, const char** argv);
+    
+    static const boost::program_options::options_description& Description() noexcept;
+    
+    static bool IsHelp() noexcept;
+    static bool IsDaemon() noexcept;
+    
+    struct Process final {
+        static const std::string& PidFile() noexcept;
+        static const std::string& StdOutFile() noexcept;
+        static const std::string& StdErrFile() noexcept;
+        static const std::string& RootDirectory() noexcept;
+        
+        static bool Daemonize() noexcept;
+        
+    private:
+        friend Config;
+        
+        static std::string pidFile_;
+        static std::string stdOutFile_;
+        static std::string stdErrFile_;
+        static std::string rootDirectory_;
+    };
+    
+    struct Environment final {
+        static unsigned CpuCount();
+        
+    private:
+    };
+    
+    struct Http final {
+        static const char DefaultAddress[];
+        static const unsigned DefaultPort;
+        
+        static const std::string& Address() noexcept;
+        static unsigned Port() noexcept;
+        
+    private:
+        friend Config;
+        
+        static std::string address_;
+        static unsigned port_;
+    };
     
     struct SpiderMonkey final {
         static std::uint32_t GetHeapSize();
@@ -42,7 +91,13 @@ public:
         static unsigned GetDatabaseDeleteDelay();
     };
     
+    static void Clear() { vm_.clear(); }
+    static bool IsEmpty() { return vm_.empty(); }
+    
 private:
+    
+    static boost::program_options::options_description desc_;
+    static boost::program_options::variables_map vm_;
 
 };
 

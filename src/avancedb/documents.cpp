@@ -651,7 +651,7 @@ DocumentCollection::size_type Documents::FindDocument(const document_array& docs
 }
 
 unsigned Documents::GetCollectionCount() const {
-    auto collections = Config::GetCPUCount() * 2;           
+    auto collections = Config::Environment::CpuCount() * 2;           
     return collections;
 }
 

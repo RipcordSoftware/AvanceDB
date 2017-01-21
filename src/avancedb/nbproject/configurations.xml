@@ -106,6 +106,12 @@
                      kind="TEST">
         <itemPath>tests/basic_database_tests.cpp</itemPath>
       </logicalFolder>
+      <logicalFolder name="f1"
+                     displayName="Config Tests"
+                     projectFiles="true"
+                     kind="TEST">
+        <itemPath>tests/config_tests.cpp</itemPath>
+      </logicalFolder>
       <logicalFolder name="f2"
                      displayName="JSON Helper Tests"
                      projectFiles="true"
@@ -307,6 +313,21 @@
           <commandLine>../../externals/installed/lib/libgtest_main.a ../../externals/installed/lib/libgtest.a $(COVERAGE_FLAGS)</commandLine>
         </linkerTool>
       </folder>
+      <folder path="TestFiles/f1">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+        <ccTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+        </ccTool>
+        <linkerTool>
+          <output>${TESTDIR}/TestFiles/f1</output>
+        </linkerTool>
+      </folder>
       <folder path="TestFiles/f2">
         <cTool>
           <incDir>
@@ -463,6 +484,8 @@
       <item path="set_thread_name.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="tests/basic_database_tests.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/config_tests.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="tests/json_helper_tests.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -662,6 +685,21 @@
           <commandLine>../../externals/installed/lib/libgtest_main.a ../../externals/installed/lib/libgtest.a</commandLine>
         </linkerTool>
       </folder>
+      <folder path="TestFiles/f1">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+        <ccTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+        </ccTool>
+        <linkerTool>
+          <output>${TESTDIR}/TestFiles/f1</output>
+        </linkerTool>
+      </folder>
       <folder path="TestFiles/f2">
         <cTool>
           <incDir>
@@ -818,6 +856,8 @@
       <item path="set_thread_name.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="tests/basic_database_tests.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/config_tests.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="tests/json_helper_tests.cpp" ex="false" tool="1" flavor2="0">
       </item>

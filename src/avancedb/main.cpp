@@ -19,53 +19,27 @@
 #include <iostream>
 #include <string>
 
-#include <boost/program_options.hpp>
-
 #include "http_server.h"
 #include "map_reduce_thread_pool.h"
 #include "daemon.h"
 #include "config.h"
 
-int main(int argc, char** argv) {
+int main(int argc, const char** argv) {
     try {
-        std::string addr = "0.0.0.0";
-        unsigned port = 5994;
-        std::string pidFile;
-        std::string stdoutFile;
-        std::string stderrFile;
-        std::string rootDirectory;
-        auto isUserProcess = false;
+        Config::Parse(argc, argv);
 
-        boost::program_options::options_description desc("Program options");
-        desc.add_options()
-            ("help,h", "shows the program options")
-            ("address,a", boost::program_options::value(&addr)->default_value(addr), "the IP address to listen on")
-            ("port,p", boost::program_options::value(&port)->default_value(port), "the TCP/IP port to listen on")
-            ("daemon,d", "daemonize the process")
-            ("pid", boost::program_options::value(&pidFile), "writes the process id to a file")
-            ("out,o", boost::program_options::value(&stdoutFile), "writes stdout to a file")
-            ("err,e", boost::program_options::value(&stderrFile), "writes stderr to a file")
-            ("dir", boost::program_options::value(&rootDirectory), "sets the working directory")
-        ;
+        if (Config::IsHelp()) {
+            std::cout << Config::Description() << std::endl;
+        } else if (!Config::IsDaemon() || Daemon::Daemonize(Config::Process::StdOutFile(), Config::Process::StdErrFile())) {
+            Daemon::RedirectStdout(Config::Process::StdOutFile());
+            Daemon::RedirectStderr(Config::Process::StdErrFile());
 
-        boost::program_options::variables_map vm;
-        boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
-        boost::program_options::notify(vm);
-
-        if (vm.count("help")) {
-            std::cout << desc << std::endl;
-        } else if ((isUserProcess = vm.count("daemon") == 0) || Daemon::Daemonize(stdoutFile, stderrFile)) {
-            Daemon::WritePid(pidFile);
-            Daemon::ChangeDir(rootDirectory);
-
-            if (isUserProcess) {
-                Daemon::RedirectStdout(stdoutFile);
-                Daemon::RedirectStderr(stderrFile);
-            }
+            Daemon::WritePid(Config::Process::PidFile());
+            Daemon::ChangeDir(Config::Process::RootDirectory());
 
             MapReduceThreadPoolScope threadPool{Config::SpiderMonkey::GetHeapSize(), Config::SpiderMonkey::GetEnableBaselineCompiler(), Config::SpiderMonkey::GetEnableIonCompiler()};
 
-            HttpServer server(addr.c_str(), port);
+            HttpServer server(Config::Http::Address().c_str(), Config::Http::Port());
             server.Start();
         }
     }
