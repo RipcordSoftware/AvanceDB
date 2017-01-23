@@ -22,6 +22,8 @@
 
 #include <boost/thread.hpp>
 
+#include "jsapi.h"
+
 const char Config::Http::DefaultAddress[] = "0.0.0.0";
 const unsigned Config::Http::DefaultPort = 5994;
 
@@ -101,6 +103,10 @@ unsigned Config::Http::Port() noexcept {
 
 std::uint32_t Config::SpiderMonkey::HeapSize() {
     return 64 * 1024 * 1024;
+}
+
+std::uint32_t Config::SpiderMonkey::NurserySize() {
+    return JS::DefaultNurseryBytes;
 }
 
 bool Config::SpiderMonkey::EnableBaselineCompiler() {

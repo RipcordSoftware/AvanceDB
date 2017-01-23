@@ -77,6 +77,7 @@ public:
     
     struct SpiderMonkey final {
         static std::uint32_t HeapSize();
+        static std::uint32_t NurserySize();
         static bool EnableBaselineCompiler();
         static bool EnableIonCompiler();
     };

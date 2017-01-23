@@ -35,7 +35,7 @@ public:
     MapReduceThreadPool(const MapReduceThreadPool&) = delete;
     MapReduceThreadPool& operator=(const MapReduceThreadPool&) = delete;    
     
-    static map_reduce_thread_pool_ptr Start(std::uint32_t jsapiHeapSize, bool enableBaselineCompiler, bool enableIonCompiler);
+    static map_reduce_thread_pool_ptr Start(std::uint32_t jsapiHeapSize, std::uint32_t jsapiNurserySize, bool enableBaselineCompiler, bool enableIonCompiler);
     static map_reduce_thread_pool_ptr Get();
 
     static void Stop();
@@ -58,8 +58,8 @@ private:
 
 class MapReduceThreadPoolScope final {
 public:
-    MapReduceThreadPoolScope(std::uint32_t jsapiHeapSize, bool enableBaselineCompiler, bool enableIonCompiler) {
-        MapReduceThreadPool::Start(jsapiHeapSize, enableBaselineCompiler, enableIonCompiler);
+    MapReduceThreadPoolScope(std::uint32_t jsapiHeapSize, std::uint32_t jsapiNurserySize, bool enableBaselineCompiler, bool enableIonCompiler) {
+        MapReduceThreadPool::Start(jsapiHeapSize, jsapiNurserySize, enableBaselineCompiler, enableIonCompiler);
         started = true;
     }
     

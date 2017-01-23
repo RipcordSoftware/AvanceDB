@@ -37,7 +37,8 @@ int main(int argc, const char** argv) {
             Daemon::WritePid(Config::Process::PidFile());
             Daemon::ChangeDir(Config::Process::RootDirectory());
 
-            MapReduceThreadPoolScope threadPool{Config::SpiderMonkey::HeapSize(), Config::SpiderMonkey::EnableBaselineCompiler(), Config::SpiderMonkey::EnableIonCompiler()};
+            MapReduceThreadPoolScope threadPool{Config::SpiderMonkey::HeapSize(), Config::SpiderMonkey::NurserySize(),
+                    Config::SpiderMonkey::EnableBaselineCompiler(), Config::SpiderMonkey::EnableIonCompiler()};
 
             HttpServer server(Config::Http::Address().c_str(), Config::Http::Port());
             server.Start();

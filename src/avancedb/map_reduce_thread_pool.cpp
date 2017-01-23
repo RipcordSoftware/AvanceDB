@@ -23,7 +23,8 @@
 
 MapReduceThreadPool::map_reduce_thread_pool_ptr mapReduceThreadPool_;
 
-MapReduceThreadPool::map_reduce_thread_pool_ptr MapReduceThreadPool::Start(std::uint32_t jsapiHeapSize, bool enableBaselineCompiler, bool enableIonCompiler) {
+MapReduceThreadPool::map_reduce_thread_pool_ptr MapReduceThreadPool::Start(
+    std::uint32_t jsapiHeapSize, std::uint32_t jsapiNurserySize, bool enableBaselineCompiler, bool enableIonCompiler) {
     auto threadPool = boost::make_shared<map_reduce_thread_pool_ptr::element_type>();
 
     ThreadPoolOptions threadPoolOptions;
@@ -34,7 +35,7 @@ MapReduceThreadPool::map_reduce_thread_pool_ptr MapReduceThreadPool::Start(std::
     threadPoolOptions.onStart = [=](size_t id){
         SetThreadName::Set("avancedb-mapred");
 
-        auto rt = new rs::jsapi::Context(jsapiHeapSize, JS::DefaultNurseryBytes, enableBaselineCompiler, enableIonCompiler);
+        auto rt = new rs::jsapi::Context(jsapiHeapSize, jsapiNurserySize, enableBaselineCompiler, enableIonCompiler);
         threadPool->threadPoolContexts_[id].reset(rt);
     };
 
