@@ -58,8 +58,12 @@ public:
     
     struct Environment final {
         static unsigned CpuCount();
+        static unsigned RealCpuCount();
         
     private:
+        friend Config;
+        
+        static unsigned cpuCount_;
     };
     
     struct Http final {

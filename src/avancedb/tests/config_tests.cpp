@@ -48,6 +48,7 @@ TEST_F(ConfigTests, test0) {
     ASSERT_EQ(0, Config::Process::StdOutFile().size());
     ASSERT_EQ(0, Config::Process::StdErrFile().size());
     ASSERT_EQ(0, Config::Process::RootDirectory().size());
+    ASSERT_EQ(Config::Environment::RealCpuCount(), Config::Environment::CpuCount());
     ASSERT_EQ(64 * 1024 * 1024, Config::SpiderMonkey::HeapSize());
     ASSERT_EQ(16 * 1024 * 1024, Config::SpiderMonkey::NurserySize());
     ASSERT_TRUE(Config::SpiderMonkey::EnableBaselineCompiler());
@@ -197,4 +198,12 @@ TEST_F(ConfigTests, test18) {
     Config::Parse(sizeof(args) / sizeof(args[0]), args);
     
     ASSERT_FALSE(Config::SpiderMonkey::EnableIonCompiler());
+}
+
+TEST_F(ConfigTests, test19) {
+    const char* args[] = { nullptr, "--cpus", "3" };
+    
+    Config::Parse(sizeof(args) / sizeof(args[0]), args);
+    
+    ASSERT_EQ(3, Config::Environment::CpuCount());
 }

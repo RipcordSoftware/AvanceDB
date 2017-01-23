@@ -28,6 +28,8 @@ const unsigned Config::Http::DefaultPort = 5994;
 std::string Config::Http::address_ = Config::Http::DefaultAddress;
 unsigned Config::Http::port_ = Config::Http::DefaultPort;
 
+unsigned Config::Environment::cpuCount_ = Config::Environment::RealCpuCount();
+
 std::string Config::Process::pidFile_;
 std::string Config::Process::stdOutFile_;
 std::string Config::Process::stdErrFile_;
@@ -38,6 +40,8 @@ std::uint32_t Config::SpiderMonkey::nurserySizeMB_ = 16;
 
 static const char* processDaemon = "daemon";
 static const char* processColor = "color";
+
+static const char* envCpus = "cpus";
 
 static const char* jsapiDisableBaseLineArg = "jsapi-disable-baseline";
 static const char* jsapiDisableIonArg = "jsapi-disable-ion";
@@ -52,6 +56,7 @@ void Config::Parse(int argc, const char** argv) {
             ("address,a", boost::program_options::value(&Http::address_)->default_value(Http::address_), "the IP address to listen on")
             ("port,p", boost::program_options::value(&Http::port_)->default_value(Http::port_), "the TCP/IP port to listen on")
             (processDaemon, "daemonize the process")
+            (envCpus, boost::program_options::value(&Environment::cpuCount_)->default_value(Environment::cpuCount_), "set the number of CPUs to use")
             ("pid", boost::program_options::value(&Process::pidFile_), "writes the process id to a file")
             ("out,o", boost::program_options::value(&Process::stdOutFile_), "writes stdout to a file")
             ("err,e", boost::program_options::value(&Process::stdErrFile_), "writes stderr to a file")
@@ -105,7 +110,15 @@ bool Config::Process::Daemonize() noexcept {
 }
 
 unsigned Config::Environment::CpuCount() {
-    auto cores = std::max(2u, boost::thread::hardware_concurrency());
+    if (vm_.count(envCpus) > 0) {
+        return cpuCount_;
+    } else {
+        return RealCpuCount();
+    }
+}
+
+unsigned Config::Environment::RealCpuCount() {
+    auto cores = std::max(1u, boost::thread::hardware_concurrency());
     return cores;
 }
 
