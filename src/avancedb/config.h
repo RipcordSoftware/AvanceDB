@@ -45,6 +45,7 @@ public:
         static const std::string& RootDirectory() noexcept;
         
         static bool Daemonize() noexcept;
+        static bool Color() noexcept;
         
     private:
         friend Config;
@@ -76,20 +77,26 @@ public:
     };
     
     struct SpiderMonkey final {
-        static std::uint32_t HeapSize();
-        static std::uint32_t NurserySize();
-        static bool EnableBaselineCompiler();
-        static bool EnableIonCompiler();
+        static std::uint32_t HeapSize() noexcept;
+        static std::uint32_t NurserySize() noexcept;
+        static bool EnableBaselineCompiler() noexcept;
+        static bool EnableIonCompiler() noexcept;
+
+    private:
+        friend Config;
+
+        static std::uint32_t heapSizeMB_;
+        static std::uint32_t nurserySizeMB_;
     };
     
     struct MapReduce final {
-        static double CpuMultiplier();
+        static double CpuMultiplier() noexcept;
     };
     
     struct Data final {
         /// The amount of time, in seconds, to wait after a database has been removed
         /// before the database destructor is called
-        static unsigned DatabaseDeleteDelay();
+        static unsigned DatabaseDeleteDelay() noexcept;
     };
     
     static void Clear() { vm_.clear(); }

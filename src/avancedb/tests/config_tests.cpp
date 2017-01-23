@@ -43,10 +43,15 @@ TEST_F(ConfigTests, test0) {
     ASSERT_TRUE(!Config::IsDaemon());
     ASSERT_STREQ(Config::Http::DefaultAddress, Config::Http::Address().c_str());
     ASSERT_EQ(Config::Http::DefaultPort, Config::Http::Port());
+    ASSERT_FALSE(Config::Process::Color());
     ASSERT_EQ(0, Config::Process::PidFile().size());
     ASSERT_EQ(0, Config::Process::StdOutFile().size());
     ASSERT_EQ(0, Config::Process::StdErrFile().size());
     ASSERT_EQ(0, Config::Process::RootDirectory().size());
+    ASSERT_EQ(64 * 1024 * 1024, Config::SpiderMonkey::HeapSize());
+    ASSERT_EQ(16 * 1024 * 1024, Config::SpiderMonkey::NurserySize());
+    ASSERT_TRUE(Config::SpiderMonkey::EnableBaselineCompiler());
+    ASSERT_TRUE(Config::SpiderMonkey::EnableIonCompiler());
 }
 
 TEST_F(ConfigTests, test1) {
@@ -89,13 +94,14 @@ TEST_F(ConfigTests, test5) {
     ASSERT_EQ(8080, Config::Http::Port());
 }
 
-TEST_F(ConfigTests, test6) {
-    const char* args[] = { nullptr, "-d" };
-    
-    Config::Parse(sizeof(args) / sizeof(args[0]), args);
-    
-    ASSERT_TRUE(Config::IsDaemon());
-}
+// REMOVED
+//TEST_F(ConfigTests, test6) {
+//    const char* args[] = { nullptr, "-d" };
+//    
+//    Config::Parse(sizeof(args) / sizeof(args[0]), args);
+//    
+//    ASSERT_TRUE(Config::IsDaemon());
+//}
 
 TEST_F(ConfigTests, test7) {
     const char* args[] = { nullptr, "--daemon" };
@@ -151,4 +157,44 @@ TEST_F(ConfigTests, test13) {
     Config::Parse(sizeof(args) / sizeof(args[0]), args);
     
     ASSERT_STREQ("~/webroot", Config::Process::RootDirectory().c_str());
+}
+
+TEST_F(ConfigTests, test14) {
+    const char* args[] = { nullptr, "--color" };
+    
+    Config::Parse(sizeof(args) / sizeof(args[0]), args);
+    
+    ASSERT_TRUE(Config::Process::Color());
+}
+
+TEST_F(ConfigTests, test15) {
+    const char* args[] = { nullptr, "--jsapi-heap-size", "256" };
+    
+    Config::Parse(sizeof(args) / sizeof(args[0]), args);
+    
+    ASSERT_EQ(256 * 1024 * 1024, Config::SpiderMonkey::HeapSize());
+}
+
+TEST_F(ConfigTests, test16) {
+    const char* args[] = { nullptr, "--jsapi-nursery-size", "32" };
+    
+    Config::Parse(sizeof(args) / sizeof(args[0]), args);
+    
+    ASSERT_EQ(32 * 1024 * 1024, Config::SpiderMonkey::NurserySize());
+}
+
+TEST_F(ConfigTests, test17) {
+    const char* args[] = { nullptr, "--jsapi-disable-baseline" };
+    
+    Config::Parse(sizeof(args) / sizeof(args[0]), args);
+    
+    ASSERT_FALSE(Config::SpiderMonkey::EnableBaselineCompiler());
+}
+
+TEST_F(ConfigTests, test18) {
+    const char* args[] = { nullptr, "--jsapi-disable-ion" };
+    
+    Config::Parse(sizeof(args) / sizeof(args[0]), args);
+    
+    ASSERT_FALSE(Config::SpiderMonkey::EnableIonCompiler());
 }

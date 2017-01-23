@@ -29,6 +29,7 @@
 #include "termcolor/termcolor.hpp"
 
 #include "set_thread_name.h"
+#include "config.h"
 
 static const unsigned cumulativeSecsPerMonth[12] = { 2678400, 5097600, 7776000, 10368000, 13046400, 15638400, 18316800, 20995200, 23587200, 26265600, 28857600, 31536000 };
 static const unsigned cumulativeSecsPerMonthLeap[12] = { 2678400, 5184000, 7862400, 10454400, 13132800, 15724800, 18403200, 21081600, 23673600, 26352000, 28944000, 31622400 };
@@ -42,12 +43,13 @@ struct LogRow {
     char data[2048];
 };
 
+static bool colorEnabled = false;
 static const unsigned maxLogRows = 4096;
 static LogRow logRows[maxLogRows];
 static boost::atomic<unsigned> writeRowIndex;
 static unsigned readRowIndex = 0;
 
-static boost::once_flag startThreadOnce = BOOST_ONCE_INIT;
+static boost::once_flag startLogging = BOOST_ONCE_INIT;
 
 static void StreamWriterThread() {
     SetThreadName::Set("avancedb-httplog");
@@ -63,7 +65,7 @@ static void StreamWriterThread() {
                 for (auto i = readRowIndex; i < lastRowIndex; ++i) {
                     auto& row = logRows[i % maxLogRows];
 
-                    if (row.status != lastStatus) {
+                    if (colorEnabled && row.status != lastStatus) {
                         if (row.status >= 500) {
                             std::cout << termcolor::red;
                         } else if (row.status >= 400) {
@@ -84,20 +86,26 @@ static void StreamWriterThread() {
                 lastRowIndex = writeRowIndex.load();
             }                        
             
-            std::cout << termcolor::reset << std::flush;                        
+            if (colorEnabled) {
+                std::cout << termcolor::reset;
+            }
+            
+            std::cout << std::flush;
         }
     } catch (boost::thread_interrupted&) {
     }
 }
 
-static void StartStreamWriterThread() {
+static void StartLogging() {
+    colorEnabled = Config::Process::Color();
+
     boost::thread logThread(StreamWriterThread);
     logThread.detach();
 }
 
 void HttpServerLog::Append(rs::httpserver::socket_ptr socket, rs::httpserver::request_ptr request, rs::httpserver::response_ptr response, const std::time_t& start, long duration) {
     // start the log thread if it isn't already running
-    boost::call_once(StartStreamWriterThread, startThreadOnce);
+    boost::call_once(StartLogging, startLogging);
     
     int year, month, day, hour, min, sec;
     GetTimestamp(start, year, month, day, hour, min, sec);
