@@ -110,10 +110,12 @@ void HttpServerLog::Append(rs::httpserver::socket_ptr socket, rs::httpserver::re
     int year, month, day, hour, min, sec;
     GetTimestamp(start, year, month, day, hour, min, sec);
     
-    const auto queryString = request->getHeaders()->getQueryString();
+    const auto& queryString = request->getHeaders()->getQueryString();
     
-    const auto localAddr = socket->getLocalEndpoint().address().to_string();
-    const auto remoteAddr = socket->getRemoteEndpoint().address().to_string();
+    auto localAddr = socket->getLocalEndpoint().address().to_string();
+    auto remoteAddr = socket->getRemoteEndpoint().address().to_string();
+
+    auto userAgent = boost::replace_all_copy(request->getHeaders()->getUserAgent(), " ", "+");
     
     auto index = writeRowIndex++;    
     index %= maxLogRows;
@@ -129,7 +131,7 @@ void HttpServerLog::Append(rs::httpserver::socket_ptr socket, rs::httpserver::re
         queryString.size() > 0 ? queryString.c_str() : "-",
         socket->getLocalEndpoint().port(),
         remoteAddr.c_str(),
-        boost::replace_all_copy(request->getHeaders()->getUserAgent(), " ", "+").c_str(),
+        userAgent.size() > 0 ? userAgent.c_str() : "-",
         response->getStatusCode(),
         duration);        
 }
