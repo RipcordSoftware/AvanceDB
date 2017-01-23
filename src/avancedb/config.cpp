@@ -19,15 +19,19 @@
 #include "config.h"
 
 #include <algorithm>
+#include <cmath>
 
 #include <boost/thread.hpp>
 
 const char Config::Http::DefaultAddress[] = "0.0.0.0";
 const unsigned Config::Http::DefaultPort = 5994;
+const unsigned Config::Http::DefaultWorkersPerCpu = 16;
+std::string Config::Http::address_ = DefaultAddress;
+unsigned Config::Http::port_ = DefaultPort;
+unsigned Config::Http::workersPerCpu_ = DefaultWorkersPerCpu;
 
-std::string Config::Http::address_ = Config::Http::DefaultAddress;
-unsigned Config::Http::port_ = Config::Http::DefaultPort;
-unsigned Config::Http::workersPerCpu_ = 16;
+const float Config::MapReduce::DefaultWorkersPerCpu = 0.5;
+float Config::MapReduce::workersPerCpu_ = DefaultWorkersPerCpu;
 
 unsigned Config::Environment::cpuCount_ = Config::Environment::RealCpuCount();
 
@@ -36,8 +40,10 @@ std::string Config::Process::stdOutFile_;
 std::string Config::Process::stdErrFile_;
 std::string Config::Process::rootDirectory_;
 
-std::uint32_t Config::SpiderMonkey::heapSizeMB_ = 64;
-std::uint32_t Config::SpiderMonkey::nurserySizeMB_ = 16;
+const std::uint32_t Config::SpiderMonkey::DefaultHeapSizeMB = 64;
+const std::uint32_t Config::SpiderMonkey::DefaultNurserySizeMB = 16;
+std::uint32_t Config::SpiderMonkey::heapSizeMB_ = DefaultHeapSizeMB;
+std::uint32_t Config::SpiderMonkey::nurserySizeMB_ = DefaultNurserySizeMB;
 
 static const char* processDaemon = "daemon";
 static const char* processColor = "color";
@@ -64,6 +70,7 @@ void Config::Parse(int argc, const char** argv) {
             ("err,e", boost::program_options::value(&Process::stdErrFile_), "writes stderr to a file")
             (processColor, "use color in the log file")
             ("dir", boost::program_options::value(&Process::rootDirectory_), "sets the working directory")
+            ("mapreduce-workers", boost::program_options::value(&MapReduce::workersPerCpu_)->default_value(MapReduce::workersPerCpu_), "the number of map/reduce worker threads per CPU core")
             ("jsapi-heap-size", boost::program_options::value(&SpiderMonkey::heapSizeMB_)->default_value(SpiderMonkey::heapSizeMB_), "the JSAPI heap size in MB")
             ("jsapi-nursery-size", boost::program_options::value(&SpiderMonkey::nurserySizeMB_)->default_value(SpiderMonkey::nurserySizeMB_), "the JSAPI nursery size in MB")
             (jsapiDisableBaseLineArg, "disable the JSAPI baseline compiler")
@@ -156,8 +163,13 @@ bool Config::SpiderMonkey::EnableIonCompiler() noexcept {
     return vm_.count(jsapiDisableIonArg) == 0;
 }
 
-double Config::MapReduce::CpuMultiplier() noexcept {
-    return 0.5;
+unsigned Config::MapReduce::Workers() noexcept {
+    auto workers = std::lround(WorkersPerCpu() * Environment::CpuCount());
+    return std::max(1l, workers);
+}
+
+float Config::MapReduce::WorkersPerCpu() noexcept {
+    return workersPerCpu_;
 }
 
 unsigned Config::Data::DatabaseDeleteDelay() noexcept {

@@ -69,6 +69,7 @@ public:
     struct Http final {
         static const char DefaultAddress[];
         static const unsigned DefaultPort;
+        static const unsigned DefaultWorkersPerCpu;
         
         static const std::string& Address() noexcept;
         static unsigned Port() noexcept;
@@ -84,6 +85,9 @@ public:
     };
     
     struct SpiderMonkey final {
+        static const std::uint32_t DefaultHeapSizeMB;
+        static const std::uint32_t DefaultNurserySizeMB;
+
         static std::uint32_t HeapSize() noexcept;
         static std::uint32_t NurserySize() noexcept;
         static bool EnableBaselineCompiler() noexcept;
@@ -97,7 +101,15 @@ public:
     };
     
     struct MapReduce final {
-        static double CpuMultiplier() noexcept;
+        static const float DefaultWorkersPerCpu;
+
+        static unsigned Workers() noexcept;
+        static float WorkersPerCpu() noexcept;
+
+    private:
+        friend Config;
+
+        static float workersPerCpu_;
     };
     
     struct Data final {

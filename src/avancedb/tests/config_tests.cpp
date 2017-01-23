@@ -19,6 +19,7 @@
 #include <gtest/gtest.h>
 
 #include <vector>
+#include <cmath>
 
 #include "../config.h"
 
@@ -43,14 +44,16 @@ TEST_F(ConfigTests, test0) {
     ASSERT_TRUE(!Config::IsDaemon());
     ASSERT_STREQ(Config::Http::DefaultAddress, Config::Http::Address().c_str());
     ASSERT_EQ(Config::Http::DefaultPort, Config::Http::Port());
+    ASSERT_EQ(Config::Http::DefaultWorkersPerCpu, Config::Http::WorkersPerCpu());
+    ASSERT_EQ(std::lround(Config::Http::DefaultWorkersPerCpu * Config::Environment::CpuCount()), Config::Http::Workers());
     ASSERT_FALSE(Config::Process::Color());
     ASSERT_EQ(0, Config::Process::PidFile().size());
     ASSERT_EQ(0, Config::Process::StdOutFile().size());
     ASSERT_EQ(0, Config::Process::StdErrFile().size());
     ASSERT_EQ(0, Config::Process::RootDirectory().size());
     ASSERT_EQ(Config::Environment::RealCpuCount(), Config::Environment::CpuCount());
-    ASSERT_EQ(64 * 1024 * 1024, Config::SpiderMonkey::HeapSize());
-    ASSERT_EQ(16 * 1024 * 1024, Config::SpiderMonkey::NurserySize());
+    ASSERT_EQ(Config::SpiderMonkey::DefaultHeapSizeMB * 1024 * 1024, Config::SpiderMonkey::HeapSize());
+    ASSERT_EQ(Config::SpiderMonkey::DefaultNurserySizeMB * 1024 * 1024, Config::SpiderMonkey::NurserySize());
     ASSERT_TRUE(Config::SpiderMonkey::EnableBaselineCompiler());
     ASSERT_TRUE(Config::SpiderMonkey::EnableIonCompiler());
 }
@@ -215,4 +218,33 @@ TEST_F(ConfigTests, test20) {
     
     ASSERT_EQ(4, Config::Http::WorkersPerCpu());
     ASSERT_EQ(4 * Config::Environment::RealCpuCount(), Config::Http::Workers());
+}
+
+TEST_F(ConfigTests, test21) {
+    const char* args[] = { nullptr, "--http-workers", "4", "--cpus", "8" };
+    
+    Config::Parse(sizeof(args) / sizeof(args[0]), args);
+    
+    ASSERT_EQ(4, Config::Http::WorkersPerCpu());
+    ASSERT_EQ(8, Config::Environment::CpuCount());
+    ASSERT_EQ(4 * 8, Config::Http::Workers());
+}
+
+TEST_F(ConfigTests, test22) {
+    const char* args[] = { nullptr, "--mapreduce-workers", "4" };
+    
+    Config::Parse(sizeof(args) / sizeof(args[0]), args);
+    
+    ASSERT_EQ(4.0, Config::MapReduce::WorkersPerCpu());
+    ASSERT_EQ(std::lround(4.0 * Config::Environment::CpuCount()), Config::MapReduce::Workers());
+}
+
+TEST_F(ConfigTests, test23) {
+    const char* args[] = { nullptr, "--mapreduce-workers", "4", "--cpus", "8" };
+    
+    Config::Parse(sizeof(args) / sizeof(args[0]), args);
+    
+    ASSERT_EQ(4.0, Config::MapReduce::WorkersPerCpu());
+    ASSERT_EQ(8, Config::Environment::CpuCount());
+    ASSERT_EQ(std::lround(4.0 * Config::Environment::CpuCount()), Config::MapReduce::Workers());
 }
