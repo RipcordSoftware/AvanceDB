@@ -27,7 +27,7 @@ MapReduceThreadPool::map_reduce_thread_pool_ptr MapReduceThreadPool::Start(std::
     auto threadPool = boost::make_shared<map_reduce_thread_pool_ptr::element_type>();
 
     ThreadPoolOptions threadPoolOptions;
-    threadPoolOptions.threads_count = Config::Environment::CpuCount() * Config::MapReduce::GetCPUMultiplier();
+    threadPoolOptions.threads_count = Config::Environment::CpuCount() * Config::MapReduce::CpuMultiplier();
 
     threadPool->threadPoolContexts_.resize(threadPoolOptions.threads_count);
 

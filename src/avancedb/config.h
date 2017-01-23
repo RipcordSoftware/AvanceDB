@@ -76,19 +76,19 @@ public:
     };
     
     struct SpiderMonkey final {
-        static std::uint32_t GetHeapSize();
-        static bool GetEnableBaselineCompiler();
-        static bool GetEnableIonCompiler();
+        static std::uint32_t HeapSize();
+        static bool EnableBaselineCompiler();
+        static bool EnableIonCompiler();
     };
     
     struct MapReduce final {
-        static double GetCPUMultiplier();
+        static double CpuMultiplier();
     };
     
     struct Data final {
         /// The amount of time, in seconds, to wait after a database has been removed
         /// before the database destructor is called
-        static unsigned GetDatabaseDeleteDelay();
+        static unsigned DatabaseDeleteDelay();
     };
     
     static void Clear() { vm_.clear(); }

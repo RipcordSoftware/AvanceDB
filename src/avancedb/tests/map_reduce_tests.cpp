@@ -47,7 +47,7 @@ protected:
     }
     
     static void SetUpTestCase() {
-        threadPool_.reset(new MapReduceThreadPoolScope{Config::SpiderMonkey::GetHeapSize(), Config::SpiderMonkey::GetEnableBaselineCompiler(), Config::SpiderMonkey::GetEnableIonCompiler()});
+        threadPool_.reset(new MapReduceThreadPoolScope{Config::SpiderMonkey::HeapSize(), Config::SpiderMonkey::EnableBaselineCompiler(), Config::SpiderMonkey::EnableIonCompiler()});
         
         auto dbName = "MapReduceTests";
         databases_.AddDatabase(dbName);

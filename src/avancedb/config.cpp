@@ -99,22 +99,22 @@ unsigned Config::Http::Port() noexcept {
     return port_;
 }
 
-std::uint32_t Config::SpiderMonkey::GetHeapSize() {
+std::uint32_t Config::SpiderMonkey::HeapSize() {
     return 64 * 1024 * 1024;
 }
 
-bool Config::SpiderMonkey::GetEnableBaselineCompiler() {
+bool Config::SpiderMonkey::EnableBaselineCompiler() {
     return true;
 }
 
-bool Config::SpiderMonkey::GetEnableIonCompiler() {
+bool Config::SpiderMonkey::EnableIonCompiler() {
     return true;
 }
 
-double Config::MapReduce::GetCPUMultiplier() {
+double Config::MapReduce::CpuMultiplier() {
     return 0.5;
 }
 
-unsigned Config::Data::GetDatabaseDeleteDelay() {
+unsigned Config::Data::DatabaseDeleteDelay() {
     return 5;
 }

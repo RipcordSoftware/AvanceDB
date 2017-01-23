@@ -46,7 +46,7 @@ bool Databases::RemoveDatabase(const char* name) {
         // capture the db in a lambda and launch it on a background thread
         auto db = iter->second;
         std::thread removeThread{[db]() mutable {
-            auto delay = Config::Data::GetDatabaseDeleteDelay();
+            auto delay = Config::Data::DatabaseDeleteDelay();
             std::this_thread::sleep_for(std::chrono::seconds(delay));
             db.reset();
         }};
