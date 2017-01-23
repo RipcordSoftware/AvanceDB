@@ -23,7 +23,7 @@
 #include "http_server_exception.h"
 #include "http_server_log.h"
 
-HttpServer::HttpServer(const char* address, int port) : server_(rs::httpserver::HttpServer::Create(address, port)) {
+HttpServer::HttpServer(const char* address, int port, unsigned threads) : server_(rs::httpserver::HttpServer::Create(address, port, threads)) {
 }
 
 void HttpServer::Start() {    

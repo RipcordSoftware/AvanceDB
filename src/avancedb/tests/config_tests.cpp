@@ -207,3 +207,12 @@ TEST_F(ConfigTests, test19) {
     
     ASSERT_EQ(3, Config::Environment::CpuCount());
 }
+
+TEST_F(ConfigTests, test20) {
+    const char* args[] = { nullptr, "--http-workers", "4" };
+    
+    Config::Parse(sizeof(args) / sizeof(args[0]), args);
+    
+    ASSERT_EQ(4, Config::Http::WorkersPerCpu());
+    ASSERT_EQ(4 * Config::Environment::RealCpuCount(), Config::Http::Workers());
+}

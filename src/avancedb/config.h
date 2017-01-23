@@ -72,12 +72,15 @@ public:
         
         static const std::string& Address() noexcept;
         static unsigned Port() noexcept;
+        static unsigned Workers() noexcept;
+        static unsigned WorkersPerCpu() noexcept;
         
     private:
         friend Config;
         
         static std::string address_;
         static unsigned port_;
+        static unsigned workersPerCpu_;
     };
     
     struct SpiderMonkey final {

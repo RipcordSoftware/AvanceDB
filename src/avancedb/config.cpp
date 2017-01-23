@@ -27,6 +27,7 @@ const unsigned Config::Http::DefaultPort = 5994;
 
 std::string Config::Http::address_ = Config::Http::DefaultAddress;
 unsigned Config::Http::port_ = Config::Http::DefaultPort;
+unsigned Config::Http::workersPerCpu_ = 16;
 
 unsigned Config::Environment::cpuCount_ = Config::Environment::RealCpuCount();
 
@@ -55,6 +56,7 @@ void Config::Parse(int argc, const char** argv) {
             ("help,h", "shows the program options")
             ("address,a", boost::program_options::value(&Http::address_)->default_value(Http::address_), "the IP address to listen on")
             ("port,p", boost::program_options::value(&Http::port_)->default_value(Http::port_), "the TCP/IP port to listen on")
+            ("http-workers", boost::program_options::value(&Http::workersPerCpu_)->default_value(Http::workersPerCpu_), "the number of HTTP workers per CPU core")
             (processDaemon, "daemonize the process")
             (envCpus, boost::program_options::value(&Environment::cpuCount_)->default_value(Environment::cpuCount_), "set the number of CPUs to use")
             ("pid", boost::program_options::value(&Process::pidFile_), "writes the process id to a file")
@@ -128,6 +130,14 @@ const std::string& Config::Http::Address() noexcept {
 
 unsigned Config::Http::Port() noexcept {
     return port_;
+}
+
+unsigned Config::Http::Workers() noexcept {
+    return WorkersPerCpu() * Environment::CpuCount();
+}
+
+unsigned Config::Http::WorkersPerCpu() noexcept {
+    return workersPerCpu_;
 }
 
 std::uint32_t Config::SpiderMonkey::HeapSize() noexcept {

@@ -17,7 +17,6 @@
  */
 
 #include <iostream>
-#include <string>
 
 #include "http_server.h"
 #include "map_reduce_thread_pool.h"
@@ -40,7 +39,7 @@ int main(int argc, const char** argv) {
             MapReduceThreadPoolScope threadPool{Config::SpiderMonkey::HeapSize(), Config::SpiderMonkey::NurserySize(),
                     Config::SpiderMonkey::EnableBaselineCompiler(), Config::SpiderMonkey::EnableIonCompiler()};
 
-            HttpServer server(Config::Http::Address().c_str(), Config::Http::Port());
+            HttpServer server(Config::Http::Address().c_str(), Config::Http::Port(), Config::Http::Workers());
             server.Start();
         }
     }

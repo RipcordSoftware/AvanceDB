@@ -25,7 +25,7 @@
 class HttpServer final {
 public:
     
-    HttpServer(const char* address = "0.0.0.0", int port = 5994);
+    HttpServer(const char* address, int port, unsigned threads);
         
     void Start();
     
