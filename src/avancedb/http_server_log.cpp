@@ -136,15 +136,21 @@ void HttpServerLog::Append(rs::httpserver::socket_ptr socket, rs::httpserver::re
         duration);        
 }
 
-void HttpServerLog::GetTimestamp(const std::time_t& time, int& year, int& month, int& day, int& hour, int& min, int& sec) {
-    auto totalDays = time / 86400;
-    auto elapsedYears = (long)(totalDays / 365.25);
-    auto leapYears = ((long)elapsedYears) / 4;
-    auto yearStart = ((elapsedYears - leapYears) * 31536000) + (leapYears * 31622400);
-    auto elapsedSecondsThisYear = time - yearStart;    
+void HttpServerLog::GetTimestamp(std::time_t time, int& year, int& month, int& day, int& hour, int& min, int& sec) {
+    decltype(time) offset = 0;
+    auto isLeap = false;
+
+    if (std::is_signed<decltype(time)>::value && time < 0) {
+        time = 0;
+    }
     
-    year = 1970 + elapsedYears;
-    auto isLeap = (year % 4) == 0;
+    if (time >= 1451606400) {
+        GetYear(time, 2016, 1451606400, year, offset, isLeap);
+    } else {
+        GetYear(time, 1970, 0, year, offset, isLeap);
+    }
+
+    auto elapsedSecondsThisYear = time - offset;
     month = GetMonth(elapsedSecondsThisYear, isLeap);
     day = GetDay(elapsedSecondsThisYear, month, isLeap);
         
@@ -154,6 +160,20 @@ void HttpServerLog::GetTimestamp(const std::time_t& time, int& year, int& month,
     hour = (time % (24 * 60 * 60)) / (60 * 60);
     min = (time % (60 * 60)) / 60;
     sec = time % 60;
+}
+
+void HttpServerLog::GetYear(std::time_t time, int startYear, std::time_t startOffset, int& year, std::time_t& offset, bool& isLeap) {
+    isLeap = (startYear % 4) == 0;
+    year = startYear;
+    
+    offset = startOffset;
+    decltype(time) delta = isLeap ? 31622400 : 31536000;
+    while ((offset + delta) <= time) {
+        ++year;
+        offset += delta;
+        isLeap = (year % 4) == 0;
+        delta = isLeap ? 31622400 : 31536000;
+    }
 }
 
 unsigned HttpServerLog::GetMonth(long elapsedSeconds, bool isLeap) {

@@ -30,11 +30,13 @@ public:
     HttpServerLog(const HttpServerLog&) = delete;
     HttpServerLog& operator=(const HttpServerLog&) = delete;    
     
-    static void Append(rs::httpserver::socket_ptr socket, rs::httpserver::request_ptr request, rs::httpserver::response_ptr response, const std::time_t& start, long duration);    
+    static void Append(rs::httpserver::socket_ptr socket, rs::httpserver::request_ptr request, rs::httpserver::response_ptr response, const std::time_t& start, long duration);
+    
+    static void GetTimestamp(std::time_t time, int& year, int& month, int& day, int& hour, int& min, int& sec);
     
 private:
-    
-    static void GetTimestamp(const std::time_t& time, int& year, int& month, int& day, int& hour, int& min, int& sec);
+
+    static void GetYear(std::time_t time, int startYear, std::time_t startOffset, int& year, std::time_t& offset, bool& isLeap);
     static unsigned GetMonth(long elapsedSeconds, bool isLeap);
     static unsigned GetDay(long elapsedSeconds, unsigned month, bool isLeap);    
 
