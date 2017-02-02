@@ -54,6 +54,7 @@ JSAPI_EXT_INSTALLED_LIB:=$(JSAPI_EXT_INSTALLED)/lib
 
 LDLIBS:=$(shell echo 'int main(){}' | $(CXX) -x c++ -o /dev/null -ldl - > /dev/null 2>&1 && echo '-ldl')
 LDLIBS+=$(shell echo 'int main(){}' | $(CXX) -x c++ -o /dev/null -lrt - > /dev/null 2>&1 && echo '-lrt')
+LDLIBS+=$(shell echo 'int main(){}' | $(CXX) -x c++ -o /dev/null -latomic - > /dev/null 2>&1 && echo '-latomic')
 LDLIBS+=$(shell if [ "$$(uname)" = "Linux" ] && [ "$(CONF)" = "Release" ]; then echo "../../externals/installed/lib/libtcmalloc_minimal.a"; fi;)
 
 COVERAGE_FLAGS:=$(shell cd /tmp; echo 'int main(){}' | $(CXX) -x c++ -o /dev/null --coverage - > /dev/null 2>&1 && echo '--coverage')
