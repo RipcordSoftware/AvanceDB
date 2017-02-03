@@ -31,10 +31,20 @@ if [ $? -ne 0 ]; then
     gem install ${USER_INSTALL} bundler
 fi
 
+if [ $? -ne 0 ]; then
+    echo 'Failed to install bundler'
+    exit 4
+fi
+
 if [ $EUID -ne 0 ] && [ "$GEM_HOME" = "" ]; then
-    bundle install --path=~/.gem
+    bundle install --verbose --path=~/.gem
 else
-    bundle install
+    bundle install --verbose
+fi
+
+if [ $? -ne 0 ]; then
+    echo 'Bundler failed to install the gems'
+    exit 5
 fi
 
 CONFIGURATION=$1
