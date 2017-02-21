@@ -52,12 +52,20 @@ CCADMIN=CCadmin
 JSAPI_EXT_INSTALLED:="../../externals/libjsapi/externals/installed"
 JSAPI_EXT_INSTALLED_LIB:=$(JSAPI_EXT_INSTALLED)/lib
 
-LDLIBS:=$(shell echo 'int main(){}' | $(CXX) -x c++ -o /dev/null -ldl - > /dev/null 2>&1 && echo '-ldl')
-LDLIBS+=$(shell echo 'int main(){}' | $(CXX) -x c++ -o /dev/null -lrt - > /dev/null 2>&1 && echo '-lrt')
-LDLIBS+=$(shell echo 'int main(){}' | $(CXX) -x c++ -o /dev/null -latomic - > /dev/null 2>&1 && echo '-latomic')
+# tests a compiler flag is valid, if so returns it
+FLAG_PROBE=$(shell cd /tmp; echo 'int main(){}' | $(CXX) -x c++ -o /dev/null $(1) - > /dev/null 2>&1 && echo '$(1)')
+
+# tests a compiler flag is valid, if so returns it, otherwise returns the second argument
+FLAG_PROBE2=$(shell cd /tmp; (echo 'int main(){}' | $(CXX) -x c++ -o /dev/null $(1) - > /dev/null 2>&1 && echo '$(1)') || echo '$(2)')
+
+LDLIBS:=$(call FLAG_PROBE, '-ldl')
+LDLIBS+=$(call FLAG_PROBE, '-lrt')
+LDLIBS+=$(call FLAG_PROBE, '-latomic')
+LDLIBS+=$(call FLAG_PROBE2, '-lboost_thread-mt', '-lboost_thread')
+LDLIBS+=$(call FLAG_PROBE2, '-lboost_atomic-mt', '-lboost_atomic')
 LDLIBS+=$(shell if [ "$$(uname)" = "Linux" ] && [ "$(CONF)" = "Release" ]; then echo "../../externals/installed/lib/libtcmalloc_minimal.a"; fi;)
 
-COVERAGE_FLAGS:=$(shell cd /tmp; echo 'int main(){}' | $(CXX) -x c++ -o /dev/null --coverage - > /dev/null 2>&1 && echo '--coverage')
+COVERAGE_FLAGS:=$(call FLAG_PROBE, '--coverage')
 
 include ../../externals/libjsapi/src/make/libmozglue.mk
 LDLIBS:=$(call LIBMOZGLUE, ../../externals/libjsapi/externals/installed/lib) $(LDLIBS)
