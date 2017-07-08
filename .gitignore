@@ -64,3 +64,6 @@ site-packages
 
 # ruby files
 **/.bundle/
+
+# docker build state files
+.docker/build/
