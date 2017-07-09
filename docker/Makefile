@@ -112,8 +112,8 @@ version:
 		echo "Error: can't promote an image from a non-versioned branch"; \
 		exit 4; \
 	fi
-	-docker rmi "avancedb:${VERSION}"
-	docker tag "${RUN_IMAGE}" "avancedb:${VERSION}"
+	-docker rmi "ripcordsoftware/avancedb:${VERSION}"
+	docker tag "${RUN_IMAGE}" "ripcordsoftware/avancedb:${VERSION}"
 
 clean:
 	# remove the run container image
@@ -136,6 +136,6 @@ purge-all: purge
 
 promote:
 	# promote the run image to be the latest
-	-docker rmi "avancedb:latest"
-	docker tag "${RUN_IMAGE}" "avancedb:latest"
+	-docker rmi "ripcordsoftware/avancedb:latest"
+	docker tag "${RUN_IMAGE}" "ripcordsoftware/avancedb:latest"
 
