@@ -15,6 +15,13 @@
 
 SHELL:=bash
 
+# limit the number of parallel source build jobs
+BUILD_JOBS?=2
+
+# we don't want parallel building of docker images
+.NOTPARALLEL:
+
+# our targets are all phonies
 .PHONY: all help build run stop version clean purge purge-all promote .build-dirs dev-img build-img run-img
 
 GIT_DIR:=$(shell git rev-parse --show-toplevel)
@@ -59,7 +66,7 @@ run-img: build-img
 			-v "${DOWNLOADS_DIR}:/home/avancedb/Downloads" \
 			"${BUILD_IMAGE}" \
 			/bin/su avancedb -c \
-			"export SHELL=/bin/bash && cd ~/AvanceDB && make -j2 CONF=Release CC='ccache gcc' CXX='ccache g++' && cp -Rf src/avancedb/dist ~/output && find . -regex '.*?externals/[a-z0-9\.\-]+\(zip\|bz2\)' -regextype posix-basic -exec cp -f {} ~/Downloads \;" - && \
+			"export SHELL=/bin/bash && cd ~/AvanceDB && make -j${BUILD_JOBS} CONF=Release CC='ccache gcc' CXX='ccache g++' && cp -Rf src/avancedb/dist ~/output && find . -regex '.*?externals/[a-z0-9\.\-]+\(zip\|bz2\)' -regextype posix-basic -exec cp -f {} ~/Downloads \;" - && \
 		# create the runnable image; \
 		cp -f Dockerfile.${DISTRO}-avancedb-run "${OUTPUT_DIR}/Dockerfile" && \
 		docker build -t "${RUN_IMAGE}" --build-arg "BIN_SOURCE=dist/Release/GNU-Linux-x86" "${OUTPUT_DIR}"; \

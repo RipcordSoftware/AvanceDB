@@ -2,7 +2,7 @@ SHELL := bash
 
 GTEST_VER=1.7.0
 
-.PHONY: build all clean .googletest .gperftools
+.PHONY: build all clean docker .googletest .gperftools
 
 .NOTPARALLEL: test ext_test
 
@@ -31,6 +31,9 @@ clean:
 	cd externals/libscriptobject && $(MAKE) $@
 	cd externals/libhttpserver && $(MAKE) $@
 	cd src/avancedb && $(MAKE) $@
+
+docker:
+	cd docker && $(MAKE) build
 
 .googletest:
 	if [ "${CI}" = "true" ] && [ "${TRAVIS_OS_NAME}" = "linux" ]; then \

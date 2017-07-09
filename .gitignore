@@ -66,4 +66,4 @@ site-packages
 **/.bundle/
 
 # docker build state files
-.docker/build/
+docker/build/
