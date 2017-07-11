@@ -35,15 +35,27 @@ AvanceDB will run on Linux on a humble Raspberry Pi 2 or an enterprise server. V
 | FreeBSD 11   | amd64              | [![freebsd-11-amd64](https://jenkins-bsd.ripcordsoftware.com/buildStatus/icon?job=avancedb-freebsd-11)](https://jenkins-bsd.ripcordsoftware.com/job/avancedb-freebsd-11/) |
 
 ## Installing
-AvanceDB can be installed with [brew](http://brew.sh) on OS X or macOS. Once you have `brew` installed you can install AvanceDB with:
+You can run AvanceDB under [Docker](https://www.docker.com) on Linux or Mac or [Homebrew](http://brew.sh) on Mac.
+
+We plan to release RPM and DEB packages for CentOS/RHEL and Debian/Ubuntu at some point in the future.
+
+### Docker
+Install Docker if you don't already have it installed. Make sure it is running properly by spinning up the `hello-world` container, then you are go:
+
+```bash
+docker run -d -p 5994:5994 ripcordsoftware/avancedb
+```
+
+Fire up your browser and navigate to `http://localhost:5994/_utils` and you should see the main Futon window.
+
+### Homebrew
+Once you have `brew` installed you can install AvanceDB with:
 
 ```bash
 brew install ripcordsoftware/packages/avancedb
 ```
 
 To run AvanceDB as a daemon under `launchd` execute: `sudo brew services start ripcordsoftware/packages/avancedb`.
-
-We plan to release RPM and DEB packages for CentOS/RHEL and Debian/Ubuntu at some point in the future.
 
 ## Building
 Check out our [Wiki](https://github.com/RipcordSoftware/AvanceDB/wiki) for information about building AvanceDB on your platform.
