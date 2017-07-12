@@ -52,6 +52,8 @@ Fire up your browser and navigate to `http://localhost:5994/_utils` and you shou
 Once you have `brew` installed you can install AvanceDB with:
 
 ```bash
+brew install autoconf@2.13 && \
+brew install autoconf && \
 brew install ripcordsoftware/packages/avancedb
 ```
 
