@@ -32,7 +32,6 @@ addons:
     - zlib1g-dev
     - lcov
     - ruby
-    - rubygems
     - doxygen
     - libtool
     - net-tools
