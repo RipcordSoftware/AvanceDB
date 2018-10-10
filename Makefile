@@ -37,12 +37,12 @@ docker:
 
 .googletest:
 	if [ "${CI}" = "true" ] && [ "${TRAVIS_OS_NAME}" = "linux" ]; then \
-		curl ftp://ftp.ripcordsoftware.com/pub/gtest-${GTEST_VER}-travis-ci-externals-installed.tar.xz -O && \
+		curl http://cdn.ripcordsoftware.com/gtest-${GTEST_VER}-travis-ci-externals-installed.tar.xz -O && \
 		tar xfJ gtest-*; \
 	elif [ ! -d externals/gtest-${GTEST_VER}/lib/.libs ]; then \
 		mkdir -p externals && \
 		cd externals && \
-		if [ ! -f gtest-${GTEST_VER}.zip ]; then curl ftp://ftp.ripcordsoftware.com/pub/gtest-${GTEST_VER}.zip -O; fi && \
+		if [ ! -f gtest-${GTEST_VER}.zip ]; then curl http://cdn.ripcordsoftware.com/gtest-${GTEST_VER}.zip -O; fi && \
 		unzip gtest-${GTEST_VER}.zip && \
 		cd gtest-${GTEST_VER} && \
 		./configure && \
